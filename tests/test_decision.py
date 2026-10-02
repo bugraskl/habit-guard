@@ -116,3 +116,15 @@ def test_missing_habit_in_counts_counts_as_absent() -> None:
     run(engine, 0.0, 1.5, IN)
     events = run(engine, 1.5, 3.0, {})
     assert any(isinstance(e, Release) for e in events)
+
+
+def test_no_first_alarm_once_the_hand_has_left_even_inside_the_forgiven_gap() -> None:
+    # The dwell time is reached only after the hand is gone, with the cooldown of an earlier
+    # alarm ending inside the gap. The alarm must not fire for a hand that is no longer there.
+    engine = make_engine(cooldown_s=5.0, gap_s=0.6)
+    run(engine, 0.0, 1.2, IN)  # first alarm at 1.0 s
+    run(engine, 1.2, 1.9, OUT)  # released
+    events = run(engine, 5.1, 5.9, IN)  # a new run, the cooldown ends at 6.0 s
+    assert [e for e in events if isinstance(e, Trigger)] == []
+    events = run(engine, 5.9, 6.5, OUT)  # past the dwell and the cooldown, inside the gap
+    assert [e for e in events if isinstance(e, Trigger)] == []

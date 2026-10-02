@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 import threading
 import time
+from pathlib import Path
 from typing import ClassVar
 
 import cv2
@@ -489,3 +490,137 @@ def test_tracker_does_not_run_the_palm_detector_while_following_a_hand() -> None
     tracker.reset()
     tracker.update(frame, 1.0)
     assert palms.calls == 2
+
+
+# ------------------------------------------------------ paths, decoding and robustness
+@needs_models
+def test_models_load_from_a_folder_with_non_ascii_letters(tmp_path: Path) -> None:
+    """OpenCV cannot open a path with letters outside the ANSI code page; the loader must."""
+    import shutil
+
+    folder = tmp_path / "Şükrü_Buğra"
+    folder.mkdir()
+    for name in (YUNET_MODEL, PALM_MODEL, HAND_MODEL):
+        shutil.copy(models_dir() / name, folder / name)
+    assert FaceDetector(folder / YUNET_MODEL).detect(np.zeros((480, 640, 3), np.uint8)) is None
+    assert PalmDetector(folder / PALM_MODEL).detect(np.zeros((480, 640, 3), np.uint8)) == []
+    points, _ = HandLandmarker(folder / HAND_MODEL).infer(
+        np.zeros((480, 640, 3), np.uint8), Roi((320.0, 240.0), 200.0, 0.0)
+    )
+    assert points.shape == (21, 2)
+
+
+def test_palm_decoding_puts_boxes_and_keypoints_at_the_right_pixels() -> None:
+    palm = PalmDetector.__new__(PalmDetector)
+    palm._anchors = make_anchors()
+    palm.score_threshold = 0.5
+    palm.nms_threshold = 0.3
+    raw = np.zeros((2016, 18), np.float32)
+    logits = np.full(2016, -20.0, np.float32)
+    index = 700  # some anchor of the 24x24 grid
+    logits[index] = 8.0
+    raw[index, 2:4] = (38.4, 38.4)  # a box 0.2 of the input wide; keypoints sit on the anchor
+    # A 640x480 picture is shrunk to 192x144 and padded by 24 px above and below.
+    scale, pad = 192 / 640, (0, 24)
+    (found,) = palm._decode(raw, logits, scale, pad)
+    ax, ay = make_anchors()[index] * 192
+    cx, cy = (ax - pad[0]) / scale, (ay - pad[1]) / scale
+    x1, y1, x2, y2 = found.box
+    assert ((x1 + x2) / 2, (y1 + y2) / 2) == pytest.approx((cx, cy), abs=0.01)
+    assert (x2 - x1, y2 - y1) == pytest.approx((38.4 / scale, 38.4 / scale), abs=0.01)
+    assert found.keypoints.shape == (7, 2)
+    assert found.keypoints[3] == pytest.approx((cx, cy), abs=0.01)
+    assert found.score > 0.99
+
+
+def test_face_rows_are_ordered_left_to_right_whatever_the_detector_calls_them() -> None:
+    from habit_guard.vision.face import _to_face_info
+
+    # The "right eye" is listed first but lies to the right in the picture.
+    row = np.array(
+        [100, 80, 60, 80, 150, 100, 110, 101, 130, 120, 140, 140, 118, 141, 0.9], np.float64
+    )
+    face = _to_face_info(row, 0.9)
+    assert face.left_eye == (110.0, 101.0)
+    assert face.right_eye == (150.0, 100.0)
+    assert face.mouth_left == (118.0, 141.0)
+    assert face.mouth_right == (140.0, 140.0)
+    assert face.nose == (130.0, 120.0)
+
+
+def test_a_collapsed_hand_gives_a_usable_crop() -> None:
+    collapsed = np.full((21, 2), 100.0)
+    roi = roi_from_landmarks(collapsed)
+    assert roi.size >= 8.0
+    matrix, _ = roi.matrix(HAND_INPUT)  # no division by zero
+    assert np.isfinite(matrix).all()
+    flat = Palm(box=(10.0, 10.0, 10.0, 10.0), keypoints=np.zeros((7, 2)), score=0.9)
+    assert roi_from_palm(flat).size >= 8.0
+
+
+class FlakyCamera(FakeCamera):
+    """The first camera raises while grabbing, as a broken driver might; later ones work."""
+
+    created: ClassVar[int] = 0
+
+    def __init__(self, source: int | str, api: str = "auto"):
+        super().__init__(source, api)
+        FlakyCamera.created += 1
+        self._first = FlakyCamera.created == 1
+
+    def grab(self) -> bool:
+        if self._first:
+            raise RuntimeError("driver exploded")
+        return super().grab()
+
+
+def test_a_camera_error_does_not_end_the_camera_thread(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from habit_guard.vision import pipeline as pipeline_module
+
+    monkeypatch.setattr(pipeline_module, "CAMERA_RETRY_S", 0.05)
+    FakeCamera.available = True
+    FlakyCamera.created = 0
+    observations: list[Observation] = []
+    statuses: list[Status] = []
+    pipeline = Pipeline(
+        Settings(),
+        observations.append,
+        lambda status, detail: statuses.append(status),
+        analyzer=Analyzer(FakeFaces(), FakeHands()),
+        camera_factory=FlakyCamera,  # type: ignore[arg-type]
+    )
+    pipeline.start()
+    try:
+        assert wait_for(lambda: len(observations) >= 1)
+        assert Status.NO_CAMERA in statuses  # the error was reported ...
+        assert statuses[-1] is Status.RUNNING  # ... and the loop recovered by itself
+    finally:
+        pipeline.stop()
+
+
+def test_a_busy_camera_is_opened_again_when_it_comes_back(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from habit_guard.vision import pipeline as pipeline_module
+
+    monkeypatch.setattr(pipeline_module, "CAMERA_RETRY_S", 0.05)
+    FakeCamera.available = False
+    FakeCamera.opened_sources = []
+    observations: list[Observation] = []
+    statuses: list[Status] = []
+    pipeline = Pipeline(
+        Settings(),
+        observations.append,
+        lambda status, detail: statuses.append(status),
+        analyzer=Analyzer(FakeFaces(), FakeHands()),
+        camera_factory=FakeCamera,  # type: ignore[arg-type]
+    )
+    pipeline.start()
+    try:
+        assert wait_for(lambda: Status.NO_CAMERA in statuses)
+        assert observations == []
+        FakeCamera.available = True  # the other program lets go
+        assert wait_for(lambda: len(observations) >= 1)
+        assert statuses[-1] is Status.RUNNING
+        assert FakeCamera.opened_sources == [0]
+    finally:
+        pipeline.stop()
+        FakeCamera.available = True

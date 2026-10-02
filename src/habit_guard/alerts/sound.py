@@ -5,13 +5,20 @@ beeps, and a warbling alarm. They are synthesised into small WAV files in the
 settings folder the first time they are needed, so the package ships no audio
 and there is nothing to license. A WAV file of your own can replace them.
 
-The tone generator is pure numpy; only :class:`SoundPlayer` needs Qt.
+Playback uses what the operating system already has, so the app needs no audio
+library: ``winsound`` on Windows, ``afplay`` on macOS, and ``paplay``,
+``pw-play``, ``aplay`` or ``play`` on Linux. The volume is baked into the WAV
+file that is played, because those tools do not all have a volume control.
 """
 
 from __future__ import annotations
 
+import hashlib
 import io
 import logging
+import shutil
+import subprocess
+import sys
 import wave
 from pathlib import Path
 
@@ -22,6 +29,8 @@ log = logging.getLogger(__name__)
 SAMPLE_RATE = 22050
 #: How loud each level plays relative to the volume setting (before the setting is applied).
 LEVEL_GAIN = {1: 0.55, 2: 0.8, 3: 1.0}
+#: Volumes are rounded to this step, so only a handful of files are ever written.
+VOLUME_STEP = 0.05
 
 
 def _tone(freq: float, seconds: float, *, fade: float = 0.015) -> np.ndarray:
@@ -55,9 +64,9 @@ def synthesize(level: int) -> np.ndarray:
     return np.concatenate(parts) * 0.9
 
 
-def wav_bytes(level: int) -> bytes:
-    """The tone for ``level`` as the bytes of a 16-bit mono WAV file."""
-    pcm = (synthesize(level) * 32767.0).astype("<i2")
+def wav_bytes(level: int, gain: float = 1.0) -> bytes:
+    """The tone for ``level`` as the bytes of a 16-bit mono WAV file, scaled by ``gain``."""
+    pcm = (synthesize(level) * 32767.0 * max(0.0, min(gain, 1.0))).astype("<i2")
     buffer = io.BytesIO()
     with wave.open(buffer, "wb") as out:
         out.setnchannels(1)
@@ -67,21 +76,46 @@ def wav_bytes(level: int) -> bytes:
     return buffer.getvalue()
 
 
-def ensure_tones(directory: Path) -> dict[int, Path]:
-    """Write the built-in tones to ``directory`` if they are not there yet."""
-    paths: dict[int, Path] = {}
-    directory.mkdir(parents=True, exist_ok=True)
-    for level in (1, 2, 3):
-        path = directory / f"alarm-{level}.wav"
-        if not path.is_file():
-            path.write_bytes(wav_bytes(level))
-        paths[level] = path
-    return paths
-
-
 def effective_volume(level: int, volume: float) -> float:
     """The playback volume (0 to 1) for an alarm ``level`` and the user's volume setting."""
     return max(0.0, min(1.0, volume * LEVEL_GAIN.get(level, 1.0)))
+
+
+def scale_wav(data: bytes, gain: float) -> bytes:
+    """``data`` (a WAV file) with every sample multiplied by ``gain``.
+
+    Only 16-bit PCM is scaled; any other format is returned as it is, so a
+    custom file still plays, just without the volume setting.
+    """
+    if gain >= 0.999:
+        return data
+    try:
+        with wave.open(io.BytesIO(data)) as source:
+            params = source.getparams()
+            frames = source.readframes(source.getnframes())
+    except (wave.Error, EOFError):
+        return data
+    if params.sampwidth != 2:
+        return data
+    samples = np.frombuffer(frames, dtype="<i2").astype(np.float64) * max(0.0, gain)
+    scaled = np.clip(samples, -32768, 32767).astype("<i2")
+    out = io.BytesIO()
+    with wave.open(out, "wb") as target:
+        target.setparams(params)
+        target.writeframes(scaled.tobytes())
+    return out.getvalue()
+
+
+def build_command(platform: str, path: Path) -> list[str] | None:
+    """The command that plays ``path`` on this platform, or ``None`` when nothing can."""
+    if platform == "darwin":
+        player = shutil.which("afplay")
+        return [player, str(path)] if player else None
+    for tool, extra in (("paplay", []), ("pw-play", []), ("aplay", ["-q"]), ("play", ["-q"])):
+        found = shutil.which(tool)
+        if found:
+            return [found, *extra, str(path)]
+    return None
 
 
 class SoundPlayer:
@@ -89,40 +123,79 @@ class SoundPlayer:
 
     def __init__(self, directory: Path):
         self._directory = directory
-        self._tones: dict[int, Path] = {}
-        self._effects: dict[str, object] = {}
+        self._process: subprocess.Popen[bytes] | None = None
+        self._warned = False
 
     def play(self, level: int, volume: float, custom_file: str = "") -> None:
-        try:
-            from PySide6.QtCore import QUrl
-            from PySide6.QtMultimedia import QSoundEffect
-        except ImportError:  # pragma: no cover - Qt multimedia is part of the dependency
-            return
-        path = self._resolve(level, custom_file)
+        path = self._render(level, volume, custom_file)
         if path is None:
             return
-        effect = self._effects.get(str(path))
-        if effect is None:
-            effect = QSoundEffect()
-            effect.setSource(QUrl.fromLocalFile(str(path)))
-            self._effects[str(path)] = effect
-        effect.setVolume(effective_volume(level, volume))  # type: ignore[attr-defined]
-        effect.play()  # type: ignore[attr-defined]
+        if sys.platform == "win32":
+            self._play_windows(path)
+        else:
+            self._play_command(path)
 
     def stop(self) -> None:
-        for effect in self._effects.values():
-            effect.stop()  # type: ignore[attr-defined]
+        if sys.platform == "win32":
+            try:
+                import winsound
 
-    def _resolve(self, level: int, custom_file: str) -> Path | None:
-        if custom_file:
-            custom = Path(custom_file).expanduser()
-            if custom.is_file():
-                return custom
-            log.warning("sound file not found, using the built-in tone: %s", custom)
+                winsound.PlaySound(None, winsound.SND_PURGE)
+            except (ImportError, RuntimeError):
+                pass
+        elif self._process is not None and self._process.poll() is None:
+            self._process.terminate()
+        self._process = None
+
+    # ---------------------------------------------------------------------------- playing
+    def _play_windows(self, path: Path) -> None:
         try:
-            if not self._tones:
-                self._tones = ensure_tones(self._directory)
+            import winsound
+
+            winsound.PlaySound(str(path), winsound.SND_FILENAME | winsound.SND_ASYNC)
+        except (ImportError, RuntimeError):
+            log.exception("could not play the alarm sound")
+
+    def _play_command(self, path: Path) -> None:
+        command = build_command(sys.platform, path)
+        if command is None:
+            if not self._warned:
+                log.warning("no command-line audio player found: the alarm will be silent")
+                self._warned = True
+            return
+        self.stop()
+        try:
+            self._process = subprocess.Popen(
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
         except OSError:
-            log.exception("could not write the alarm tones")
+            log.exception("could not start the audio player")
+
+    # --------------------------------------------------------------------------- the file
+    def _render(self, level: int, volume: float, custom_file: str) -> Path | None:
+        """The WAV file to play, with the volume baked in (written once, then reused)."""
+        gain = round(effective_volume(level, volume) / VOLUME_STEP) * VOLUME_STEP
+        pct = round(gain * 100)
+        try:
+            self._directory.mkdir(parents=True, exist_ok=True)
+            if custom_file:
+                custom = Path(custom_file).expanduser()
+                if custom.is_file():
+                    stamp = f"{custom.resolve()}|{custom.stat().st_mtime_ns}"
+                    name = f"custom-{hashlib.sha1(stamp.encode()).hexdigest()[:10]}-{pct}.wav"
+                    return self._write(name, lambda: scale_wav(custom.read_bytes(), gain))
+                log.warning("sound file not found, using the built-in tone: %s", custom)
+            tone = min(max(level, 1), 3)
+            return self._write(f"alarm-{tone}-{pct}.wav", lambda: wav_bytes(tone, gain))
+        except OSError:
+            log.exception("could not prepare the alarm sound")
             return None
-        return self._tones.get(min(max(level, 1), 3))
+
+    def _write(self, name: str, make: object) -> Path:
+        path = self._directory / name
+        if not path.is_file():
+            path.write_bytes(make())  # type: ignore[operator]
+        return path

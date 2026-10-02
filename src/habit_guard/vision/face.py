@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 
 from ..types import FaceInfo
+from .loader import load_face_detector
 
 #: Faces are searched in a copy of the picture no wider than this; YuNet is quick at this size.
 DETECT_WIDTH = 320
@@ -18,11 +19,10 @@ class FaceDetector:
     """Finds the main face and its five landmarks (eyes, nose tip, mouth corners)."""
 
     def __init__(self, model_path: Path, score_threshold: float = 0.6):
-        self._model_path = str(model_path)
         self._score_threshold = score_threshold
         self._size = (0, 0)
-        self._detector = cv2.FaceDetectorYN.create(
-            self._model_path, "", (DETECT_WIDTH, DETECT_WIDTH * 3 // 4), score_threshold, 0.3, 5
+        self._detector = load_face_detector(
+            model_path, (DETECT_WIDTH, DETECT_WIDTH * 3 // 4), score_threshold, 0.3, 5
         )
 
     def detect(self, image: np.ndarray) -> FaceInfo | None:

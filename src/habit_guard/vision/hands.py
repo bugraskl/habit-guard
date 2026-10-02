@@ -22,11 +22,14 @@ import cv2
 import numpy as np
 
 from ..types import HAND_LANDMARKS, HandInfo
+from .loader import load_net
 
 PALM_INPUT = 192
 HAND_INPUT = 224
 #: The crop around a palm is this many times the palm box (MediaPipe's constant).
 PALM_ROI_SCALE = 2.6
+#: A crop is never smaller than this many pixels, so a collapsed hand cannot divide by zero.
+MIN_ROI_PX = 8.0
 #: The crop around an already followed hand is this many times its landmark box.
 TRACK_ROI_SCALE = 2.0
 
@@ -106,7 +109,9 @@ def roi_from_palm(palm: Palm) -> Roi:
     w, h = x2 - x1, y2 - y1
     center = np.array([(x1 + x2) / 2.0, (y1 + y2) / 2.0]) + _unit(direction) * 0.5 * h
     return Roi(
-        (float(center[0]), float(center[1])), max(w, h) * PALM_ROI_SCALE, _upright_angle(direction)
+        (float(center[0]), float(center[1])),
+        max(w * PALM_ROI_SCALE, h * PALM_ROI_SCALE, MIN_ROI_PX),
+        _upright_angle(direction),
     )
 
 
@@ -117,7 +122,9 @@ def roi_from_landmarks(landmarks: np.ndarray) -> Roi:
     w, h = float(hi[0] - lo[0]), float(hi[1] - lo[1])
     center = (lo + hi) / 2.0 + _unit(direction) * 0.1 * h
     return Roi(
-        (float(center[0]), float(center[1])), max(w, h) * TRACK_ROI_SCALE, _upright_angle(direction)
+        (float(center[0]), float(center[1])),
+        max(w * TRACK_ROI_SCALE, h * TRACK_ROI_SCALE, MIN_ROI_PX),
+        _upright_angle(direction),
     )
 
 
@@ -126,7 +133,7 @@ class PalmDetector:
     """Finds palms in a picture. Slow part of hand tracking: ~6 ms on a desktop CPU."""
 
     def __init__(self, model_path: Path, score_threshold: float = 0.5, nms_threshold: float = 0.3):
-        self._net = cv2.dnn.readNet(str(model_path))
+        self._net = load_net(model_path)
         self._outputs = self._net.getUnconnectedOutLayersNames()
         self._anchors = make_anchors()
         self.score_threshold = score_threshold
@@ -194,7 +201,7 @@ class HandLandmarker:
     """The 21-point hand network: a crop in, landmarks and a "this is a hand" score out."""
 
     def __init__(self, model_path: Path):
-        self._net = cv2.dnn.readNet(str(model_path))
+        self._net = load_net(model_path)
         self._outputs = self._net.getUnconnectedOutLayersNames()
 
     def infer(self, image: np.ndarray, roi: Roi) -> tuple[np.ndarray, float]:

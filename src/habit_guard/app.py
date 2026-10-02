@@ -68,6 +68,8 @@ class Controller(QObject):
         self._stats_dirty = False
         self._settings_dialog: SettingsDialog | None = None
         self._preview: PreviewWindow | None = None
+        self._previewing = False
+        self._closed = False
         self._stats_window: StatsDialog | None = None
 
         self._save_timer = QTimer(self)
@@ -104,6 +106,8 @@ class Controller(QObject):
     def _on_status(self, status: Status, detail: str) -> None:
         log.info("camera pipeline: %s %s", status.value, detail)
         self._status, self._detail = status, detail
+        if status in (Status.NO_CAMERA, Status.ERROR, Status.PAUSED):
+            self._calm_down()  # no picture means no hand: never leave an alarm standing
         self._refresh_tray()
 
     def _on_observation(self, obs: Observation) -> None:
@@ -124,7 +128,7 @@ class Controller(QObject):
 
         for event in self.engine.update(obs.ts, counts if armed else {}):
             self._handle(event)
-        if self._preview is not None and self._preview.isVisible():
+        if self._previewing and self._preview is not None:
             self._preview.show_observation(obs, frame, zones, counts)
 
     def _handle(self, event: Trigger | Release) -> None:
@@ -167,8 +171,7 @@ class Controller(QObject):
         self._resume_at = None
 
     def _sync_pipeline(self) -> None:
-        previewing = self._preview is not None and self._preview.isVisible()
-        if previewing or (not self._user_paused and self.settings.any_habit_enabled()):
+        if self._previewing or (not self._user_paused and self.settings.any_habit_enabled()):
             self.pipeline.resume()
         else:
             self.pipeline.pause()
@@ -225,12 +228,14 @@ class Controller(QObject):
             self._preview = PreviewWindow()
             self._preview.setWindowIcon(icon(IconState.ACTIVE))
             self._preview.closed.connect(self._on_preview_closed)
+        self._previewing = True
         self.pipeline.set_preview(True)
         self._preview.show()
         self._preview.raise_()
         self._sync_pipeline()  # the preview works even while paused
 
     def _on_preview_closed(self) -> None:
+        self._previewing = False
         self.pipeline.set_preview(False)
         self._sync_pipeline()
 
@@ -298,13 +303,20 @@ class Controller(QObject):
             log.exception("could not save the statistics")
 
     # ------------------------------------------------------------------------------ shutdown
-    def quit(self) -> None:
+    def shutdown(self) -> None:
+        """Stop everything and save. Safe to call more than once."""
+        if self._closed:
+            return
+        self._closed = True
         self.pipeline.stop()
         self._calm_down()
         self._speech.stop()
         self._curtain.close()
         self._save_stats()
         self.tray.hide()
+
+    def quit(self) -> None:
+        self.shutdown()
         app = QApplication.instance()
         if app is not None:
             app.quit()
@@ -335,7 +347,7 @@ def run(settings: Settings, source: int | str | None = None) -> int:
         log.warning("no system tray here: the settings window opens instead")
         controller.open_settings()
     controller.start()
-    app.aboutToQuit.connect(controller.pipeline.stop)
+    app.aboutToQuit.connect(controller.shutdown)  # also on logoff and system shutdown
     code = app.exec()
     lock.unlock()
     return int(code)

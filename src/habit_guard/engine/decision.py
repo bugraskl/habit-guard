@@ -94,14 +94,15 @@ class HabitEngine:
                 run = self._runs[habit] = _Run(since=now, last_hit=now)
             if hit:
                 run.last_hit = now
-            events.extend(self._advance(habit, run, now))
+            events.extend(self._advance(habit, run, now, hit))
         return events
 
-    def _advance(self, habit: Habit, run: _Run, now: float) -> list[Event]:
+    def _advance(self, habit: Habit, run: _Run, now: float, hit: bool) -> list[Event]:
         # Duration counts up to the last time the hand was actually seen.
         duration = run.last_hit - run.since
         if run.level == 0:
-            if duration < self.dwell.get(habit, 1.0):
+            # A first alarm needs the hand to be there now, not just within the forgiven gap.
+            if not hit or duration < self.dwell.get(habit, 1.0):
                 return []
             if now - self._last_new_alarm.get(habit, float("-inf")) < self.settings.cooldown_s:
                 return []

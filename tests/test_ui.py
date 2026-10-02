@@ -181,6 +181,7 @@ def test_curtain_shows_and_hides_on_every_screen(qapp: QApplication) -> None:
     curtain.show("flash", 3, "Hands down!")
     assert not curtain._windows[0].grab().isNull()
     curtain.hide()
+    assert all(w._closing for w in curtain._windows)  # fading out
     curtain.close()
     assert curtain._windows == []
 
@@ -322,3 +323,35 @@ def test_a_paused_app_with_the_preview_open_raises_no_alarm(qapp: QApplication) 
     assert rec.events == []
     assert controller.stats.total() == 0
     assert controller.stats.watched_s == 0
+
+
+def test_a_raised_alarm_is_calmed_when_the_camera_is_lost(qapp: QApplication) -> None:
+    from habit_guard.vision.pipeline import Status
+
+    controller, rec = make_controller(qapp)
+    feed(controller, 0.0, 1.5, (0.0, 1.3))
+    assert controller.engine.active_habits()
+    rec.events.clear()
+    controller._on_status(Status.NO_CAMERA, "0")
+    assert controller.engine.active_habits() == set()
+    assert ("hide", 0) in rec.events  # the curtain does not stay up while nobody is watching
+
+
+def test_closing_the_preview_releases_the_camera_of_a_paused_app(qapp: QApplication) -> None:
+    controller, _ = make_controller(qapp)
+    controller.toggle_pause()
+    assert controller.pipeline.paused
+    controller.open_preview()
+    assert not controller.pipeline.paused  # the preview works even while paused
+    assert controller._preview is not None
+    controller._preview.close()
+    assert controller.pipeline.paused  # and the camera goes off again when it is closed
+
+
+def test_shutdown_saves_the_statistics_once(qapp: QApplication) -> None:
+    controller, _ = make_controller(qapp)
+    feed(controller, 0.0, 1.5, (0.0, 1.3))
+    assert Stats.load(paths.stats_path()).total() == 0  # not saved yet
+    controller.shutdown()
+    assert Stats.load(paths.stats_path()).total() == 1
+    controller.shutdown()  # a second call (quit, then aboutToQuit) is harmless

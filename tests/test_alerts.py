@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import sys
 import wave
 from pathlib import Path
 
@@ -12,8 +13,10 @@ from habit_guard.alerts import speech
 from habit_guard.alerts.manager import AlertManager
 from habit_guard.alerts.sound import (
     SAMPLE_RATE,
+    SoundPlayer,
+    build_command,
     effective_volume,
-    ensure_tones,
+    scale_wav,
     synthesize,
     wav_bytes,
 )
@@ -48,21 +51,154 @@ def test_tones_start_and_end_silently() -> None:
         assert abs(samples[-1]) < 0.05  # no click at the end
 
 
-def test_ensure_tones_writes_files_once(tmp_path: Path) -> None:
-    paths = ensure_tones(tmp_path / "sounds")
-    assert set(paths) == {1, 2, 3}
-    assert all(p.is_file() for p in paths.values())
-    stamp = paths[1].stat().st_mtime_ns
-    ensure_tones(tmp_path / "sounds")
-    assert paths[1].stat().st_mtime_ns == stamp
-
-
 def test_volume_rises_with_the_level_and_stays_in_range() -> None:
     volumes = [effective_volume(level, 0.7) for level in (1, 2, 3)]
     assert volumes == sorted(volumes)
     assert all(0.0 <= v <= 1.0 for v in volumes)
     assert effective_volume(3, 5.0) == 1.0
     assert effective_volume(1, -1.0) == 0.0
+
+
+def _peak(data: bytes) -> int:
+    with wave.open(io.BytesIO(data)) as wav:
+        return int(np.abs(np.frombuffer(wav.readframes(wav.getnframes()), dtype="<i2")).max())
+
+
+def test_the_gain_is_baked_into_the_wav() -> None:
+    loud, soft = _peak(wav_bytes(2, 1.0)), _peak(wav_bytes(2, 0.25))
+    assert loud > 20000
+    assert soft == pytest.approx(loud * 0.25, rel=0.05)
+    assert wav_bytes(2, 0.0) != wav_bytes(2, 1.0)
+    assert _peak(wav_bytes(2, 0.0)) == 0
+    assert _peak(wav_bytes(2, 7.0)) == loud  # gain is capped at 1
+
+
+def test_scale_wav_scales_16_bit_and_leaves_other_data_alone() -> None:
+    original = wav_bytes(1, 1.0)
+    assert _peak(scale_wav(original, 0.5)) == pytest.approx(_peak(original) * 0.5, rel=0.05)
+    assert scale_wav(original, 1.0) == original
+    assert scale_wav(b"not a wav file", 0.5) == b"not a wav file"
+    eight_bit = io.BytesIO()
+    with wave.open(eight_bit, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(1)
+        wav.setframerate(8000)
+        wav.writeframes(bytes([128, 200, 50] * 100))
+    assert scale_wav(eight_bit.getvalue(), 0.5) == eight_bit.getvalue()
+
+
+def test_playback_command_per_platform(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from habit_guard.alerts import sound
+
+    monkeypatch.setattr(sound.shutil, "which", lambda name: f"/bin/{name}")
+    assert build_command("darwin", Path("a.wav")) == ["/bin/afplay", "a.wav"]
+    assert build_command("linux", Path("a.wav")) == ["/bin/paplay", "a.wav"]
+    monkeypatch.setattr(
+        sound.shutil, "which", lambda name: "/bin/aplay" if name == "aplay" else None
+    )
+    assert build_command("linux", Path("a.wav")) == ["/bin/aplay", "-q", "a.wav"]
+    monkeypatch.setattr(sound.shutil, "which", lambda name: None)
+    assert build_command("linux", Path("a.wav")) is None
+    assert build_command("darwin", Path("a.wav")) is None
+
+
+class FakeWinsound:
+    SND_FILENAME = 1
+    SND_ASYNC = 2
+    SND_PURGE = 4
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[object, int]] = []
+
+    def PlaySound(self, sound, flags):  # type: ignore[no-untyped-def]
+        self.calls.append((sound, flags))
+
+
+def test_windows_playback_uses_winsound_with_the_volume_baked_in(
+    tmp_path: Path, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    from habit_guard.alerts import sound
+
+    fake = FakeWinsound()
+    monkeypatch.setitem(sys.modules, "winsound", fake)
+    monkeypatch.setattr(sound.sys, "platform", "win32")
+    player = SoundPlayer(tmp_path / "sounds")
+    player.play(2, 0.7)
+    ((played, flags),) = fake.calls
+    assert flags == FakeWinsound.SND_FILENAME | FakeWinsound.SND_ASYNC
+    path = Path(played)
+    assert path.is_file()
+    assert _peak(path.read_bytes()) == pytest.approx(_peak(wav_bytes(2, 0.56)), rel=0.06)
+    player.play(2, 0.7)  # the same file is reused, not written again
+    assert fake.calls[1][0] == played
+    player.play(2, 0.1)  # another volume, another file
+    assert fake.calls[2][0] != played
+    player.stop()
+    assert fake.calls[-1] == (None, FakeWinsound.SND_PURGE)
+
+
+def test_custom_sound_file_is_used_and_scaled(tmp_path: Path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from habit_guard.alerts import sound
+
+    fake = FakeWinsound()
+    monkeypatch.setitem(sys.modules, "winsound", fake)
+    monkeypatch.setattr(sound.sys, "platform", "win32")
+    custom = tmp_path / "mine.wav"
+    custom.write_bytes(wav_bytes(3, 1.0))
+    player = SoundPlayer(tmp_path / "sounds")
+    player.play(1, 1.0, str(custom))
+    played = Path(fake.calls[0][0])
+    assert played.name.startswith("custom-")
+    assert _peak(played.read_bytes()) == pytest.approx(_peak(custom.read_bytes()) * 0.55, rel=0.06)
+    # A missing custom file falls back to the built-in tone.
+    player.play(1, 1.0, str(tmp_path / "gone.wav"))
+    assert Path(fake.calls[1][0]).name.startswith("alarm-1-")
+
+
+def test_command_line_playback_starts_the_player_and_replaces_it(
+    tmp_path: Path, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    from habit_guard.alerts import sound
+
+    started: list[list[str]] = []
+
+    class FakeProcess:
+        def __init__(self, command, **kwargs):  # type: ignore[no-untyped-def]
+            started.append(command)
+            self.stopped = False
+
+        def poll(self):  # type: ignore[no-untyped-def]
+            return 0 if self.stopped else None
+
+        def terminate(self) -> None:
+            self.stopped = True
+
+    monkeypatch.setattr(sound.sys, "platform", "linux")
+    monkeypatch.setattr(
+        sound.shutil, "which", lambda name: "/bin/paplay" if name == "paplay" else None
+    )
+    monkeypatch.setattr(sound.subprocess, "Popen", FakeProcess)
+    player = SoundPlayer(tmp_path)
+    player.play(3, 1.0)
+    first = player._process
+    assert started[0][0] == "/bin/paplay"
+    assert started[0][1].endswith("alarm-3-100.wav")
+    player.play(3, 1.0)
+    assert first is not None
+    assert first.stopped  # the previous sound is cut off, not layered
+    player.stop()
+    assert player._process is None
+
+
+def test_no_player_is_a_quiet_no(tmp_path: Path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from habit_guard.alerts import sound
+
+    monkeypatch.setattr(sound.sys, "platform", "linux")
+    monkeypatch.setattr(sound.shutil, "which", lambda name: None)
+    player = SoundPlayer(tmp_path)
+    player.play(2, 0.7)
+    player.play(2, 0.7)
+    assert player._process is None
 
 
 # ------------------------------------------------------------------------------- speech

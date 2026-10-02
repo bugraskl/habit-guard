@@ -42,7 +42,9 @@ window when there is no tray. On Windows 11 the icon may sit behind the **^** on
 
 ## No sound, or no voice
 
-- The sound uses Qt Multimedia; check the system volume and the output device.
+- The sound is played with what the system has: `winsound` on Windows, `afplay` on macOS and
+  `paplay`, `pw-play`, `aplay` or `play` on Linux (install one of them if none is present).
+  Check the system volume and the output device.
 - The voice needs `spd-say` or `espeak` on Linux. On Windows, *Settings → Time & language →
   Speech* controls which voices exist; the app picks one that matches the interface language when
   there is one.

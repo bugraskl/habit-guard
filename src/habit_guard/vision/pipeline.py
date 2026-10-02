@@ -91,6 +91,9 @@ class Pipeline:
         self._paused = False
         self._preview = False
         self._thread: threading.Thread | None = None
+        self._camera: Camera | None = None
+        self._next_at = 0.0
+        self._failures = 0
         self._status: Status | None = None
         # Counters for `habit-guard bench`.
         self.analyses = 0
@@ -152,72 +155,83 @@ class Pipeline:
             self._emit_status(Status.ERROR, str(exc))
             return
 
-        camera: Camera | None = None
-        next_at = 0.0
-        failures = 0
         while not self._stop.is_set():
-            if self._paused:
-                if camera is not None:
-                    camera.release()
-                    camera = None
-                    analyzer.reset()
-                self._emit_status(Status.PAUSED)
-                self._wait(0.5)
-                continue
-
-            source = (
-                self._source_override
-                if self._source_override is not None
-                else self._settings.camera_index
-            )
-            api = self._settings.camera_api
-            if camera is None or camera.source != source or camera.api != api:
-                if camera is not None:
-                    camera.release()
-                camera = self._camera_factory(source, api)
-                if not camera.open():
-                    camera.release()
-                    camera = None
-                    self._emit_status(Status.NO_CAMERA, str(source))
-                    self._wait(CAMERA_RETRY_S)
-                    continue
-                analyzer.reset()
-                next_at = 0.0
-                failures = 0
-            self._emit_status(Status.RUNNING)
-
-            if not camera.grab():
-                failures += 1
-                if failures >= MAX_GRAB_FAILURES:
-                    camera.release()
-                    camera = None
-                    self._emit_status(Status.NO_CAMERA, str(source))
-                    self._wait(CAMERA_RETRY_S)
-                else:
-                    self._wait(0.05)
-                continue
-            failures = 0
-
-            now = self._clock()
-            if now < next_at:
-                continue  # this picture is dropped; a later one will be analysed
-            frame = camera.retrieve()
-            if frame is None:
-                continue
-            started = time.perf_counter()
             try:
-                step = analyzer.step(frame, now, self._settings.cadence(), keep_frame=self._preview)
+                self._iteration(analyzer)
             except Exception:
-                log.exception("analysis failed on one picture")
-                next_at = now + 1.0
-                continue
-            self.analysis_s += time.perf_counter() - started
-            next_at = now + step.interval
-            if step.observation is None:
-                self.skipped += 1
-                continue
-            self.analyses += 1
-            self._on_observation(step.observation)
+                # A driver or OpenCV error must not end the thread silently while the tray
+                # still says "watching": let go of the camera and try again in a moment.
+                log.exception("camera loop error")
+                self._drop_camera()
+                analyzer.reset()
+                self._emit_status(Status.NO_CAMERA, "error")
+                self._wait(CAMERA_RETRY_S)
+        self._drop_camera()
 
-        if camera is not None:
-            camera.release()
+    def _drop_camera(self) -> None:
+        if self._camera is not None:
+            self._camera.release()
+            self._camera = None
+
+    def _iteration(self, analyzer: Analyzer) -> None:
+        """One turn of the camera loop."""
+        if self._paused:
+            if self._camera is not None:
+                self._drop_camera()
+                analyzer.reset()
+            self._emit_status(Status.PAUSED)
+            self._wait(0.5)
+            return
+
+        source = (
+            self._source_override
+            if self._source_override is not None
+            else self._settings.camera_index
+        )
+        api = self._settings.camera_api
+        camera = self._camera
+        if camera is None or camera.source != source or camera.api != api:
+            self._drop_camera()
+            camera = self._camera_factory(source, api)
+            if not camera.open():
+                camera.release()
+                self._emit_status(Status.NO_CAMERA, str(source))
+                self._wait(CAMERA_RETRY_S)
+                return
+            self._camera = camera
+            analyzer.reset()
+            self._next_at = 0.0
+            self._failures = 0
+        self._emit_status(Status.RUNNING)
+
+        if not camera.grab():
+            self._failures += 1
+            if self._failures >= MAX_GRAB_FAILURES:
+                self._drop_camera()
+                self._emit_status(Status.NO_CAMERA, str(source))
+                self._wait(CAMERA_RETRY_S)
+            else:
+                self._wait(0.05)
+            return
+        self._failures = 0
+
+        now = self._clock()
+        if now < self._next_at:
+            return  # this picture is dropped; a later one will be analysed
+        frame = camera.retrieve()
+        if frame is None:
+            return
+        started = time.perf_counter()
+        try:
+            step = analyzer.step(frame, now, self._settings.cadence(), keep_frame=self._preview)
+        except Exception:
+            log.exception("analysis failed on one picture")
+            self._next_at = now + 1.0
+            return
+        self.analysis_s += time.perf_counter() - started
+        self._next_at = now + step.interval
+        if step.observation is None:
+            self.skipped += 1
+            return
+        self.analyses += 1
+        self._on_observation(step.observation)
