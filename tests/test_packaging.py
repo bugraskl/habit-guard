@@ -32,6 +32,21 @@ entry = load("hg_entry", ROOT / "packaging" / "pyinstaller" / "entry.py")
 bundle_check = load("check_bundle", ROOT / "scripts" / "check_bundle.py")
 notes_script = load("release_notes", ROOT / "scripts" / "release_notes.py")
 
+
+def _bash_works() -> bool:
+    """A usable bash: on Windows, ``bash`` may be the stub of the Windows Subsystem for Linux."""
+    found = shutil.which("bash")
+    if found is None:
+        return False
+    try:
+        result = subprocess.run(
+            [found, "-c", "echo ok"], capture_output=True, text=True, timeout=20, check=False
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0 and result.stdout.strip() == "ok"
+
+
 SPEC = (ROOT / "packaging" / "pyinstaller" / "habit-guard.spec").read_text(encoding="utf-8")
 ISS = (ROOT / "packaging" / "windows" / "installer.iss").read_bytes()
 
@@ -122,7 +137,7 @@ def test_linux_desktop_entry() -> None:
     assert text.startswith("[Desktop Entry]")
 
 
-@pytest.mark.skipif(shutil.which("bash") is None, reason="needs bash")
+@pytest.mark.skipif(not _bash_works(), reason="needs a working bash")
 @pytest.mark.parametrize(
     "script",
     ["packaging/macos/make_dmg.sh", "packaging/linux/build_appimage.sh", "packaging/linux/AppRun"],

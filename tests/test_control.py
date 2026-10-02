@@ -205,3 +205,10 @@ def test_the_status_reports_a_raised_alarm(qapp: QApplication) -> None:
         assert status["today"] >= 1
     finally:
         controller.shutdown()
+
+
+def test_commands_sent_within_the_same_clock_tick_are_all_kept_in_order(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setattr(control.time, "time_ns", lambda: 1_000_000_000)  # a coarse clock
+    for command in ("pause", "resume", "toggle", "pause"):
+        control.send(command)
+    assert [c for _, c in control.pending()] == ["pause", "resume", "toggle", "pause"]

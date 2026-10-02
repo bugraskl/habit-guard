@@ -15,8 +15,10 @@ list below is the whole vocabulary.
 from __future__ import annotations
 
 import contextlib
+import itertools
 import json
 import os
+import secrets
 import time
 from pathlib import Path
 from typing import Any
@@ -32,6 +34,10 @@ EXIT_NOT_RUNNING = 3
 STALE_AFTER_S = 15.0
 #: How often a running app refreshes its status file.
 HEARTBEAT_S = 5.0
+
+#: Makes file names unique and ordered within one process, whatever the clock's resolution
+#: (Windows' clock ticks about every 15 ms, so two quick commands can share a timestamp).
+_counter = itertools.count()
 
 
 def control_dir() -> Path:
@@ -53,7 +59,7 @@ def send(command: str) -> Path:
         raise ValueError(f"unknown command {command!r}; known: {', '.join(COMMANDS)}")
     folder = control_dir()
     folder.mkdir(parents=True, exist_ok=True)
-    name = f"{time.time_ns()}-{os.getpid()}.cmd"
+    name = f"{time.time_ns():020d}-{next(_counter):06d}-{os.getpid()}-{secrets.token_hex(3)}.cmd"
     path = folder / name
     tmp = folder / (name + ".part")
     tmp.write_text(command + "\n", encoding="utf-8")
