@@ -27,8 +27,8 @@
 > ([nasıl bildirilir](CONTRIBUTING.md#reporting-a-problem)).
 
 <p align="center">
-  <a href="assets/video/demo.mp4"><img src="assets/video/demo.webp" alt="On saniyelik bir animasyon: el ağza doğru gider, Habit Guard onu ağız bölgesinde bulur, el kaldıkça bir halka dolar, ardından ekran ses dalgalarıyla kırmızıya döner ve el inince her şey sakinleşir." width="760"></a><br>
-  <sub>On saniyede baştan sona. Uygulamanın ekran kaydı değil, yapay zekâ video aracıyla hazırlanmış bir çizimdir. <a href="assets/video/demo.mp4">MP4'ü açın</a>.</sub>
+  <a href="https://bugraskl.github.io/habit-guard/assets/demo.mp4"><img src="assets/video/demo.webp" alt="On saniyelik bir animasyon: el ağza doğru gider, Habit Guard onu ağız bölgesinde bulur, el kaldıkça bir halka dolar, ardından ekran ses dalgalarıyla kırmızıya döner ve el inince her şey sakinleşir." width="760"></a><br>
+  <sub>On saniyede baştan sona. Uygulamanın ekran kaydı değil, yapay zekâ video aracıyla hazırlanmış bir çizimdir. <a href="https://bugraskl.github.io/habit-guard/assets/demo.mp4">MP4'ü açın</a>.</sub>
 </p>
 
 ## Neden Habit Guard

@@ -250,7 +250,8 @@ def test_the_readmes_show_the_animation_and_link_the_video() -> None:
     for name in ("README.md", "README.tr.md"):
         text = (ROOT / name).read_text(encoding="utf-8")
         assert 'src="assets/video/demo.webp"' in text, name
-        assert 'href="assets/video/demo.mp4"' in text, name
+        # The website serves the MP4 as video/mp4, so a browser plays it where it opens.
+        assert 'href="https://bugraskl.github.io/habit-guard/assets/demo.mp4"' in text, name
         assert 'alt="' in text.split("demo.webp")[1].split(">")[0], name
     for name in ("demo.webp", "demo.mp4", "demo-poster.jpg"):
         assert (ROOT / "assets" / "video" / name).is_file(), name
