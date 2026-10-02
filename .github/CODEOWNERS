@@ -1,0 +1,8 @@
+# Code owners are requested for review automatically on every pull request.
+
+* @bugraskl
+
+# Privacy-critical areas: changes here need an explicit look from the maintainer.
+/scripts/check_privacy.py @bugraskl
+/src/habit_guard/vision/ @bugraskl
+/.github/workflows/ @bugraskl

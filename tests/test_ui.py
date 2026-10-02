@@ -297,3 +297,19 @@ def test_second_instance_cannot_take_the_lock(qapp: QApplication) -> None:
     again = acquire_lock()
     assert again is not None
     again.unlock()
+
+
+def test_timed_pause_resumes_by_itself(qapp: QApplication) -> None:
+    controller, _ = make_controller(qapp)
+    controller.pause_for(15)
+    assert controller.pipeline.paused
+    assert controller._resume_timer.isActive()
+    assert controller._resume_at is not None
+    assert "Paused until" in controller.tray._status
+    controller._resume_timer.stop()
+    controller._resume_after_pause()
+    assert not controller.pipeline.paused
+    assert controller._resume_at is None
+    controller.toggle_pause()  # a manual pause cancels any timer
+    assert controller.pipeline.paused
+    assert not controller._resume_timer.isActive()

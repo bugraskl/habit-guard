@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..config import CURTAIN_STYLES, LANGUAGES, PROFILES, Settings
+from ..config import CAMERA_APIS, CURTAIN_STYLES, LANGUAGES, PROFILES, Settings
 from ..i18n import habit_name, tr
 from ..types import Habit
 
@@ -198,6 +198,13 @@ class SettingsDialog(QDialog):
         self.camera.setRange(0, 16)
         self.camera.setValue(s.camera_index)
         form.addRow(tr("settings.general.camera"), self.camera)
+        self.camera_api = _combo(
+            [(a, tr(f"settings.general.camera_api.{a}")) for a in CAMERA_APIS], s.camera_api
+        )
+        form.addRow(tr("settings.general.camera_api"), self.camera_api)
+        camera_hint = QLabel(tr("settings.general.camera_hint"))
+        camera_hint.setWordWrap(True)
+        form.addRow(camera_hint)
         self.profile = _combo(
             [(p, tr(f"settings.general.profile.{p}")) for p in PROFILES], s.profile
         )
@@ -233,6 +240,7 @@ class SettingsDialog(QDialog):
         a.repeat_s = round(self.repeat.value(), 1)
         out.language = str(self.language.currentData())
         out.camera_index = self.camera.value()
+        out.camera_api = str(self.camera_api.currentData())
         out.profile = str(self.profile.currentData())
         out.onboarded = True
         return out

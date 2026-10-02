@@ -1,0 +1,46 @@
+# Keep GitHub Actions and Python dependencies (uv.lock) up to date.
+# Workflow actions are pinned to commit SHAs with a "# vX.Y.Z" comment; Dependabot
+# updates both together.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci
+    labels:
+      - dependencies
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: deps
+    labels:
+      - dependencies
+    groups:
+      dev-tools:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      # Qt and OpenCV are updated one at a time on purpose: each can change
+      # behaviour and runs the models.
+      runtime-patches:
+        dependency-type: production
+        exclude-patterns:
+          - pyside6*
+          - shiboken6
+          - opencv*
+        update-types:
+          - patch

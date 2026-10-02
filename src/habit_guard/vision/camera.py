@@ -20,7 +20,14 @@ FRAME_HEIGHT = 480
 FRAME_RATE = 15
 
 
-def _backends() -> list[int]:
+def backends(api: str = "auto") -> list[int]:
+    """The OpenCV capture backends to try, in order, for the ``camera_api`` setting."""
+    if api == "dshow" and sys.platform == "win32":
+        return [cv2.CAP_DSHOW]
+    if api == "msmf" and sys.platform == "win32":
+        return [cv2.CAP_MSMF]
+    if api == "any":
+        return [cv2.CAP_ANY]
     if sys.platform == "win32":
         return [cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_ANY]
     if sys.platform == "darwin":
@@ -31,8 +38,9 @@ def _backends() -> list[int]:
 class Camera:
     """A webcam (an index) or, for development, a video file (a path) played in real time."""
 
-    def __init__(self, source: int | str):
+    def __init__(self, source: int | str, api: str = "auto"):
         self.source = source
+        self.api = api
         self._cap: cv2.VideoCapture | None = None
         self._file_period = 0.0
         self._file_next = 0.0
@@ -48,7 +56,7 @@ class Camera:
     def open(self) -> bool:
         """Open the source; ``False`` if nothing delivers a picture (missing or busy camera)."""
         self.release()
-        candidates = [cv2.CAP_ANY] if self.is_file else _backends()
+        candidates = [cv2.CAP_ANY] if self.is_file else backends(self.api)
         for backend in candidates:
             cap = cv2.VideoCapture(self.source, backend)
             if not cap.isOpened():

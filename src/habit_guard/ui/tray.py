@@ -12,6 +12,7 @@ from .icons import IconState, icon
 
 class Tray(QObject):
     pause_toggled = Signal()
+    pause_for_requested = Signal(int)  # minutes
     settings_requested = Signal()
     preview_requested = Signal()
     stats_requested = Signal()
@@ -31,6 +32,15 @@ class Tray(QObject):
         self._today_action = QAction(self._menu)
         self._today_action.setEnabled(False)
         self._pause_action = QAction(self._menu)
+        self._pause_for_menu = QMenu(self._menu)
+        self._pause_for_actions = [
+            (minutes, QAction(self._pause_for_menu), key)
+            for minutes, key in (
+                (15, "tray.pause_15m"),
+                (60, "tray.pause_1h"),
+                (180, "tray.pause_3h"),
+            )
+        ]
         self._preview_action = QAction(self._menu)
         self._stats_action = QAction(self._menu)
         self._settings_action = QAction(self._menu)
@@ -41,6 +51,7 @@ class Tray(QObject):
             self._today_action,
             None,
             self._pause_action,
+            self._pause_for_menu,
             self._preview_action,
             self._stats_action,
             self._settings_action,
@@ -50,8 +61,15 @@ class Tray(QObject):
         ):
             if action is None:
                 self._menu.addSeparator()
+            elif isinstance(action, QMenu):
+                self._menu.addMenu(action)
             else:
                 self._menu.addAction(action)
+        for minutes, action, _ in self._pause_for_actions:
+            self._pause_for_menu.addAction(action)
+            action.triggered.connect(
+                lambda _checked=False, m=minutes: self.pause_for_requested.emit(m)
+            )
         self._pause_action.triggered.connect(self.pause_toggled)
         self._preview_action.triggered.connect(self.preview_requested)
         self._stats_action.triggered.connect(self.stats_requested)
@@ -74,6 +92,9 @@ class Tray(QObject):
 
     def retranslate(self) -> None:
         """Set every text again, after a language change."""
+        self._pause_for_menu.setTitle(tr("tray.pause_for"))
+        for _, action, key in self._pause_for_actions:
+            action.setText(tr(key))
         self._preview_action.setText(tr("tray.preview"))
         self._stats_action.setText(tr("tray.stats"))
         self._settings_action.setText(tr("tray.settings"))

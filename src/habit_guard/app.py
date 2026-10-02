@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from PySide6.QtCore import QLockFile, QObject, QTimer, Signal
 from PySide6.QtWidgets import QApplication
@@ -28,6 +28,7 @@ from .zones import FaceFrame, Zone, build_zones, evaluate
 log = logging.getLogger(__name__)
 
 STATS_SAVE_MS = 60_000
+MS_PER_MINUTE = 60_000
 TEST_ALARM_MS = 2500
 
 
@@ -59,6 +60,10 @@ class Controller(QObject):
         self._status = Status.STARTING
         self._detail = ""
         self._user_paused = False
+        self._resume_at: datetime | None = None
+        self._resume_timer = QTimer(self)
+        self._resume_timer.setSingleShot(True)
+        self._resume_timer.timeout.connect(self._resume_after_pause)
         self._last_ts: float | None = None
         self._stats_dirty = False
         self._settings_dialog: SettingsDialog | None = None
@@ -70,6 +75,7 @@ class Controller(QObject):
         self._save_timer.start(STATS_SAVE_MS)
 
         self.tray.pause_toggled.connect(self.toggle_pause)
+        self.tray.pause_for_requested.connect(self.pause_for)
         self.tray.settings_requested.connect(self.open_settings)
         self.tray.preview_requested.connect(self.open_preview)
         self.tray.stats_requested.connect(self.open_stats)
@@ -96,6 +102,7 @@ class Controller(QObject):
 
     # ----------------------------------------------------------------------------- tracking
     def _on_status(self, status: Status, detail: str) -> None:
+        log.info("camera pipeline: %s %s", status.value, detail)
         self._status, self._detail = status, detail
         self._refresh_tray()
 
@@ -138,7 +145,24 @@ class Controller(QObject):
 
     def toggle_pause(self) -> None:
         self._user_paused = not self._user_paused
+        self._cancel_timed_pause()
         self._sync_pipeline()
+
+    def pause_for(self, minutes: int) -> None:
+        """Pause tracking and resume by itself after ``minutes``."""
+        self._user_paused = True
+        self._resume_at = datetime.now() + timedelta(minutes=minutes)
+        self._resume_timer.start(minutes * MS_PER_MINUTE)
+        self._sync_pipeline()
+
+    def _resume_after_pause(self) -> None:
+        self._user_paused = False
+        self._resume_at = None
+        self._sync_pipeline()
+
+    def _cancel_timed_pause(self) -> None:
+        self._resume_timer.stop()
+        self._resume_at = None
 
     def _sync_pipeline(self) -> None:
         previewing = self._preview is not None and self._preview.isVisible()
@@ -248,7 +272,11 @@ class Controller(QObject):
         elif not self.settings.any_habit_enabled():
             text, state = i18n.tr("tray.status.nothing"), IconState.PAUSED
         elif self._user_paused or self._status is Status.PAUSED:
-            text, state = i18n.tr("tray.status.paused"), IconState.PAUSED
+            if self._resume_at is not None:
+                text = i18n.tr("tray.status.paused_until", time=self._resume_at.strftime("%H:%M"))
+            else:
+                text = i18n.tr("tray.status.paused")
+            state = IconState.PAUSED
         elif self._status is Status.STARTING:
             text, state = i18n.tr("tray.status.starting"), IconState.ACTIVE
         else:

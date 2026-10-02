@@ -20,6 +20,7 @@ from .zones import ZoneSpec
 PROFILES = ("eco", "balanced", "responsive")
 LANGUAGES = ("auto", "en", "tr")
 CURTAIN_STYLES = ("dim", "flash")
+CAMERA_APIS = ("auto", "dshow", "msmf", "any")
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,6 +89,8 @@ class Settings:
     language: str = "auto"
     #: Camera number, as the operating system counts them.
     camera_index: int = 0
+    #: Which capture interface to open the camera with (Windows has two; "auto" picks the best).
+    camera_api: str = "auto"
     profile: str = "balanced"
     habits: dict[str, HabitConfig] = field(
         default_factory=lambda: {
@@ -169,6 +172,7 @@ CHOICES: dict[str, tuple[str, ...]] = {
     "language": LANGUAGES,
     "profile": PROFILES,
     "curtain_style": CURTAIN_STYLES,
+    "camera_api": CAMERA_APIS,
 }
 
 T = TypeVar("T")

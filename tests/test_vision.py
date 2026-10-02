@@ -305,8 +305,9 @@ class FakeCamera:
     available = True
     opened_sources: ClassVar[list[object]] = []
 
-    def __init__(self, source: int | str):
+    def __init__(self, source: int | str, api: str = "auto"):
         self.source = source
+        self.api = api
         self._open = False
 
     def open(self) -> bool:

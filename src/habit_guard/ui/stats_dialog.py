@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from PySide6.QtCore import QRectF, Qt, Signal
+from PySide6.QtCore import QDate, QLocale, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import (
     QFormLayout,
@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..i18n import format_duration, habit_name, tr
+from ..i18n import current_language, format_duration, habit_name, tr
 from ..stats import Stats
 from ..types import Habit
 
@@ -42,6 +42,9 @@ class WeekChart(QWidget):
         label_h, count_h = 18.0, 16.0
         area = self.height() - label_h - count_h
         text = self.palette().text().color()
+        locale = QLocale(
+            QLocale.Language.Turkish if current_language() == "tr" else QLocale.Language.English
+        )
         for i, (day, n) in enumerate(self._days):
             height = area * n / peak
             x = i * slot + slot * 0.2
@@ -56,7 +59,7 @@ class WeekChart(QWidget):
             painter.drawText(
                 QRectF(i * slot, self.height() - label_h, slot, label_h),
                 int(Qt.AlignmentFlag.AlignCenter),
-                day.strftime("%a"),
+                locale.toString(QDate(day.year, day.month, day.day), "ddd"),
             )
 
 

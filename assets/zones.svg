@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 640" role="img" aria-labelledby="t d">
+<title id="t">Habit Guard zones</title>
+<desc id="d">A face with the zone of each watched habit drawn over it: the mouth, the moustache and beard area, the brows and hairline, and the rest of the face.</desc>
+<rect width="860" height="640" rx="18" fill="#f4f6f8"/>
+<g transform="translate(0 80)">
+<rect x="262" y="475" width="76" height="70" fill="#e9b992"/>
+<ellipse cx="300" cy="305" rx="125" ry="185" fill="#f2c9a5" stroke="#c99a74" stroke-width="3"/>
+<path d="M 178 160 C 215 60 385 60 422 160 C 400 130 350 108 300 108 C 250 108 200 130 178 160 Z" fill="#5b4a3f"/>
+<ellipse cx="300.0" cy="300.0" rx="140.0" ry="160.0" fill="#3fb36b" fill-opacity="0.1" stroke="#3fb36b" stroke-width="2.5"/>
+<ellipse cx="300.0" cy="458.0" rx="80.0" ry="42.0" fill="#1c9be6" fill-opacity="0.08" stroke="#1c9be6" stroke-width="2.5" stroke-dasharray="7 5"/>
+<ellipse cx="200.0" cy="375.0" rx="42.0" ry="62.0" fill="#1c9be6" fill-opacity="0.08" stroke="#1c9be6" stroke-width="2.5" stroke-dasharray="7 5"/>
+<ellipse cx="400.0" cy="375.0" rx="42.0" ry="62.0" fill="#1c9be6" fill-opacity="0.08" stroke="#1c9be6" stroke-width="2.5" stroke-dasharray="7 5"/>
+<ellipse cx="300.0" cy="60.0" rx="140.0" ry="70.0" fill="#9a5cf0" fill-opacity="0.08" stroke="#9a5cf0" stroke-width="2.5" stroke-dasharray="7 5"/>
+<ellipse cx="300.0" cy="386.0" rx="60.0" ry="30.0" fill="#f08c00" fill-opacity="0.22" stroke="#f08c00" stroke-width="2.5"/>
+<ellipse cx="300.0" cy="354.5" rx="62.0" ry="27.5" fill="#1c9be6" fill-opacity="0.22" stroke="#1c9be6" stroke-width="2.5"/>
+<ellipse cx="250.0" cy="220.0" rx="50.0" ry="20.0" fill="#9a5cf0" fill-opacity="0.22" stroke="#9a5cf0" stroke-width="2.5"/>
+<ellipse cx="350.0" cy="220.0" rx="50.0" ry="20.0" fill="#9a5cf0" fill-opacity="0.22" stroke="#9a5cf0" stroke-width="2.5"/>
+<ellipse cx="250.0" cy="250.0" rx="40.0" ry="22.0" fill="#9a5cf0" fill-opacity="0.22" stroke="#9a5cf0" stroke-width="2.5"/>
+<ellipse cx="350.0" cy="250.0" rx="40.0" ry="22.0" fill="#9a5cf0" fill-opacity="0.22" stroke="#9a5cf0" stroke-width="2.5"/>
+<ellipse cx="300.0" cy="150.0" rx="110.0" ry="55.0" fill="#9a5cf0" fill-opacity="0.22" stroke="#9a5cf0" stroke-width="2.5"/>
+<ellipse cx="250.0" cy="250.0" rx="22" ry="11" fill="#fff" stroke="#3a2a20" stroke-width="2"/>
+<circle cx="250.0" cy="250.0" r="7" fill="#3a2a20"/>
+<path d="M 220.0 224.0 Q 250.0 210.0 280.0 224.0" fill="none" stroke="#3a2a20" stroke-width="5" stroke-linecap="round"/>
+<ellipse cx="350.0" cy="250.0" rx="22" ry="11" fill="#fff" stroke="#3a2a20" stroke-width="2"/>
+<circle cx="350.0" cy="250.0" r="7" fill="#3a2a20"/>
+<path d="M 320.0 224.0 Q 350.0 210.0 380.0 224.0" fill="none" stroke="#3a2a20" stroke-width="5" stroke-linecap="round"/>
+<path d="M 297.0 277.0 Q 282.0 320.0 286.0 325.0 Q 300.0 333.0 314.0 325.0" fill="none" stroke="#a9744f" stroke-width="3" stroke-linecap="round"/>
+<path d="M 260.0 380.0 Q 300.0 396.0 340.0 380.0" fill="none" stroke="#a5483f" stroke-width="5" stroke-linecap="round"/>
+</g>
+<g font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="19" fill="#26323d" transform="translate(0 60)">
+<text x="500" y="110" font-size="24" font-weight="700">Where each habit is watched</text>
+<rect x="500" y="147" width="26" height="26" rx="6" fill="#f08c00" fill-opacity="0.35" stroke="#f08c00" stroke-width="2.5"/>
+<text x="540" y="167">Nail and finger biting</text>
+<rect x="500" y="199" width="26" height="26" rx="6" fill="#1c9be6" fill-opacity="0.35" stroke="#1c9be6" stroke-width="2.5"/>
+<text x="540" y="219">Mustache, beard, lip picking</text>
+<rect x="500" y="251" width="26" height="26" rx="6" fill="#9a5cf0" fill-opacity="0.35" stroke="#9a5cf0" stroke-width="2.5"/>
+<text x="540" y="271">Brow, lash, hair pulling</text>
+<rect x="500" y="303" width="26" height="26" rx="6" fill="#3fb36b" fill-opacity="0.35" stroke="#3fb36b" stroke-width="2.5"/>
+<text x="540" y="323">Face touching, skin picking</text>
+<rect x="500" y="372" width="26" height="26" rx="6" fill="none" stroke="#5b6773" stroke-width="2.5" stroke-dasharray="7 5"/>
+<text x="540" y="392">Wider area (optional)</text>
+<text x="500" y="450" font-size="16" fill="#5b6773">A zone counts when a fingertip is inside it for</text>
+<text x="500" y="474" font-size="16" fill="#5b6773">longer than the dwell time. Sizes are adjustable.</text>
+</g>
+</svg>

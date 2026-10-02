@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest an idea or an improvement for Habit Guard.
+title: "[Feature]: "
+labels:
+  - enhancement
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Habit Guard aims to stay small, fast and fully offline. Features that
+        would send data over the network, store camera pictures or noticeably raise CPU use are out
+        of scope, but a problem statement is always welcome: there may be another way to solve it.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the situation and what is hard or impossible today.
+      placeholder: I pull at my eyelashes only when I read, and the zone never fires because…
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How could Habit Guard help? A new habit or zone, an alarm type, a setting, a command…
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds you use today or other approaches you thought about.
+    validations:
+      required: false

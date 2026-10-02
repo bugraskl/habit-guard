@@ -76,7 +76,7 @@ class Pipeline:
         *,
         source: int | str | None = None,
         analyzer: Analyzer | None = None,
-        camera_factory: Callable[[int | str], Camera] = Camera,
+        camera_factory: Callable[[int | str, str], Camera] = Camera,
         clock: Callable[[], float] = time.monotonic,
     ):
         self._settings = settings
@@ -170,10 +170,11 @@ class Pipeline:
                 if self._source_override is not None
                 else self._settings.camera_index
             )
-            if camera is None or camera.source != source:
+            api = self._settings.camera_api
+            if camera is None or camera.source != source or camera.api != api:
                 if camera is not None:
                     camera.release()
-                camera = self._camera_factory(source)
+                camera = self._camera_factory(source, api)
                 if not camera.open():
                     camera.release()
                     camera = None

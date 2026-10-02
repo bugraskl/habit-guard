@@ -78,3 +78,12 @@ def face() -> FaceInfo:
 def _isolated_config(tmp_path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
     """No test may touch the real settings: every test gets its own empty config folder."""
     monkeypatch.setenv("HABIT_GUARD_HOME", str(tmp_path / "config"))
+
+
+@pytest.fixture(autouse=True)
+def _english_by_default(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """Tests must not depend on the language of the machine they run on."""
+    from habit_guard import i18n
+
+    monkeypatch.setattr(i18n, "detect_language", lambda: "en")
+    i18n.set_language("en")

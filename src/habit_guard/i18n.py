@@ -52,7 +52,15 @@ _STRINGS: dict[str, dict[str, str]] = {
         "en": "No habit selected: open Settings",
         "tr": "Hiç alışkanlık seçilmedi: Ayarlar'ı açın",
     },
+    "tray.status.paused_until": {
+        "en": "Paused until {time}",
+        "tr": "{time} saatine kadar duraklatıldı",
+    },
     "tray.pause": {"en": "Pause tracking", "tr": "İzlemeyi duraklat"},
+    "tray.pause_for": {"en": "Pause for…", "tr": "Şu süre duraklat…"},
+    "tray.pause_15m": {"en": "15 minutes", "tr": "15 dakika"},
+    "tray.pause_1h": {"en": "1 hour", "tr": "1 saat"},
+    "tray.pause_3h": {"en": "3 hours", "tr": "3 saat"},
     "tray.resume": {"en": "Resume tracking", "tr": "İzlemeyi sürdür"},
     "tray.settings": {"en": "Settings…", "tr": "Ayarlar…"},
     "tray.preview": {"en": "Camera preview…", "tr": "Kamera önizleme…"},
@@ -105,6 +113,28 @@ _STRINGS: dict[str, dict[str, str]] = {
     "settings.general.language": {"en": "Language", "tr": "Dil"},
     "settings.general.language.auto": {"en": "Automatic", "tr": "Otomatik"},
     "settings.general.camera": {"en": "Camera number", "tr": "Kamera numarası"},
+    "settings.general.camera_api": {"en": "Camera interface", "tr": "Kamera arayüzü"},
+    "settings.general.camera_api.auto": {"en": "Automatic", "tr": "Otomatik"},
+    "settings.general.camera_api.dshow": {
+        "en": "DirectShow (Windows)",
+        "tr": "DirectShow (Windows)",
+    },
+    "settings.general.camera_api.msmf": {
+        "en": "Media Foundation (Windows)",
+        "tr": "Media Foundation (Windows)",
+    },
+    "settings.general.camera_api.any": {
+        "en": "Operating system default",
+        "tr": "Sistem varsayılanı",
+    },
+    "settings.general.camera_hint": {
+        "en": "Most webcams can be used by one program at a time. If another app holds the "
+        "camera, Habit Guard waits and tries again. Changing the interface sometimes lets two "
+        "programs share it.",
+        "tr": "Çoğu kamera aynı anda tek programca kullanılabilir. Kamerayı başka bir uygulama "
+        "tutuyorsa Habit Guard bekler ve yeniden dener. Arayüzü değiştirmek bazen iki "
+        "programın paylaşmasını sağlar.",
+    },
     "settings.general.profile": {"en": "Performance", "tr": "Performans"},
     "settings.general.profile.eco": {"en": "Eco: lowest CPU use", "tr": "Eko: en düşük işlemci"},
     "settings.general.profile.balanced": {"en": "Balanced", "tr": "Dengeli"},
