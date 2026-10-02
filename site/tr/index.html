@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Habit Guard: webcam ile tırnak yemeyi ve kıl yolmayı bırakın</title>
+  <meta name="description" content="Elinizin ağzınıza, bıyığınıza, kaşınıza ya da saçınıza gittiğini webcam'den fark edip alışkanlığı ses, kararan ekran veya sesli uyarıyla bölen ücretsiz, açık kaynaklı uygulama. Çevrimdışı, gizli, işlemciyi yormaz. Windows, macOS ve Linux.">
+  <link rel="canonical" href="{{SITE_URL}}tr/">
+  <link rel="alternate" hreflang="en" href="{{SITE_URL}}">
+  <link rel="alternate" hreflang="tr" href="{{SITE_URL}}tr/">
+  <link rel="alternate" hreflang="x-default" href="{{SITE_URL}}">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0f1012">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Habit Guard">
+  <meta property="og:title" content="Habit Guard: webcam ile tırnak yemeyi ve kıl yolmayı bırakın">
+  <meta property="og:description" content="Ücretsiz, açık kaynaklı alışkanlık alarmı. Çevrimdışı, gizli, işlemciyi yormaz. Tırnak yeme, bıyık ve kıl yolma, yüze dokunma.">
+  <meta property="og:url" content="{{SITE_URL}}tr/">
+  <meta property="og:image" content="{{SITE_URL}}assets/og.png">
+  <meta property="og:image:width" content="1920">
+  <meta property="og:image:height" content="960">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Habit Guard",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Windows 10, Windows 11, macOS, Linux",
+    "softwareVersion": "{{VERSION}}",
+    "inLanguage": "tr",
+    "description": "Elinizin ağzınıza, bıyığınıza, kaşınıza ya da saçınıza gittiğini webcam'den fark edip alışkanlığı böler. Varsayılan olarak çevrimdışı.",
+    "url": "{{SITE_URL}}tr/",
+    "downloadUrl": "{{RELEASE_URL}}",
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Buğra Şıkel", "url": "https://github.com/bugraskl" }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">İçeriğe geç</a>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="m8 12.5 2.7 2.7L16.5 9.5"/></symbol>
+    <symbol id="i-yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></symbol>
+    <symbol id="i-maybe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></symbol>
+    <symbol id="i-no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="11" r="7"/><circle cx="12" cy="11" r="2.6"/><path d="M8 21h8"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.6 6.6C3.9 8.4 2 12 2 12s4 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15L6 17Z"/><path d="M10 21h4"/></symbol>
+    <symbol id="i-screen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-voice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-steps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h5v-5h5v-5h5V5h3"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M10 9v6M14 9v6"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V6a1.5 1.5 0 0 1 3 0v5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-2-3a1.5 1.5 0 0 1 2.3-1.8L8 14"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <nav class="wrap nav" aria-label="Ana menü">
+      <a class="brand" href="./" aria-label="Habit Guard ana sayfa">
+        <img src="../assets/favicon.png" alt="" width="28" height="28">
+        Habit Guard
+      </a>
+      <ul class="nav-links">
+        <li><a href="#how">Nasıl çalışır</a></li>
+        <li><a href="#screens">Görüntüler</a></li>
+        <li><a href="#habits">Alışkanlıklar</a></li>
+        <li><a href="#privacy">Gizlilik</a></li>
+        <li><a href="#install">Kurulum</a></li>
+        <li><a href="https://github.com/bugraskl/habit-guard/tree/main/docs">Dokümanlar</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="segmented" role="group" aria-label="Dil">
+          <a href="../" lang="en" hreflang="en">EN</a>
+          <span aria-current="true" lang="tr">TR</span>
+        </div>
+        <a class="btn github-link" href="https://github.com/bugraskl/habit-guard">
+          <svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span>
+        </a>
+      </div>
+    </nav>
+    <span class="bars" aria-hidden="true"></span>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <h1><span>Eliniz ağzınıza yarı yolda.</span> <span>Habit Guard önce fark etti.</span></h1>
+          <p class="lead">Habit Guard webcam'inizi izler; eliniz ağzınıza, bıyığınıza, kaşınıza ya da saçınıza gittiğinde alışkanlığı yaklaşık bir saniye içinde böler: ses, kararan ekran, sesli bir cümle ya da bildirim, siz seçersiniz. Bilgisayarınızda çalışır, işlemcinizin yüzde birinin bir kesrini kullanır ve hiçbir görüntüyü kaydetmez.</p>
+          <div class="actions">
+            <a class="btn btn-accent" href="#install"><svg aria-hidden="true"><use href="#i-download"/></svg>Habit Guard'ı edinin</a>
+            <a class="btn" href="https://github.com/bugraskl/habit-guard"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub'da yıldızlayın</a>
+          </div>
+          <p class="hero-meta">Sürüm {{VERSION}} · Ücretsiz ve açık kaynak, <a href="https://github.com/bugraskl/habit-guard/blob/main/LICENSE">MIT lisansı</a> · Windows, macOS, Linux · Çevrimdışı</p>
+          <p class="alpha"><strong>Alfa.</strong> Yazıldı ve test edildi, ama gerçek masa ve webcam'lerde henüz yeni. Yanlış alarm ve kaçırma bildirimleri en çok işe yarar.</p>
+        </div>
+
+        <figure class="demo" data-demo {{DEMO_TARGETS}}
+                data-msg-watch="İzliyor. Nasıl göründüğünü görmek için bir alışkanlık seçin ya da bekleyin: demo kendiliğinden oynar."
+                data-msg-dwell="{habit}: bir parmak ucu bölgede. Bekleme süresi sayılıyor…"
+                data-msg-alarm="Alarm! Ekran kararır, bir çınlama çalar, bildirim gelir. El inince hemen durur."
+                data-msg-away="El indi. Alarm bırakıldı, temiz süre serisi yeniden başlıyor."
+                data-msg-off="Yüze dokunma varsayılan olarak kapalı, bu yüzden hiçbir şey olmaz. Ayarlar'dan açın.">
+          <div class="demo-bar">
+            <span class="demo-title">Bölgeler</span>
+            <span class="demo-live"><span class="dot" aria-hidden="true"></span>İzliyor</span>
+          </div>
+          <div class="demo-canvas">
+            <svg class="demo-svg" viewBox="60 0 480 560" role="img" aria-label="Dört alışkanlığın bölgelerinin çizildiği bir yüz ve her birine sırayla giden bir el">
+              {{DEMO_FACE}}
+              <g class="hand" aria-hidden="true">
+                <rect class="skin" x="-48" y="86" width="96" height="88" rx="18"/>
+                <rect class="skin" x="-48" y="26" width="22" height="100" rx="11"/>
+                <rect class="skin" x="-22" y="0" width="22" height="120" rx="11"/>
+                <rect class="skin" x="4" y="14" width="22" height="110" rx="11"/>
+                <rect class="skin" x="30" y="40" width="22" height="90" rx="11"/>
+                <rect class="skin" x="-72" y="98" width="22" height="64" rx="11" transform="rotate(-28 -61 130)"/>
+                <rect x="-46" y="88" width="92" height="40" fill="#eab68e"/>
+                <circle class="ring" cx="0" cy="12" r="20" transform="rotate(-90 0 12)"/>
+              </g>
+            </svg>
+            <span class="alarm-pill" aria-hidden="true">Elini indir!</span>
+          </div>
+          <div class="chips" role="group" aria-label="Bir alışkanlık seçin">
+            <button type="button" class="chip" style="--c: var(--nail)" data-habit="nail_biting" data-name="Tırnak yeme" aria-pressed="false"><i></i>Tırnak yeme</button>
+            <button type="button" class="chip" style="--c: var(--mustache)" data-habit="mustache" data-name="Bıyık koparma" aria-pressed="false"><i></i>Bıyık</button>
+            <button type="button" class="chip" style="--c: var(--hair)" data-habit="hair_pulling" data-name="Kaş yolma" aria-pressed="false"><i></i>Kaş ve saç</button>
+            <button type="button" class="chip" style="--c: var(--touch)" data-habit="face_touch" data-name="Yüze dokunma" aria-pressed="false"><i></i>Yüze dokunma</button>
+          </div>
+          <div class="demo-foot">
+            <p class="status"><svg aria-hidden="true"><use href="#i-hand"/></svg><span data-status>İzliyor. Nasıl göründüğünü görmek için bir alışkanlık seçin ya da bekleyin: demo kendiliğinden oynar.</span></p>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="measured" aria-labelledby="measured-title">
+      <div class="wrap props">
+        <div class="props-intro">
+          <h2 id="measured-title">Söz değil, ölçüm</h2>
+          <p>Windows 11, Ryzen 7 3700X; <code>habit-guard bench</code> ile 640×480 bir klip oynatılarak.</p>
+        </div>
+        <dl class="prop-list">
+          <div class="prop"><dt>İşlemci, yüz görüşte</dt><dd><strong>%0,34</strong>bir çekirdeğin %5,5'i</dd></div>
+          <div class="prop"><dt>İşlemci, el yüze yakın</dt><dd><strong>~%1,3</strong>bir çekirdeğin %20'si</dd></div>
+          <div class="prop"><dt>Tek bir inceleme</dt><dd><strong>20 ila 26 ms</strong>yüz ve el</dd></div>
+          <div class="prop"><dt>Ağ bağlantısı</dt><dd><strong>0</strong>telemetri yok, güncelleme denetimi yok</dd></div>
+          <div class="prop"><dt>Kaydedilen görüntü</dt><dd><strong>0</strong>yalnızca bellekte incelenir</dd></div>
+          <div class="prop"><dt>CI'da denenen</dt><dd><strong>3 sistem</strong>Windows, macOS, Linux</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section band" id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Bir kez kurun. Sonra unutun.</h2>
+          <p>Bir şey olması için elin bir bölgede biraz kalması gerekir; bu yüzden su içmek, dudağınızı silmek ya da kısa bir kaşıma yok sayılır.</p>
+        </div>
+        <ol class="steps">
+          <li class="step">
+            <span class="identify" aria-hidden="true">1</span>
+            <h3>Kamerayı yerleştirin</h3>
+            <p>Yüzünüz ve kaldırdığınızda iki eliniz görüntüde olsun, yüzünüze ışık gelsin. Kamera önizlemesi Habit Guard'ın tam olarak ne gördüğünü gösterir.</p>
+          </li>
+          <li class="step">
+            <span class="identify" aria-hidden="true">2</span>
+            <h3>Alışkanlıklarınızı seçin</h3>
+            <p>İzlenecekleri işaretleyin. Her birinin yüzünüzde kendi bölgesi, kendi bekleme süresi ve boyutu var. Bölgeler öne eğilince ya da başınızı yatırınca sizi takip eder.</p>
+          </li>
+          <li class="step">
+            <span class="identify" aria-hidden="true">3</span>
+            <h3>İşinize bakın</h3>
+            <p>Tepside bekler. Bir parmak ucu bekleme süresi kadar bir bölgede kalırsa alarm çalar ve el kaldıkça güçlenir.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="screens">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Ne elde edeceğinizi görün</h2>
+          <p>Bunlar gerçek pencereler. Önizlemedeki kamera görüntüsü bir fotoğraf değil, çizimdir: bu projede hiçbir yerde gerçek bir yüz yok.</p>
+        </div>
+        <div class="shots">
+          <div class="shot-row two-one">
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/preview.png"><img src="../assets/screenshots/tr/preview.png" {{SIZE:screenshots/tr/preview.png}} alt="Kamera önizleme: ağzında eli olan çizilmiş bir kişi, yüzdeki bölgeler ve elin 21 noktası" loading="lazy"></a>
+              <figcaption><strong>Kamera önizleme</strong>Yüzünüzde bölgeler, elin 21 noktası ve kırmızı parmak uçları. Bir parmak ucu içindeyse bölge dolar.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/stats.png"><img src="../assets/screenshots/tr/stats.png" {{SIZE:screenshots/tr/stats.png}} alt="İstatistik penceresi: bugünkü ve toplam alarmlar, temiz süre, 7 günlük çubuk grafik ve alışkanlık bazında toplamlar" loading="lazy"></a>
+              <figcaption><strong>İstatistikler</strong>Gün ve alışkanlık bazında alarmlar, 7 günlük grafik ve temiz süre seriniz. Bilgisayarınızda düz sayılar olarak saklanır.</figcaption>
+            </figure>
+          </div>
+          <div class="shot-row three">
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/settings-habits.png"><img src="../assets/screenshots/tr/settings-habits.png" {{SIZE:screenshots/tr/settings-habits.png}} alt="Ayarlar, Alışkanlıklar sekmesi: dört alışkanlığın her biri için anahtar, bekleme süresi ve bölge boyutu" loading="lazy"></a>
+              <figcaption><strong>Alışkanlıklar</strong>Her alışkanlık için bir anahtar, bekleme süresi ve bölge boyutu.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/settings-alarms.png"><img src="../assets/screenshots/tr/settings-alarms.png" {{SIZE:screenshots/tr/settings-alarms.png}} alt="Ayarlar, Uyarılar sekmesi: ses, bildirim, ekran perdesi, sesli uyarı ve kademeli güçlenme" loading="lazy"></a>
+              <figcaption><strong>Uyarılar</strong>Ses, bildirim, ekran, sesli uyarı ve güçlenme; her biri kendi anahtarıyla.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/settings-general.png"><img src="../assets/screenshots/tr/settings-general.png" {{SIZE:screenshots/tr/settings-general.png}} alt="Ayarlar, Genel sekmesi: dil, kamera, kamera arayüzü ve performans profili" loading="lazy"></a>
+              <figcaption><strong>Genel</strong>Dil, kamera, kameranın nasıl açılacağı ve performans profili.</figcaption>
+            </figure>
+          </div>
+          <div class="shot-row two">
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/alarm-dim.png"><img src="../assets/screenshots/tr/alarm-dim.png" {{SIZE:screenshots/tr/alarm-dim.png}} alt="Ekranı kararmış bir belge ve Elini indir! mesajı" loading="lazy"></a>
+              <figcaption><strong>Ekran kararır</strong>El inene kadar, tüm monitörlerde. Tıklamalar perdeden geçer, bu yüzden sizi asla dışarıda bırakamaz.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/alarm-flash.png"><img src="../assets/screenshots/tr/alarm-flash.png" {{SIZE:screenshots/tr/alarm-flash.png}} alt="Ekranın çevresinde yanıp sönen kırmızı çerçeve olan bir belge ve Elini indir! mesajı" loading="lazy"></a>
+              <figcaption><strong>Ya da kırmızı çerçeve</strong>Okumaya devam etmek isterseniz karartma yerine yanıp sönen bir çerçeve.</figcaption>
+            </figure>
+          </div>
+          <div class="shot-row one-two">
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/tray.png"><img src="../assets/screenshots/tr/tray.png" {{SIZE:screenshots/tr/tray.png}} alt="Tepsi menüsü: durum, bugünkü alarmlar, duraklat, şu süre duraklat, kamera önizleme, istatistikler, ayarlar, alarmı dene, çık" loading="lazy"></a>
+              <figcaption><strong>Tepside yaşar</strong>Duraklat, önizleme, istatistik ve ayarlar bir tık uzakta.</figcaption>
+            </figure>
+            <div class="side-note">
+              <h3>Gerektiğinde duraklatın</h3>
+              <p>Yemek, görüntülü görüşme, çeneniz elinizdeyken telefon konuşması: izlemeyi tepsiden 15 dakika, bir saat ya da üç saat duraklatın; kendiliğinden devam eder. Duraklatmak kamerayı serbest bırakır, böylece webcam ışığı söner.</p>
+              <p>Alarmı istediğiniz zaman <strong>Alarmı dene</strong> ile deneyin: ayarlarınızın tarif ettiği şeyi tam olarak çalar.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section band" id="habits">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Dört alışkanlık, dört bölge</h2>
+          <p>Her bölge yüzünüzde birkaç elipstir ve göz mesafesi cinsinden ölçülür; öne eğilince, geri yaslanınca ya da başınızı yatırınca sizi takip eder. Çizim, uygulamanın kullandığı sayılardan üretilmiştir.</p>
+        </div>
+        <div class="zones-grid">
+          <img src="../assets/zones.svg" width="860" height="640" alt="Dört alışkanlığın bölgelerinin üzerine çizildiği bir yüz" loading="lazy">
+          <ul class="habit-list">
+            <li class="habit" style="--c: var(--nail)"><span class="swatch"></span><div><strong>Tırnak ve parmak yeme</strong><p>Dudaklar ve çevresi.</p></div><span class="value">1,0 sn bekleme</span></li>
+            <li class="habit" style="--c: var(--mustache)"><span class="swatch"></span><div><strong>Bıyık, sakal ve dudak koparma</strong><p>Burun ile ağız arası. İsteğe bağlı olarak çene ve sakal hattı.</p></div><span class="value">1,5 sn bekleme</span></li>
+            <li class="habit" style="--c: var(--hair)"><span class="swatch"></span><div><strong>Kaş, kirpik ve saç yolma</strong><p>Kaşlar, göz kapakları, alın ve saç çizgisi. İsteğe bağlı olarak saçlı deri.</p></div><span class="value">1,5 sn · kapalı</span></li>
+            <li class="habit" style="--c: var(--touch)"><span class="swatch"></span><div><strong>Yüze dokunma ve cilt kaşıma</strong><p>Yüzün geri kalanı; diğer alışkanlıkların sahiplenmediği her yer.</p></div><span class="value">4 sn · kapalı</span></li>
+          </ul>
+        </div>
+        <p class="settings-note">Tırnak yeme ve bıyık varsayılan olarak açık; diğer ikisi bir işaret uzakta. Boyutlar, bekleme süreleri ve geniş alanlar birer ayardır. Bkz. <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/zones.md">bölgeler ve ayar</a>.</p>
+      </div>
+    </section>
+
+    <section class="section" id="alarms">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Sizi yakaladığında ne olur</h2>
+          <p>Her tepki bir ayardır. Birini ya da hepsini birlikte kullanın.</p>
+        </div>
+        <div class="settings">
+          <ul class="rows">
+            <li class="row"><svg aria-hidden="true"><use href="#i-bell"/></svg><div><strong>Ses</strong><p>Önce yumuşak bir çınlama, sonra üç bip, devam ederseniz çalkalanan bir alarm. Ya da kendi WAV dosyanız.</p></div><span class="value">Açık<span class="switch on" aria-hidden="true"></span></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-screen"/></svg><div><strong>Ekran perdesi</strong><p>El inene kadar tüm monitörlerde ekranı karartın ya da kırmızı bir çerçeve yakıp söndürün.</p></div><span class="value"><span class="combo">Ekranı karart<svg aria-hidden="true"><use href="#i-chevron"/></svg></span></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-voice"/></svg><div><strong>Sesli uyarı</strong><p>Sisteminizin çevrimdışı sesiyle seçtiğiniz bir cümleyi söyler.</p></div><span class="value">Kapalı<span class="switch" aria-hidden="true"></span></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-chat"/></svg><div><strong>Bildirim</strong><p>Her olayın ilk alarmında bir masaüstü bildirimi.</p></div><span class="value">Açık<span class="switch on" aria-hidden="true"></span></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-steps"/></svg><div><strong>Kademeli güçlenme</strong><p>Önce daha sessiz; el kaldıkça daha yüksek ve daha karanlık.</p></div><span class="value">4 sn'de bir</span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-pause"/></svg><div><strong>Tepsiden duraklatma</strong><p>15 dakika, bir saat ya da üç saat. Kendiliğinden devam eder.</p></div><span class="value"><kbd>15 dk</kbd><kbd>1 sa</kbd><kbd>3 sa</kbd></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-chart"/></svg><div><strong>İstatistikler</strong><p>Gün ve alışkanlık bazında alarmlar, 7 günlük grafik ve temiz süre serisi; yerelde düz sayılar olarak saklanır.</p></div><span class="value">Açık</span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-file"/></svg><div><strong>Performans profili</strong><p>Uyarlanabilir inceleme hızı ve hareket kapısı, işlemciyi yüzde birin üçte biri civarında tutar.</p></div><span class="value"><span class="combo">Dengeli<svg aria-hidden="true"><use href="#i-chevron"/></svg></span></span></li>
+          </ul>
+        </div>
+        <p class="settings-note">Hepsi, aralıklarıyla birlikte <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/configuration.md">yapılandırma başvurusunda</a>.</p>
+      </div>
+    </section>
+
+    <section class="section band" id="privacy">
+      <div class="wrap privacy-grid">
+        <div>
+          <div class="section-head">
+            <h2>Gerçekten güvenebileceğiniz bir kamera uygulaması</h2>
+            <p>Habit Guard yüzünüzü ve ellerinizi görür; bu yüzden gizlilik tasarımın içinde ve herkes bunu denetleyebilir.</p>
+          </div>
+          <div class="notice">
+            <h3>MediaPipe'ın çalışma zamanını çıkardık, çünkü eve telefon ediyor</h3>
+            <p>El modelleri Google'ın MediaPipe'ından (Apache-2.0) gelir, ama çalışma zamanı Google sunucularına bağlanan bir kullanım kaydedicisi içerir. Habit Guard aynı ağırlıkları OpenCV ile çalıştırır ve çalışma zamanını pakete koymaz.</p>
+            <span class="verified"><svg aria-hidden="true"><use href="#i-check"/></svg>Her değişiklik ağ kodu ve görüntü yazma için taranır</span>
+          </div>
+        </div>
+        <ul class="rows joined">
+          <li class="row"><svg aria-hidden="true"><use href="#i-shield"/></svg><div><strong>Ağ erişimi</strong><p>Telemetri, hesap, güncelleme denetimi ya da çökme raporu yok. Herhangi bir dosya bir ağ kütüphanesini içe aktarırsa CI başarısız olur.</p></div><span class="value"><strong>Yok</strong></span></li>
+          <li class="row"><svg aria-hidden="true"><use href="#i-camera"/></svg><div><strong>Kamera görüntüleri</strong><p>Birkaç milisaniye bellekte incelenir, diske asla yazılmaz. OpenCV'nin görüntü ve video yazıcılarında CI başarısız olur.</p></div><span class="value"><strong>Asla saklanmaz</strong></span></li>
+          <li class="row"><svg aria-hidden="true"><use href="#i-file"/></svg><div><strong>Saklanan şey</strong><p>Ayarlarınız ve günlük sayaçlar; okuyabileceğiniz düz JSON olarak. Görüntü yok.</p></div><span class="value"><strong>Yalnızca sayılar</strong></span></li>
+          <li class="row"><svg aria-hidden="true"><use href="#i-eye-off"/></svg><div><strong>Duraklatma</strong><p>Kamera aygıtı serbest bırakılır, webcam ışığı söner.</p></div><span class="value"><strong>Kamera kapalı</strong></span></li>
+          <li class="row"><svg aria-hidden="true"><use href="#i-screen"/></svg><div><strong>Ekran, klavye, fare</strong><p>Perde ekranın üzerine çizer, ekranı okumaz. Tuşlar ve tıklamalar asla okunmaz.</p></div><span class="value"><strong>Asla okunmaz</strong></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="status">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Sınırlar konusunda dürüst</h2>
+          <p>Habit Guard alfa yazılımıdır. Nelerin denendiğini ve nelerin denenmediğini burada görebilirsiniz.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col"><span class="visually-hidden">Sistem</span></th><th scope="col">Algılama ve alarmlar</th><th scope="col">Ekran perdesi</th><th scope="col">Sesli uyarı</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Windows 10 ve 11</th><td><span class="mark yes"><svg aria-hidden="true"><use href="#i-yes"/></svg>Burada geliştirildi</span></td><td><span class="mark yes"><svg aria-hidden="true"><use href="#i-yes"/></svg>Evet</span></td><td><span class="mark yes"><svg aria-hidden="true"><use href="#i-yes"/></svg>Evet</span></td></tr>
+              <tr><th scope="row">macOS</th><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>Bunun için yazıldı, CI'da denendi, henüz kamerayla değil</span></td><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>Bunun için yazıldı</span></td><td><span class="mark yes"><svg aria-hidden="true"><use href="#i-yes"/></svg>Evet (<code>say</code>)</span></td></tr>
+              <tr><th scope="row">Linux (X11, Wayland)</th><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>Bunun için yazıldı, CI'da denendi, henüz kamerayla değil</span></td><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>X11; bazı Wayland bileşenleri tıklamaları engelleyebilir</span></td><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg><code>spd-say</code> ya da <code>espeak</code> ile</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="settings-note">Henüz kurulum paketi yok: kaynaktan çalıştırın (aşağıda). Çoğu webcam aynı anda tek programca kullanılabilir; kamerayı başka bir uygulama tutuyorsa Habit Guard bekler ve yeniden dener. <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Sorun giderme kılavuzu</a> bunu anlatır.</p>
+      </div>
+    </section>
+
+    <section class="section band" id="install">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Habit Guard {{VERSION}} çalıştırın</h2>
+          <p>Ücretsiz ve açık kaynak. Git ve doğru Python'u kendisi getiren <a href="https://docs.astral.sh/uv/">uv</a> gerekir.</p>
+        </div>
+        <div class="install">
+          <div>
+            <h3>Kaynaktan, dört satırda</h3>
+            <ol>
+              <li>Sağdaki komutları bir terminalde çalıştırın.</li>
+              <li>Tepsiye (macOS'ta menü çubuğuna) bir el simgesi gelir. Ayarlar penceresi ilk seferde açılır.</li>
+              <li>İzlenecek alışkanlıkları seçin, sonra sizi iyi görüp görmediğini denetlemek için tepsi menüsünden <em>Kamera önizleme</em>'yi açın.</li>
+              <li>İsteğe bağlı: <code>uv run habit-guard autostart enable</code> oturum açılışında başlatır.</li>
+            </ol>
+          </div>
+          <pre><code>git clone https://github.com/bugraskl/habit-guard.git
+cd habit-guard
+uv sync
+uv run habit-guard</code></pre>
+        </div>
+        <div class="install-foot">
+          <a href="{{RELEASE_URL}}">Sürümler</a>
+          <a href="https://github.com/bugraskl/habit-guard/blob/main/CHANGELOG.md">Değişiklik günlüğü</a>
+          <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Sorun giderme</a>
+          <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/configuration.md">Yapılandırma</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Sık sorulan sorular</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Beni kaydediyor mu?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Hayır. Bir kamera görüntüsü, incelenirken yalnızca birkaç milisaniye bellekte bulunur. Hiçbir şey diske yazılmaz ya da bir yere gönderilmez; bunlardan birini yapabilecek bir kod eklenirse CI'daki tarama derlemeyi başarısız kılar.</p>
+          </details>
+          <details>
+            <summary>Su içerken ya da telefonla konuşurken çalıyor. Ne yapabilirim?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>O alışkanlığa daha uzun bir bekleme süresi verin, bölgesini küçültün ya da izlemeyi tepsiden bir süre duraklatın. Kamera önizlemesi elinizin hangi bölgede olduğunu tam olarak gösterir.</p>
+          </details>
+          <details>
+            <summary>Gözlükle çalışır mı?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Evet. Camlardaki güçlü yansımalar bölgeleri yerleştirmekte kullanılan gözleri gizleyebilir; böyle olursa lambayı ya da kamerayı biraz eğin.</p>
+          </details>
+          <details>
+            <summary>Görüntülü görüşme sırasında kullanabilir miyim?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Çoğu webcam aynı anda tek programca açılabilir. Kamerayı bir görüşme uygulaması tutuyorsa Habit Guard bekler ve kamera boşalınca yeniden başlar; ayrıca tepsiden bir süre duraklatabilirsiniz.</p>
+          </details>
+          <details>
+            <summary>Hangi webcam gerekir?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Dahili ya da harici herhangi bir webcam. Yüzünüz ve kaldırdığınızda iki eliniz görüntüde olacak, yüzünüze ışık gelecek şekilde yerleştirin.</p>
+          </details>
+          <details>
+            <summary>Tıbbi bir cihaz mı?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Hayır. Bir kendi kendine yardım aracıdır. Bir alışkanlık size zarar veriyor ya da sıkıntı yaratıyorsa bir doktor ya da terapistle konuşmaya değer; birçok kişi bu tür hatırlatıcıları bir yerine koyma değil, yararlı bir ek olarak buluyor.</p>
+          </details>
+          <details>
+            <summary>Benim alışkanlığım listede yok.<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Bölgeler yüzde yalnızca şekillerdir; yeni bir alışkanlık çoğunlukla bir şekil çizmek demektir. <a href="https://github.com/bugraskl/habit-guard/issues/new/choose">Bir özellik isteği açın</a> ve elinizin nereye gittiğini anlatın.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing" aria-labelledby="closing-title">
+      <span class="bars" aria-hidden="true"></span>
+      <div class="wrap closing-inner">
+        <div>
+          <h2 id="closing-title">Alışkanlıktan önce eli fark edin</h2>
+          <p>Ücretsiz, açık kaynak ve tasarımı gereği gizli. Kurulum yaklaşık bir dakika sürer.</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-accent" href="#install"><svg aria-hidden="true"><use href="#i-download"/></svg>Habit Guard'ı edinin</a>
+          <a class="btn" href="https://github.com/bugraskl/habit-guard"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub'da yıldızlayın</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a class="brand" href="./"><img src="../assets/favicon.png" alt="" width="28" height="28">Habit Guard</a>
+          <p>Elinizin ağzınıza, bıyığınıza, kaşınıza ya da saçınıza giderken yakalar. Bu site çerez ve analiz kullanmaz.</p>
+        </div>
+        <div>
+          <p class="footer-title">Proje</p>
+          <ul>
+            <li><a href="https://github.com/bugraskl/habit-guard">GitHub</a></li>
+            <li><a href="{{RELEASE_URL}}">Sürümler</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/CHANGELOG.md">Değişiklik günlüğü</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/issues">Sorun bildir</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer-title">Dokümanlar</p>
+          <ul>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/zones.md">Bölgeler ve ayar</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/configuration.md">Yapılandırma</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Sorun giderme</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/architecture.md">Mimari</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer-title">Güven</p>
+          <ul>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/privacy.md">Gizlilik</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/SECURITY.md">Güvenlik</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/LICENSE">MIT lisansı</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© {{YEAR}} Buğra Şıkel · MIT lisansı</span>
+        <span>El modelleri: OpenCV Zoo üzerinden MediaPipe (Apache-2.0) · Yüz: YuNet (MIT)</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/site.js" defer></script>
+</body>
+</html>

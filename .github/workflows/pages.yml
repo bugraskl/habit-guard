@@ -1,0 +1,83 @@
+name: Website
+
+# Publishes the project website (site/) to GitHub Pages:
+# https://bugraskl.github.io/habit-guard/
+# The version and release links are filled in from the latest GitHub release at build time, so the
+# site is rebuilt for every release ("release: published"). Before the first release the API
+# answers 404 and the site falls back to the package version and the releases page.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "site/**"
+      - "assets/**"
+      - "scripts/build_site.py"
+      - "scripts/make_assets.py"
+      - "src/habit_guard/zones.py"
+      - ".github/workflows/pages.yml"
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; a queued run waits instead of cancelling a live one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build the site
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      # numpy: the demo face is drawn from the app's zone geometry; Pillow: image sizes, favicons.
+      - name: Install numpy and Pillow
+        run: python -m pip install --disable-pip-version-check numpy "pillow>=10.4"
+
+      - name: Read the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/releases/latest" > release.json || echo '{}' > release.json
+
+      - name: Build
+        run: python scripts/build_site.py --release release.json --out _site
+
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

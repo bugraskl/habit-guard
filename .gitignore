@@ -24,3 +24,6 @@ graft/
 *.log
 .DS_Store
 Thumbs.db
+
+# Website build output (scripts/build_site.py)
+_site/

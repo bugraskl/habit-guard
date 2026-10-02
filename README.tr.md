@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> · <b>Türkçe</b>
+  <a href="https://bugraskl.github.io/habit-guard/tr/"><b>Web sitesi</b></a> · <a href="README.md">English</a> · <b>Türkçe</b>
 </p>
 
 > **Durum: alfa.** Algılama, alarmlar ve arayüz yazıldı ve otomatik testlerle kapsandı; algılama
@@ -68,6 +68,40 @@ ederler.
 **Kademeli güçlenme** açıkken (varsayılan) el kaldıkça alarm birkaç saniyede bir artar: önce daha
 sessiz, sonra daha yüksek ve daha karanlık. Yemek yerken ya da görüşme yaparken tepsiden izlemeyi
 15 dakika, bir saat ya da üç saat duraklatabilirsiniz.
+
+## Ekran görüntüleri
+
+Pencereler gerçek olanlardır, İngilizce ve Türkçe. Önizlemedeki kamera görüntüsü bir fotoğraf değil, çizimdir: bu depoda gerçek bir yüz yok.
+
+<p align="center">
+  <img src="assets/screenshots/tr/preview.png" width="560" alt="Kamera önizleme: ağzında eli olan çizilmiş bir kişi, yüzdeki bölgeler ve elin 21 noktası">
+  <img src="assets/screenshots/tr/stats.png" width="310" alt="İstatistikler: bugünkü ve toplam alarmlar, temiz süre serisi ve 7 günlük grafik">
+</p>
+
+<p align="center">**Kamera önizleme** bölgeleri yüzünüzde ve elin 21 noktasını gösterir; **İstatistikler** 7 günlük grafik ve temiz süre serinizi tutar.</p>
+
+<p align="center">
+  <img src="assets/screenshots/tr/settings-habits.png" width="300" alt="Ayarlar, Alışkanlıklar sekmesi">
+  <img src="assets/screenshots/tr/settings-alarms.png" width="300" alt="Ayarlar, Uyarılar sekmesi">
+  <img src="assets/screenshots/tr/settings-general.png" width="300" alt="Ayarlar, Genel sekmesi">
+</p>
+
+<p align="center">**Ayarlar**: kendi bekleme süresi ve bölge boyutuyla alışkanlıklar, uyarılar ve genel seçenekler.</p>
+
+<p align="center">
+  <img src="assets/screenshots/tr/alarm-dim.png" width="440" alt="Ekran kararır ve Elini indir! mesajı görünür">
+  <img src="assets/screenshots/tr/alarm-flash.png" width="440" alt="Ekranın çevresinde yanıp sönen kırmızı çerçeve">
+</p>
+
+<p align="center">**Alarm**: el inene kadar ekran kararır (solda) ya da kırmızı bir çerçeve yanıp söner (sağda). Tıklamalar doğrudan geçer.</p>
+
+<p align="center">
+  <img src="assets/screenshots/tr/tray.png" width="200" alt="Tepsi menüsü">
+</p>
+
+<p align="center">**Tepsi menüsü**: duraklat, şu süre duraklat, önizleme, istatistikler, ayarlar.</p>
+
+Daha fazla görüntü ve tıklayabileceğiniz bir demo [web sitesinde](https://bugraskl.github.io/habit-guard/tr/).
 
 ## Nasıl çalışır
 

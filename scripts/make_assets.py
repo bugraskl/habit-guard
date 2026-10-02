@@ -122,26 +122,24 @@ def _legend() -> list[str]:
     return out
 
 
-def zones_svg() -> str:
-    frame = FaceFrame.from_face(_frontal_face())
-    assert frame is not None
-    narrow = {z.habit: z for z in build_zones(frame, dict.fromkeys(Habit, ZoneSpec()))}
-    wide = {z.habit: z for z in build_zones(frame, dict.fromkeys(Habit, ZoneSpec(wide=True)))}
-
-    parts = [
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 640" role="img" '
-        'aria-labelledby="t d">',
-        '<title id="t">Habit Guard zones</title>',
-        '<desc id="d">A face with the zone of each watched habit drawn over it: the mouth, the '
-        "moustache and beard area, the brows and hairline, and the rest of the face.</desc>",
-        '<rect width="860" height="640" rx="18" fill="#f4f6f8"/>',
-        '<g transform="translate(0 80)">',
+def _face_base() -> list[str]:
+    """Neck, head and hair, in the diagram's own coordinates (no zones, no features)."""
+    return [
         '<rect x="262" y="475" width="76" height="70" fill="#e9b992"/>',  # neck
         '<ellipse cx="300" cy="305" rx="125" ry="185" fill="#f2c9a5" stroke="#c99a74" '
         'stroke-width="3"/>',
         '<path d="M 178 160 C 215 60 385 60 422 160 C 400 130 350 108 300 108 C 250 108 200 '
         '130 178 160 Z" fill="#5b4a3f"/>',  # hair
     ]
+
+
+def _face_group() -> list[str]:
+    """The face with every zone drawn on it, in the diagram's own coordinates (about 0-640 high)."""
+    frame = FaceFrame.from_face(_frontal_face())
+    assert frame is not None
+    narrow = {z.habit: z for z in build_zones(frame, dict.fromkeys(Habit, ZoneSpec()))}
+    wide = {z.habit: z for z in build_zones(frame, dict.fromkeys(Habit, ZoneSpec(wide=True)))}
+    parts = ['<g transform="translate(0 80)">', *_face_base()]
     face_touch: Zone = narrow[Habit.FACE_TOUCH]
     parts += [
         _ellipse(frame, e, COLORS[Habit.FACE_TOUCH], dashed=False, opacity=0.10)
@@ -156,10 +154,118 @@ def zones_svg() -> str:
                 _ellipse(frame, e, COLORS[habit], dashed=False, opacity=0.22) for e in zone.include
             ]
     parts += _features(frame)
-    parts.append("</g>")  # the face
-    parts += _legend()
-    parts.append("</svg>")
+    parts.append("</g>")
+    return parts
+
+
+#: Where a fingertip goes to "do" each habit, in face coordinates: the demo on the website.
+DEMO_TARGETS = {
+    Habit.NAIL_BITING: (0.0, 1.36),
+    Habit.MUSTACHE: (0.0, 0.92),
+    Habit.HAIR_PULLING: (-0.5, -0.3),
+    Habit.FACE_TOUCH: (0.95, 0.6),
+}
+
+
+def demo_face() -> tuple[str, dict[str, tuple[float, float]]]:
+    """The face for the website's interactive demo, and the fingertip target of each habit.
+
+    Every zone is its own ``<g class="zone" data-habit=...>`` so a script can light it up; the
+    coordinates are the diagram's own (the face is centred on x = 300).
+    """
+    frame = FaceFrame.from_face(_frontal_face())
+    assert frame is not None
+    zones = {z.habit: z for z in build_zones(frame, dict.fromkeys(Habit, ZoneSpec()))}
+    parts = list(_face_base())
+    for habit in (Habit.FACE_TOUCH, Habit.HAIR_PULLING, Habit.MUSTACHE, Habit.NAIL_BITING):
+        ellipses = "".join(
+            _ellipse(frame, e, "currentColor", dashed=False, opacity=1.0)
+            for e in zones[habit].include
+        )
+        parts.append(
+            f'<g class="zone zone-{habit.value}" data-habit="{habit.value}" '
+            f'style="color:{COLORS[habit]}">{ellipses}</g>'
+        )
+    parts += _features(frame)
+    targets = {h.value: frame.to_image(*uv) for h, uv in DEMO_TARGETS.items()}
+    return "\n".join(parts), targets
+
+
+def zones_svg() -> str:
+    parts = [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 640" role="img" '
+        'aria-labelledby="t d">',
+        '<title id="t">Habit Guard zones</title>',
+        '<desc id="d">A face with the zone of each watched habit drawn over it: the mouth, the '
+        "moustache and beard area, the brows and hairline, and the rest of the face.</desc>",
+        '<rect width="860" height="640" rx="18" fill="#f4f6f8"/>',
+        *_face_group(),
+        *_legend(),
+        "</svg>",
+    ]
     return "\n".join(parts) + "\n"
+
+
+def hero_svg() -> str:
+    """The social preview picture (1920 x 960): name, promise and the zones on a face."""
+    colors = [COLORS[h] for h in Habit]
+    bars = "".join(
+        f'<rect x="{i * 480}" y="0" width="480" height="10" fill="{c}"/>'
+        for i, c in enumerate(colors)
+    )
+    chips = []
+    x = 120
+    for text, width in (
+        ("Offline", 190),
+        ("Private", 190),
+        ("Light on the CPU", 330),
+        ("MIT", 120),
+    ):
+        chips.append(
+            f'<rect x="{x}" y="716" width="{width}" height="60" rx="30" fill="#1c1d22" '
+            'stroke="#3d4049" stroke-width="2"/>'
+            f'<text x="{x + width / 2}" y="755" text-anchor="middle" font-size="28" '
+            f'fill="#d9dbe0">{text}</text>'
+        )
+        x += width + 20
+    return "\n".join(
+        [
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 960" role="img" '
+            'aria-label="Habit Guard">',
+            '<rect width="1920" height="960" fill="#0f1012"/>',
+            bars,
+            '<circle cx="190" cy="230" r="70" fill="#0f9d8a"/>',
+            '<g transform="translate(126 166) scale(1.0)">'
+            '<g transform="scale(1)">'
+            + "".join(
+                f'<rect x="{x * 128:.1f}" y="{y * 128:.1f}" width="{w * 128:.1f}" '
+                f'height="{h * 128:.1f}" rx="{r * 128:.1f}" fill="#fff"/>'
+                for x, y, w, h, r in (
+                    (0.30, 0.46, 0.40, 0.30, 0.08),
+                    (0.30, 0.32, 0.085, 0.24, 0.04),
+                    (0.405, 0.24, 0.085, 0.32, 0.04),
+                    (0.51, 0.24, 0.085, 0.32, 0.04),
+                    (0.615, 0.32, 0.085, 0.24, 0.04),
+                )
+            )
+            + "</g></g>",
+            f'<g font-family="{FONT}" fill="#f4f4f5">',
+            '<text x="120" y="440" font-size="124" font-weight="700" letter-spacing="-2">'
+            "Habit Guard</text>",
+            '<text x="120" y="536" font-size="40" fill="#b9bbc2">Catches the hand on its way to '
+            "your mouth,</text>",
+            '<text x="120" y="592" font-size="40" fill="#b9bbc2">mustache, brows or hair, and '
+            "nudges you to stop.</text>",
+            *chips,
+            "</g>",
+            '<rect x="1090" y="70" width="640" height="820" rx="32" fill="#f4f6f8"/>',
+            '<g transform="translate(1050 66) scale(1.2)">',
+            *_face_group(),
+            "</g>",
+            "</svg>",
+            "",
+        ]
+    )
 
 
 def icon_svg() -> str:
@@ -196,7 +302,8 @@ def main() -> int:
     ASSETS.mkdir(exist_ok=True)
     (ASSETS / "zones.svg").write_text(zones_svg(), encoding="utf-8", newline="\n")
     (ASSETS / "icon.svg").write_text(icon_svg(), encoding="utf-8", newline="\n")
-    print(f"wrote {ASSETS / 'zones.svg'} and {ASSETS / 'icon.svg'}")
+    (ASSETS / "hero.svg").write_text(hero_svg(), encoding="utf-8", newline="\n")
+    print(f"wrote zones.svg, icon.svg and hero.svg in {ASSETS}")
     return 0
 
 

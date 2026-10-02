@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <b>English</b> · <a href="README.tr.md">Türkçe</a>
+  <a href="https://bugraskl.github.io/habit-guard/"><b>Website</b></a> · <b>English</b> · <a href="README.tr.md">Türkçe</a>
 </p>
 
 > **Status: alpha.** Detection, alarms and the interface are built and covered by automated tests,
@@ -67,6 +67,40 @@ Pick any combination in **Settings → Alarms**:
 With **escalation** on (the default) the alarm steps up every few seconds while the hand stays:
 quieter first, louder and darker after. Pause tracking from the tray for 15 minutes, an hour or
 three hours when you eat or take a call.
+
+## Screenshots
+
+The windows are the real ones, in English and Turkish. The camera picture in the preview is an illustration, not a photograph: no real face is in this repository.
+
+<p align="center">
+  <img src="assets/screenshots/en/preview.png" width="560" alt="Camera preview: a drawn person with a hand at the mouth, the zones on the face and the hand's 21 points">
+  <img src="assets/screenshots/en/stats.png" width="310" alt="Statistics: alarms today and in total, the clean streak and a 7-day chart">
+</p>
+
+<p align="center">**Camera preview** shows the zones on your face and the hand's 21 points; **Statistics** keeps a 7-day chart and your clean streak.</p>
+
+<p align="center">
+  <img src="assets/screenshots/en/settings-habits.png" width="300" alt="Settings, Habits tab">
+  <img src="assets/screenshots/en/settings-alarms.png" width="300" alt="Settings, Alarms tab">
+  <img src="assets/screenshots/en/settings-general.png" width="300" alt="Settings, General tab">
+</p>
+
+<p align="center">**Settings**: habits with their own dwell time and zone size, alarms, and general options.</p>
+
+<p align="center">
+  <img src="assets/screenshots/en/alarm-dim.png" width="440" alt="The screen dims with the message Hands down!">
+  <img src="assets/screenshots/en/alarm-flash.png" width="440" alt="A pulsing red frame around the screen">
+</p>
+
+<p align="center">**The alarm**: the screen dims (left) or a red frame pulses (right) until your hand is down. Clicks pass straight through.</p>
+
+<p align="center">
+  <img src="assets/screenshots/en/tray.png" width="200" alt="The tray menu">
+</p>
+
+<p align="center">**The tray menu**: pause, pause for a set time, preview, statistics, settings.</p>
+
+More pictures, and a demo you can click, on the [website](https://bugraskl.github.io/habit-guard/).
 
 ## How it works
 

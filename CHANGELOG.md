@@ -6,6 +6,25 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A project website in English and Turkish with an interactive zone demo drawn from the real zone
+  geometry, published to GitHub Pages.
+- Interface screenshots in English and Turkish in the READMEs and on the website. The camera picture
+  in the preview is an illustration, never a photograph.
+
+### Fixed
+
+- The alarm sound never played: Qt Multimedia is not part of PySide6-Essentials. Sound now uses what
+  the system has (`winsound`, `afplay`, `paplay`, `pw-play`, `aplay` or `play`).
+- A sound that is still playing is no longer restarted by another alarm of the same or a lower
+  level, so a long custom sound no longer stutters when two habits raise their alarms together.
+- Models failed to load from a folder with letters outside the Windows ANSI code page (for example
+  a Turkish user name).
+- A raised alarm is released when the camera is lost, the camera is released again when the preview
+  is closed while paused, statistics are saved on logoff, and the camera thread survives driver
+  errors.
+
 ## [0.1.0] - 2026-10-02
 
 First public version (alpha).

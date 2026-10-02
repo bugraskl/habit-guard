@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Habit Guard: stop nail biting and hair pulling with your webcam</title>
+  <meta name="description" content="Free, open-source app that watches your webcam for a hand going to your mouth, mustache, brows or hair and interrupts the habit with a sound, a dimmed screen or a voice. Offline, private, light on the CPU. Windows, macOS and Linux.">
+  <link rel="canonical" href="{{SITE_URL}}">
+  <link rel="alternate" hreflang="en" href="{{SITE_URL}}">
+  <link rel="alternate" hreflang="tr" href="{{SITE_URL}}tr/">
+  <link rel="alternate" hreflang="x-default" href="{{SITE_URL}}">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0f1012">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Habit Guard">
+  <meta property="og:title" content="Habit Guard: stop nail biting and hair pulling with your webcam">
+  <meta property="og:description" content="Free, open-source habit alarm. Offline, private, light on the CPU. Nail biting, mustache and hair pulling, face touching.">
+  <meta property="og:url" content="{{SITE_URL}}">
+  <meta property="og:image" content="{{SITE_URL}}assets/og.png">
+  <meta property="og:image:width" content="1920">
+  <meta property="og:image:height" content="960">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="tr_TR">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Habit Guard",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Windows 10, Windows 11, macOS, Linux",
+    "softwareVersion": "{{VERSION}}",
+    "description": "Watches your webcam for a hand going to your mouth, mustache, brows or hair and interrupts the habit. Offline by default.",
+    "url": "{{SITE_URL}}",
+    "downloadUrl": "{{RELEASE_URL}}",
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Buğra Şıkel", "url": "https://github.com/bugraskl" }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="m8 12.5 2.7 2.7L16.5 9.5"/></symbol>
+    <symbol id="i-yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></symbol>
+    <symbol id="i-maybe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></symbol>
+    <symbol id="i-no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="11" r="7"/><circle cx="12" cy="11" r="2.6"/><path d="M8 21h8"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.6 6.6C3.9 8.4 2 12 2 12s4 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15L6 17Z"/><path d="M10 21h4"/></symbol>
+    <symbol id="i-screen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-voice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-steps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h5v-5h5v-5h5V5h3"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M10 9v6M14 9v6"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V6a1.5 1.5 0 0 1 3 0v5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-2-3a1.5 1.5 0 0 1 2.3-1.8L8 14"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <nav class="wrap nav" aria-label="Main">
+      <a class="brand" href="./" aria-label="Habit Guard home">
+        <img src="assets/favicon.png" alt="" width="28" height="28">
+        Habit Guard
+      </a>
+      <ul class="nav-links">
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#screens">Screens</a></li>
+        <li><a href="#habits">Habits</a></li>
+        <li><a href="#privacy">Privacy</a></li>
+        <li><a href="#install">Install</a></li>
+        <li><a href="https://github.com/bugraskl/habit-guard/tree/main/docs">Docs</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="segmented" role="group" aria-label="Language">
+          <span aria-current="true" lang="en">EN</span>
+          <a href="tr/" lang="tr" hreflang="tr">TR</a>
+        </div>
+        <a class="btn github-link" href="https://github.com/bugraskl/habit-guard">
+          <svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span>
+        </a>
+      </div>
+    </nav>
+    <span class="bars" aria-hidden="true"></span>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <h1><span>Your hand is halfway to your mouth.</span> <span>Habit Guard noticed first.</span></h1>
+          <p class="lead">Habit Guard watches your webcam for a hand going to your mouth, mustache, brows or hair, and interrupts the habit within about a second: a sound, a dimmed screen, a spoken phrase or a notification, your choice. It runs on your computer, costs a fraction of a percent of your CPU and never saves a picture.</p>
+          <div class="actions">
+            <a class="btn btn-accent" href="#install"><svg aria-hidden="true"><use href="#i-download"/></svg>Get Habit Guard</a>
+            <a class="btn" href="https://github.com/bugraskl/habit-guard"><svg aria-hidden="true"><use href="#i-github"/></svg>Star on GitHub</a>
+          </div>
+          <p class="hero-meta">Version {{VERSION}} · Free and open source, <a href="https://github.com/bugraskl/habit-guard/blob/main/LICENSE">MIT licence</a> · Windows, macOS, Linux · Offline</p>
+          <p class="alpha"><strong>Alpha.</strong> Built and tested, but new to real desks and webcams. Reports of false alarms and misses help most.</p>
+        </div>
+
+        <figure class="demo" data-demo {{DEMO_TARGETS}}
+                data-msg-watch="Watching. Pick a habit to see what it looks like, or wait: the demo plays by itself."
+                data-msg-dwell="{habit}: a fingertip is in the zone. Counting the dwell time…"
+                data-msg-alarm="Alarm! The screen dims, a chime plays, a notification appears. It stops the moment the hand is down."
+                data-msg-away="Hand down. The alarm is released and the clean-time streak starts again."
+                data-msg-off="Face touching is off by default, so nothing happens. Turn it on in Settings.">
+          <div class="demo-bar">
+            <span class="demo-title">Zones</span>
+            <span class="demo-live"><span class="dot" aria-hidden="true"></span>Watching</span>
+          </div>
+          <div class="demo-canvas">
+            <svg class="demo-svg" viewBox="60 0 480 560" role="img" aria-label="A face with the zones of four habits, and a hand that goes to each one in turn">
+              {{DEMO_FACE}}
+              <g class="hand" aria-hidden="true">
+                <rect class="skin" x="-48" y="86" width="96" height="88" rx="18"/>
+                <rect class="skin" x="-48" y="26" width="22" height="100" rx="11"/>
+                <rect class="skin" x="-22" y="0" width="22" height="120" rx="11"/>
+                <rect class="skin" x="4" y="14" width="22" height="110" rx="11"/>
+                <rect class="skin" x="30" y="40" width="22" height="90" rx="11"/>
+                <rect class="skin" x="-72" y="98" width="22" height="64" rx="11" transform="rotate(-28 -61 130)"/>
+                <rect x="-46" y="88" width="92" height="40" fill="#eab68e"/>
+                <circle class="ring" cx="0" cy="12" r="20" transform="rotate(-90 0 12)"/>
+              </g>
+            </svg>
+            <span class="alarm-pill" aria-hidden="true">Hands down!</span>
+          </div>
+          <div class="chips" role="group" aria-label="Pick a habit">
+            <button type="button" class="chip" style="--c: var(--nail)" data-habit="nail_biting" data-name="Nail biting" aria-pressed="false"><i></i>Nail biting</button>
+            <button type="button" class="chip" style="--c: var(--mustache)" data-habit="mustache" data-name="Mustache pulling" aria-pressed="false"><i></i>Mustache</button>
+            <button type="button" class="chip" style="--c: var(--hair)" data-habit="hair_pulling" data-name="Brow pulling" aria-pressed="false"><i></i>Brows and hair</button>
+            <button type="button" class="chip" style="--c: var(--touch)" data-habit="face_touch" data-name="Face touching" aria-pressed="false"><i></i>Face touching</button>
+          </div>
+          <div class="demo-foot">
+            <p class="status"><svg aria-hidden="true"><use href="#i-hand"/></svg><span data-status>Watching. Pick a habit to see what it looks like, or wait: the demo plays by itself.</span></p>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="measured" aria-labelledby="measured-title">
+      <div class="wrap props">
+        <div class="props-intro">
+          <h2 id="measured-title">Measured, not promised</h2>
+          <p>Windows 11 on a Ryzen 7 3700X, replaying a 640×480 clip with <code>habit-guard bench</code>.</p>
+        </div>
+        <dl class="prop-list">
+          <div class="prop"><dt>CPU, face in view</dt><dd><strong>0.34%</strong>5.5% of one core</dd></div>
+          <div class="prop"><dt>CPU, hand near the face</dt><dd><strong>~1.3%</strong>20% of one core</dd></div>
+          <div class="prop"><dt>One analysis</dt><dd><strong>20 to 26 ms</strong>face and hand</dd></div>
+          <div class="prop"><dt>Network connections</dt><dd><strong>0</strong>no telemetry, no update check</dd></div>
+          <div class="prop"><dt>Pictures saved</dt><dd><strong>0</strong>analysed in memory only</dd></div>
+          <div class="prop"><dt>Tested in CI on</dt><dd><strong>3 systems</strong>Windows, macOS, Linux</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section band" id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Set it up once. Then forget it.</h2>
+          <p>A hand has to stay in a zone for a moment before anything happens, so drinking, wiping your lips or a quick scratch are ignored.</p>
+        </div>
+        <ol class="steps">
+          <li class="step">
+            <span class="identify" aria-hidden="true">1</span>
+            <h3>Place the camera</h3>
+            <p>Where your face and both raised hands are in the picture, with light on your face. The camera preview shows exactly what Habit Guard sees.</p>
+          </li>
+          <li class="step">
+            <span class="identify" aria-hidden="true">2</span>
+            <h3>Choose your habits</h3>
+            <p>Tick the ones to watch. Each has its own zone on your face, its own dwell time and size. Zones follow you when you lean in or tilt your head.</p>
+          </li>
+          <li class="step">
+            <span class="identify" aria-hidden="true">3</span>
+            <h3>Carry on</h3>
+            <p>It waits in the tray. When a fingertip stays in a zone for the dwell time the alarm goes off, and steps up while the hand stays.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="screens">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>See what you get</h2>
+          <p>These are the real windows. The camera picture in the preview is an illustration, not a photograph: no real face appears anywhere in this project.</p>
+        </div>
+        <div class="shots">
+          <div class="shot-row two-one">
+            <figure class="shot">
+              <a href="assets/screenshots/en/preview.png"><img src="assets/screenshots/en/preview.png" {{SIZE:screenshots/en/preview.png}} alt="The camera preview: a drawn person with a hand at the mouth, the zones on the face and the hand's 21 points" loading="lazy"></a>
+              <figcaption><strong>Camera preview</strong>Zones on your face, the hand's 21 points with the fingertips in red. A zone fills in when a fingertip is inside it.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="assets/screenshots/en/stats.png"><img src="assets/screenshots/en/stats.png" {{SIZE:screenshots/en/stats.png}} alt="The statistics window: alarms today and in total, the clean time, a 7-day bar chart and totals per habit" loading="lazy"></a>
+              <figcaption><strong>Statistics</strong>Alarms per day and habit, a 7-day chart and your clean streak. Kept as plain numbers on your computer.</figcaption>
+            </figure>
+          </div>
+          <div class="shot-row three">
+            <figure class="shot">
+              <a href="assets/screenshots/en/settings-habits.png"><img src="assets/screenshots/en/settings-habits.png" {{SIZE:screenshots/en/settings-habits.png}} alt="Settings, Habits tab: a switch, a dwell time and a zone size for each of four habits" loading="lazy"></a>
+              <figcaption><strong>Habits</strong>A switch, a dwell time and a zone size for each habit.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="assets/screenshots/en/settings-alarms.png"><img src="assets/screenshots/en/settings-alarms.png" {{SIZE:screenshots/en/settings-alarms.png}} alt="Settings, Alarms tab: sound, notification, screen curtain, voice and escalation" loading="lazy"></a>
+              <figcaption><strong>Alarms</strong>Sound, notification, screen, voice and escalation, each on its own switch.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="assets/screenshots/en/settings-general.png"><img src="assets/screenshots/en/settings-general.png" {{SIZE:screenshots/en/settings-general.png}} alt="Settings, General tab: language, camera, camera interface and performance profile" loading="lazy"></a>
+              <figcaption><strong>General</strong>Language, camera, how the camera is opened and the performance profile.</figcaption>
+            </figure>
+          </div>
+          <div class="shot-row two">
+            <figure class="shot">
+              <a href="assets/screenshots/en/alarm-dim.png"><img src="assets/screenshots/en/alarm-dim.png" {{SIZE:screenshots/en/alarm-dim.png}} alt="A document with the screen dimmed and the message Hands down!" loading="lazy"></a>
+              <figcaption><strong>The screen dims</strong>Until your hand is down, on every monitor. Clicks pass straight through, so it can never lock you out.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="assets/screenshots/en/alarm-flash.png"><img src="assets/screenshots/en/alarm-flash.png" {{SIZE:screenshots/en/alarm-flash.png}} alt="A document with a pulsing red frame around the screen and the message Hands down!" loading="lazy"></a>
+              <figcaption><strong>Or a red frame</strong>A pulsing frame instead of the dimming, if you want to keep reading.</figcaption>
+            </figure>
+          </div>
+          <div class="shot-row one-two">
+            <figure class="shot">
+              <a href="assets/screenshots/en/tray.png"><img src="assets/screenshots/en/tray.png" {{SIZE:screenshots/en/tray.png}} alt="The tray menu: status, today's alarms, pause, pause for a set time, camera preview, statistics, settings, test the alarm, quit" loading="lazy"></a>
+              <figcaption><strong>Lives in the tray</strong>Pause, preview, statistics and settings, one click away.</figcaption>
+            </figure>
+            <div class="side-note">
+              <h3>Pause when you need to</h3>
+              <p>Eating, a video call, a phone call with your chin on your hand: pause tracking from the tray for 15 minutes, an hour or three hours, and it resumes by itself. Pausing releases the camera, so the webcam light goes out.</p>
+              <p>Try the alarm any time with <strong>Test the alarm</strong>: it plays exactly what your settings describe.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section band" id="habits">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Four habits, four zones</h2>
+          <p>Each zone is a few ellipses on your face, measured in eye distances, so they follow you as you lean in, lean back or tilt your head. The picture is drawn from the same numbers the app uses.</p>
+        </div>
+        <div class="zones-grid">
+          <img src="assets/zones.svg" width="860" height="640" alt="A face with the zones of the four habits drawn over it" loading="lazy">
+          <ul class="habit-list">
+            <li class="habit" style="--c: var(--nail)"><span class="swatch"></span><div><strong>Nail and finger biting</strong><p>The lips and the area around them.</p></div><span class="value">1.0 s dwell</span></li>
+            <li class="habit" style="--c: var(--mustache)"><span class="swatch"></span><div><strong>Mustache, beard and lip picking</strong><p>Between the nose and the mouth. Optionally the chin and the beard line.</p></div><span class="value">1.5 s dwell</span></li>
+            <li class="habit" style="--c: var(--hair)"><span class="swatch"></span><div><strong>Brow, lash and hair pulling</strong><p>Brows, eyelids, forehead and hairline. Optionally the scalp.</p></div><span class="value">1.5 s · off</span></li>
+            <li class="habit" style="--c: var(--touch)"><span class="swatch"></span><div><strong>Face touching and skin picking</strong><p>The rest of the face, whatever the other habits do not own.</p></div><span class="value">4 s · off</span></li>
+          </ul>
+        </div>
+        <p class="settings-note">Nail biting and mustache are on by default; the other two are one tick away. Sizes, dwell times and the wider areas are all settings. See <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/zones.md">zones and tuning</a>.</p>
+      </div>
+    </section>
+
+    <section class="section" id="alarms">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>What happens when it catches you</h2>
+          <p>Every response is a setting. Use one, or all of them together.</p>
+        </div>
+        <div class="settings">
+          <ul class="rows">
+            <li class="row"><svg aria-hidden="true"><use href="#i-bell"/></svg><div><strong>Sound</strong><p>A soft chime, then three beeps, then a warbling alarm as you keep going. Or your own WAV file.</p></div><span class="value">On<span class="switch on" aria-hidden="true"></span></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-screen"/></svg><div><strong>Screen curtain</strong><p>Dim the screen or pulse a red frame on every monitor, until the hand is down.</p></div><span class="value"><span class="combo">Dim the screen<svg aria-hidden="true"><use href="#i-chevron"/></svg></span></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-voice"/></svg><div><strong>Voice</strong><p>Says a phrase of your choice with your system's offline voice.</p></div><span class="value">Off<span class="switch" aria-hidden="true"></span></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-chat"/></svg><div><strong>Notification</strong><p>A desktop notification on the first alarm of each episode.</p></div><span class="value">On<span class="switch on" aria-hidden="true"></span></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-steps"/></svg><div><strong>Escalation</strong><p>Quieter first, louder and darker the longer the hand stays.</p></div><span class="value">Every 4 s</span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-pause"/></svg><div><strong>Pause from the tray</strong><p>For 15 minutes, an hour or three hours. It resumes by itself.</p></div><span class="value"><kbd>15 m</kbd><kbd>1 h</kbd><kbd>3 h</kbd></span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-chart"/></svg><div><strong>Statistics</strong><p>Alarms per day and habit, a 7-day chart and a clean streak, stored locally as plain numbers.</p></div><span class="value">On</span></li>
+            <li class="row"><svg aria-hidden="true"><use href="#i-file"/></svg><div><strong>Performance profile</strong><p>An adaptive analysis rate and a motion gate keep the CPU near a third of a percent.</p></div><span class="value"><span class="combo">Balanced<svg aria-hidden="true"><use href="#i-chevron"/></svg></span></span></li>
+          </ul>
+        </div>
+        <p class="settings-note">All of these, with their ranges, are in the <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/configuration.md">configuration reference</a>.</p>
+      </div>
+    </section>
+
+    <section class="section band" id="privacy">
+      <div class="wrap privacy-grid">
+        <div>
+          <div class="section-head">
+            <h2>A camera app you can actually trust</h2>
+            <p>Habit Guard watches your face and hands, so privacy is designed in, and anyone can check it.</p>
+          </div>
+          <div class="notice">
+            <h3>We removed MediaPipe's runtime because it phones home</h3>
+            <p>The hand models come from Google's MediaPipe (Apache-2.0), but its runtime contains a usage logger that connects to Google's servers. Habit Guard runs the same weights through OpenCV instead, and the runtime is not shipped.</p>
+            <span class="verified"><svg aria-hidden="true"><use href="#i-check"/></svg>Every change is scanned for networking code and picture writing</span>
+          </div>
+        </div>
+        <ul class="rows joined">
+          <li class="row"><svg aria-hidden="true"><use href="#i-shield"/></svg><div><strong>Network access</strong><p>No telemetry, no accounts, no update check, no crash reports. CI fails when any file imports a networking library.</p></div><span class="value"><strong>None</strong></span></li>
+          <li class="row"><svg aria-hidden="true"><use href="#i-camera"/></svg><div><strong>Camera pictures</strong><p>Analysed in memory for a few milliseconds and never written to disk. CI fails on OpenCV's image and video writers.</p></div><span class="value"><strong>Never stored</strong></span></li>
+          <li class="row"><svg aria-hidden="true"><use href="#i-file"/></svg><div><strong>What is stored</strong><p>Your settings and the daily counters, in plain JSON you can read. No images.</p></div><span class="value"><strong>Numbers only</strong></span></li>
+          <li class="row"><svg aria-hidden="true"><use href="#i-eye-off"/></svg><div><strong>Pause</strong><p>The camera device is released, so the webcam light goes out.</p></div><span class="value"><strong>Camera off</strong></span></li>
+          <li class="row"><svg aria-hidden="true"><use href="#i-screen"/></svg><div><strong>Screen, keyboard, mouse</strong><p>The curtain draws over the screen; it never reads it. Keys and clicks are never read.</p></div><span class="value"><strong>Never read</strong></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="status">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Honest about the limits</h2>
+          <p>Habit Guard is alpha software. Here is what has been tried and what has not.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col"><span class="visually-hidden">System</span></th><th scope="col">Detection and alarms</th><th scope="col">Screen curtain</th><th scope="col">Voice</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Windows 10 and 11</th><td><span class="mark yes"><svg aria-hidden="true"><use href="#i-yes"/></svg>Developed here</span></td><td><span class="mark yes"><svg aria-hidden="true"><use href="#i-yes"/></svg>Yes</span></td><td><span class="mark yes"><svg aria-hidden="true"><use href="#i-yes"/></svg>Yes</span></td></tr>
+              <tr><th scope="row">macOS</th><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>Built for it, tested in CI, not yet with a camera</span></td><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>Built for it</span></td><td><span class="mark yes"><svg aria-hidden="true"><use href="#i-yes"/></svg>Yes (<code>say</code>)</span></td></tr>
+              <tr><th scope="row">Linux (X11, Wayland)</th><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>Built for it, tested in CI, not yet with a camera</span></td><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>X11; some Wayland compositors may block clicks</span></td><td><span class="mark maybe"><svg aria-hidden="true"><use href="#i-maybe"/></svg>With <code>spd-say</code> or <code>espeak</code></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="settings-note">No installers yet: run it from source (below). Most webcams can be used by one program at a time; if another app holds the camera, Habit Guard waits and retries. The <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">troubleshooting guide</a> covers it.</p>
+      </div>
+    </section>
+
+    <section class="section band" id="install">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Run Habit Guard {{VERSION}}</h2>
+          <p>Free and open source. You need Git and <a href="https://docs.astral.sh/uv/">uv</a>, which fetches the right Python itself.</p>
+        </div>
+        <div class="install">
+          <div>
+            <h3>From source, in four lines</h3>
+            <ol>
+              <li>Run the commands on the right in a terminal.</li>
+              <li>A hand icon appears in the tray (the menu bar on macOS). The settings window opens the first time.</li>
+              <li>Pick the habits to watch, then open <em>Camera preview</em> from the tray menu to check that it sees you well.</li>
+              <li>Optional: <code>uv run habit-guard autostart enable</code> starts it at login.</li>
+            </ol>
+          </div>
+          <pre><code>git clone https://github.com/bugraskl/habit-guard.git
+cd habit-guard
+uv sync
+uv run habit-guard</code></pre>
+        </div>
+        <div class="install-foot">
+          <a href="{{RELEASE_URL}}">Releases</a>
+          <a href="https://github.com/bugraskl/habit-guard/blob/main/CHANGELOG.md">Changelog</a>
+          <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Troubleshooting</a>
+          <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/configuration.md">Configuration</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Questions people ask</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Does it record me?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>No. A camera picture exists only in memory for a few milliseconds while it is analysed. Nothing is written to disk or sent anywhere, and a scan in CI fails the build if code that could do either is added.</p>
+          </details>
+          <details>
+            <summary>It goes off when I drink, or talk on the phone. What can I do?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Give that habit a longer dwell time, make its zone smaller, or pause tracking from the tray for a while. The camera preview shows exactly which zone your hand is in.</p>
+          </details>
+          <details>
+            <summary>Does it work with glasses?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Yes. Strong reflections on the lenses can hide the eyes, which are used to place the zones; tilt the lamp or the camera slightly if that happens.</p>
+          </details>
+          <details>
+            <summary>Can I use it during a video call?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Most webcams can be opened by one program at a time. If a call app holds the camera, Habit Guard waits and starts again when the camera is free; you can also pause it from the tray for a set time.</p>
+          </details>
+          <details>
+            <summary>Which webcam do I need?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Any webcam, built-in or external. Place it so that your face and both raised hands are in the picture, with light on your face.</p>
+          </details>
+          <details>
+            <summary>Is it a medical device?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>No. It is a self-help tool. If a habit hurts you or causes distress, talking to a doctor or therapist is worth it; many people find reminders like this a helpful addition, not a replacement.</p>
+          </details>
+          <details>
+            <summary>My habit is not on the list.<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p>Zones are just shapes on the face, so new habits are mostly a matter of drawing one. <a href="https://github.com/bugraskl/habit-guard/issues/new/choose">Open a feature request</a> and describe where your hand goes.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing" aria-labelledby="closing-title">
+      <span class="bars" aria-hidden="true"></span>
+      <div class="wrap closing-inner">
+        <div>
+          <h2 id="closing-title">Notice the hand before the habit does</h2>
+          <p>Free, open source and private by design. Setup takes about a minute.</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-accent" href="#install"><svg aria-hidden="true"><use href="#i-download"/></svg>Get Habit Guard</a>
+          <a class="btn" href="https://github.com/bugraskl/habit-guard"><svg aria-hidden="true"><use href="#i-github"/></svg>Star on GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a class="brand" href="./"><img src="assets/favicon.png" alt="" width="28" height="28">Habit Guard</a>
+          <p>Catches the hand on its way to your mouth, mustache, brows or hair. This site uses no cookies and no analytics.</p>
+        </div>
+        <div>
+          <p class="footer-title">Project</p>
+          <ul>
+            <li><a href="https://github.com/bugraskl/habit-guard">GitHub</a></li>
+            <li><a href="{{RELEASE_URL}}">Releases</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/CHANGELOG.md">Changelog</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/issues">Report an issue</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer-title">Docs</p>
+          <ul>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/zones.md">Zones and tuning</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/configuration.md">Configuration</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Troubleshooting</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/architecture.md">Architecture</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer-title">Trust</p>
+          <ul>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/docs/privacy.md">Privacy</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/SECURITY.md">Security</a></li>
+            <li><a href="https://github.com/bugraskl/habit-guard/blob/main/LICENSE">MIT licence</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© {{YEAR}} Buğra Şıkel · MIT licence</span>
+        <span>Hand models: MediaPipe via the OpenCV Zoo (Apache-2.0) · Face: YuNet (MIT)</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/site.js" defer></script>
+</body>
+</html>

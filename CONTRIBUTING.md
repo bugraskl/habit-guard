@@ -51,8 +51,22 @@ uv run pytest
 
 The Qt tests run without a display (`QT_QPA_PLATFORM=offscreen`).
 
-After changing the zone shapes in `src/habit_guard/zones.py`, regenerate the README picture with
-`uv run python scripts/make_assets.py`.
+After changing the zone shapes in `src/habit_guard/zones.py`, regenerate the README pictures with
+`uv run python scripts/make_assets.py` (CI checks that they are up to date).
+
+After changing a window, regenerate the screenshots with `uv run python scripts/make_screenshots.py`
+(English and Turkish, with demo data; the camera picture is a drawing, never a photograph; it
+needs a system UI font such as Segoe UI, so CI does not run it).
+
+The website lives in `site/` (English) and `site/tr/` (Turkish) and is published to GitHub Pages
+by `.github/workflows/pages.yml`. Build and look at it locally:
+
+```bash
+uv run python scripts/build_site.py --out _site
+uv run python -m http.server 8000 --directory _site
+```
+
+Keep both languages in step: a test checks that the two pages have the same sections.
 
 ## Reporting a problem
 

@@ -66,6 +66,7 @@ dev = [
   "pytest>=8.2",
   "ruff>=0.6",
   "mypy>=1.11",
+  "pillow>=12.3.0",
 ]
 
 [tool.uv]
