@@ -107,9 +107,11 @@ class Controller(QObject):
         self._refresh_tray()
 
     def _on_observation(self, obs: Observation) -> None:
-        if self._last_ts is not None and obs.face is not None:
+        # While paused (the camera may still run for the preview) nothing is counted or raised.
+        armed = not self._user_paused and self.settings.any_habit_enabled()
+        if armed and self._last_ts is not None and obs.face is not None:
             self.stats.add_watched(obs.ts - self._last_ts)
-        self._last_ts = obs.ts
+        self._last_ts = obs.ts if armed else None
 
         frame: FaceFrame | None = None
         zones: list[Zone] = []
@@ -120,7 +122,7 @@ class Controller(QObject):
             zones = build_zones(frame, self.settings.zone_specs())
             counts = evaluate(frame, zones, obs.hands)
 
-        for event in self.engine.update(obs.ts, counts):
+        for event in self.engine.update(obs.ts, counts if armed else {}):
             self._handle(event)
         if self._preview is not None and self._preview.isVisible():
             self._preview.show_observation(obs, frame, zones, counts)

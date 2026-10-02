@@ -313,3 +313,12 @@ def test_timed_pause_resumes_by_itself(qapp: QApplication) -> None:
     controller.toggle_pause()  # a manual pause cancels any timer
     assert controller.pipeline.paused
     assert not controller._resume_timer.isActive()
+
+
+def test_a_paused_app_with_the_preview_open_raises_no_alarm(qapp: QApplication) -> None:
+    controller, rec = make_controller(qapp)
+    controller._user_paused = True  # paused, but the camera may run for the preview
+    feed(controller, 0.0, 4.0, (0.0, 1.3))
+    assert rec.events == []
+    assert controller.stats.total() == 0
+    assert controller.stats.watched_s == 0

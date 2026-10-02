@@ -109,7 +109,8 @@ class Analyzer:
             )
         else:
             self._hands.reset()
-        face, held = self._memory.update(now, detected, bool(hands))
+        covered = search_face is not None and hand_is_near_face(search_face, hands)
+        face, held = self._memory.update(now, detected, bool(hands), covered)
 
         near = face is not None and hand_is_near_face(face, hands)
         if near:

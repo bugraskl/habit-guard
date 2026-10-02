@@ -61,14 +61,16 @@ def _to_face_info(row: np.ndarray, score: float) -> FaceInfo:
 class FaceMemory:
     """Remembers the last face so zones survive a hand covering the face.
 
-    A hand over the mouth is exactly when the detector tends to lose the face.
-    The head hardly moves in that moment, so the last good face stays valid for
-    ``hold_s`` seconds, but only while a hand is in view: with no hand, a lost
-    face means the person left.
+    A hand over the mouth is exactly when the detector tends to lose the face,
+    and nail biting keeps it there for as long as the habit lasts. The head
+    hardly moves in that time, so the last good face stays valid while a hand
+    is *near it* (up to ``hold_near_s``), or for a short ``hold_s`` while a hand
+    is merely in view. With no hand at all, a lost face means the person left.
     """
 
-    def __init__(self, hold_s: float = 2.0):
+    def __init__(self, hold_s: float = 2.0, hold_near_s: float = 60.0):
         self.hold_s = hold_s
+        self.hold_near_s = hold_near_s
         self._face: FaceInfo | None = None
         self._seen_at = float("-inf")
 
@@ -77,16 +79,24 @@ class FaceMemory:
         self._seen_at = float("-inf")
 
     def update(
-        self, now: float, detected: FaceInfo | None, hand_visible: bool
+        self,
+        now: float,
+        detected: FaceInfo | None,
+        hand_visible: bool,
+        hand_near_face: bool = False,
     ) -> tuple[FaceInfo | None, bool]:
         """``(face to use, whether it is a remembered one)``."""
         if detected is not None:
             self._face, self._seen_at = detected, now
             return detected, False
-        if self._face is not None and hand_visible and now - self._seen_at <= self.hold_s:
-            return self._face, True
-        if now - self._seen_at > self.hold_s:
-            self._face = None
+        if self._face is not None:
+            age = now - self._seen_at
+            if hand_near_face and age <= self.hold_near_s:
+                return self._face, True
+            if hand_visible and age <= self.hold_s:
+                return self._face, True
+            if age > self.hold_s:
+                self._face = None
         return None, False
 
     @property

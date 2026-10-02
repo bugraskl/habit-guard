@@ -184,6 +184,19 @@ def test_face_memory_holds_the_face_only_while_a_hand_is_visible() -> None:
     assert memory.last is None
 
 
+def test_face_memory_holds_a_covered_face_for_as_long_as_the_hand_stays_near() -> None:
+    memory = FaceMemory(hold_s=2.0, hold_near_s=60.0)
+    face = make_face()
+    memory.update(0.0, face, False)
+    # A hand covers the mouth for half a minute: the face detector sees nothing, the zones stay.
+    assert memory.update(30.0, None, True, True) == (face, True)
+    assert memory.update(59.0, None, True, True) == (face, True)
+    # Beyond the long hold, or once the hand is not near, the short hold applies.
+    assert memory.update(61.0, None, True, True) == (None, False)
+    memory.update(100.0, face, False)
+    assert memory.update(105.0, None, True, False) == (None, False)
+
+
 # ------------------------------------------------------------------------------ analyzer
 class FakeFaces:
     def __init__(self) -> None:
@@ -281,6 +294,25 @@ def test_analyzer_keeps_the_face_while_a_hand_covers_it() -> None:
     assert step.observation.face_held
     # ... and the search window for the hand is still built from the remembered face.
     assert hands.last_search is not None
+
+
+def test_analyzer_keeps_zones_while_a_hand_stays_over_the_face_for_a_long_time() -> None:
+    faces, hands = FakeFaces(), FakeHands()
+    analyzer = Analyzer(faces, hands)
+    frame = still_frame()
+    first = analyzer.step(frame, 0.0, CADENCE).observation
+    assert first is not None
+    faces.face = None  # the detector never sees the face again while the hand covers it
+    hands.hands = [make_hand(face_u_v=(0.0, 1.3))]
+    for i, t in enumerate((0.2, 3.0, 10.0, 30.0)):
+        step = analyzer.step(255 - frame if i % 2 == 0 else frame, t, CADENCE)
+        assert step.observation is not None
+        assert step.observation.face == first.face
+        assert step.observation.face_held
+    hands.hands = []  # the hand comes down and the face is still not found: the person left
+    gone = analyzer.step(255 - frame, 40.0, CADENCE)
+    assert gone.observation is not None
+    assert gone.observation.face is None
 
 
 def test_preview_bypasses_the_gate_and_attaches_the_picture() -> None:
