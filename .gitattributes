@@ -1,0 +1,32 @@
+# Normalise line endings in the repository to LF; check out text with LF everywhere
+# so shell scripts, the AppRun launcher and YAML behave the same on every OS.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF in the working tree.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+# Inno Setup reads either; CRLF keeps the file friendly to the Inno Setup IDE.
+*.iss text eol=crlf
+
+# Scripts that run on macOS/Linux must never get CRLF (the shebang would break).
+*.sh text eol=lf
+packaging/linux/AppRun text eol=lf
+
+# Binary assets: never diff, merge or convert.
+*.png binary
+*.ico binary
+*.icns binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.onnx binary
+*.tflite binary
+*.binarypb binary
+
+# SVG is text, but a textual diff of drawing data is rarely useful.
+*.svg text eol=lf -diff
+
+# Generated files: collapsed in GitHub diffs, excluded from language statistics.
+uv.lock text eol=lf linguist-generated=true

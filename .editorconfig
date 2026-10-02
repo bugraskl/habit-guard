@@ -1,0 +1,47 @@
+# https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python: formatted by ruff (line length 100, see pyproject.toml).
+[*.{py,pyi,spec}]
+indent_size = 4
+max_line_length = 100
+
+[*.{yml,yaml,json,toml}]
+indent_size = 2
+
+[*.md]
+indent_size = 2
+# Two trailing spaces are a hard line break in Markdown.
+trim_trailing_whitespace = false
+
+[{*.sh,AppRun}]
+indent_size = 2
+
+[*.desktop]
+indent_size = unset
+
+[*.{bat,cmd,ps1}]
+end_of_line = crlf
+
+# Inno Setup needs a BOM to read non-ASCII text (publisher name, translations) as UTF-8.
+[*.iss]
+charset = utf-8-bom
+end_of_line = crlf
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.{png,ico,icns,onnx,tflite,binarypb}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset

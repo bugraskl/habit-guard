@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build output
+build/
+dist/
+
+# Local tooling
+graft/
+.ignore
+.claude/
+.idea/
+.vscode/
+.impeccable/
+*.log
+.DS_Store
+Thumbs.db

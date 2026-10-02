@@ -1,0 +1,119 @@
+[build-system]
+# 1.27 is the first release that reads the PEP 639 `license-files` list.
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "habit-guard"
+dynamic = ["version"]
+description = "Catches nail biting, mustache pulling, hair pulling and face touching through your webcam and nudges you to stop. Private, offline and light on the CPU."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Buğra Şıkel" }]
+requires-python = ">=3.11,<3.15"
+keywords = [
+  "habit",
+  "nail-biting",
+  "onychophagia",
+  "trichotillomania",
+  "body-focused-repetitive-behavior",
+  "bfrb",
+  "hand-tracking",
+  "webcam",
+  "opencv",
+  "privacy",
+  "wellbeing",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: X11 Applications :: Qt",
+  "Environment :: Win32 (MS Windows)",
+  "Environment :: MacOS X",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Image Recognition",
+  "Topic :: Utilities",
+]
+dependencies = [
+  "numpy>=1.26",
+  "opencv-python-headless>=4.10",
+  "PySide6-Essentials>=6.7",
+  "platformdirs>=4.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/bugraskl/habit-guard"
+Documentation = "https://github.com/bugraskl/habit-guard#readme"
+Privacy = "https://github.com/bugraskl/habit-guard/blob/main/docs/privacy.md"
+Issues = "https://github.com/bugraskl/habit-guard/issues"
+Changelog = "https://github.com/bugraskl/habit-guard/blob/main/CHANGELOG.md"
+
+[project.scripts]
+habit-guard = "habit_guard.cli:main"
+
+[project.gui-scripts]
+habit-guard-gui = "habit_guard.cli:gui_main"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.2",
+  "ruff>=0.6",
+  "mypy>=1.11",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.hatch.version]
+path = "src/habit_guard/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/habit_guard"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/habit_guard", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "PL", "PT", "C4"]
+ignore = [
+  "PLR0911", # too many return statements
+  "PLR0912", # too many branches
+  "PLR0913", # too many arguments
+  "PLR0915", # too many statements
+  "PLR0917", # too many positional arguments
+  "PLR2004", # magic values in comparisons
+  "PLC0415", # imports inside functions are intentional (optional/platform deps)
+  "RUF001",  # ambiguous unicode characters in UI strings
+  "RUF002",
+  "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["PLR2004", "PLC2701", "S101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = false
+check_untyped_defs = true
+files = ["src/habit_guard"]
+
+[tool.ruff.format]
+line-ending = "lf"
