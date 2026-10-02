@@ -5,10 +5,10 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import date
 
-from . import __version__, autostart, paths
+from . import __version__, autostart, control, paths
 
 
 def _camera_source(value: str | None) -> int | str | None:
@@ -42,6 +42,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("stats", help="print the statistics")
 
+    ctl = sub.add_parser("ctl", help="control a running Habit Guard")
+    ctl.add_argument(
+        "action",
+        choices=(*control.COMMANDS, "status"),
+        help="status prints the state; the others ask the running app to do it",
+    )
+    ctl.add_argument("--timeout", type=float, default=10.0, help="how long quit waits (seconds)")
+
+    sub.add_parser("selftest", help="check that the models, the camera code and the windows work")
+
     reset = sub.add_parser("reset", help="forget settings and statistics")
     reset.add_argument("--yes", action="store_true", help="do not ask first")
 
@@ -68,6 +78,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if command == "stats":
         return _print_stats()
+    if command == "ctl":
+        return _ctl(args.action, args.timeout)
+    if command == "selftest":
+        return _selftest()
     if command == "reset":
         return _reset(args.yes)
     if command == "autostart":
@@ -89,6 +103,112 @@ def _run(args: argparse.Namespace) -> int:
     logging_setup.setup(args.debug)
     settings = Settings.load(paths.settings_path())
     return run(settings, _camera_source(args.camera))
+
+
+def _ctl(action: str, timeout: float) -> int:
+    status = control.read_status()
+    if action == "status":
+        if status is None:
+            print("Habit Guard is not running.")
+            return control.EXIT_NOT_RUNNING
+        print(
+            f"running  pid {status.get('pid')}  version {status.get('version')}  "
+            f"state {status.get('state')}  alarms today {status.get('today')}"
+        )
+        return 0
+    if status is None:
+        print("Habit Guard is not running.", file=sys.stderr)
+        return control.EXIT_NOT_RUNNING
+    control.send(action)
+    if action == "quit":
+        if control.wait_until_stopped(timeout):
+            print("Habit Guard has quit.")
+            return 0
+        print("Habit Guard did not quit in time.", file=sys.stderr)
+        return 1
+    print(f"Sent: {action}")
+    return 0
+
+
+def _selftest() -> int:
+    """Exercise what a broken installation would lack: models, vision, tones, Qt windows.
+
+    Runs in a scratch settings folder with Qt's offscreen platform, so it opens no window and
+    touches none of your files. A frozen build runs it in CI.
+    """
+    import tempfile
+
+    os.environ["QT_QPA_PLATFORM"] = "offscreen"
+    os.environ[paths.HOME_ENV] = tempfile.mkdtemp(prefix="habit-guard-selftest-")
+    failures: list[str] = []
+
+    def check(name: str, run: Callable[[], str]) -> None:
+        try:
+            detail = run()
+        except Exception as exc:
+            failures.append(name)
+            print(f"  FAILED   {name}: {type(exc).__name__}: {exc}")
+        else:
+            print(f"  ok       {name}{(': ' + detail) if detail else ''}")
+
+    def models() -> str:
+        from .vision import manifest
+
+        states = manifest.verify(paths.models_dir())
+        bad = {n: s for n, s in states.items() if s != "ok"}
+        if bad:
+            raise RuntimeError(f"model files not ok: {bad}")
+        return f"{len(states)} files verified"
+
+    def vision() -> str:
+        import numpy as np
+
+        from .config import CADENCES
+        from .vision.pipeline import build_analyzer
+
+        step = build_analyzer().step(np.zeros((480, 640, 3), np.uint8), 0.0, CADENCES["balanced"])
+        if step.observation is None:
+            raise RuntimeError("the first picture was not analysed")
+        return "face and hand models ran on a blank picture"
+
+    def tones() -> str:
+        from .alerts.sound import wav_bytes
+
+        sizes = [len(wav_bytes(level)) for level in (1, 2, 3)]
+        if min(sizes) < 1000:
+            raise RuntimeError(f"tones are too short: {sizes}")
+        return "alarm tones made"
+
+    def windows() -> str:
+        from PySide6.QtWidgets import QApplication
+
+        from .config import Settings
+        from .ui.preview import PreviewWindow
+        from .ui.settings_dialog import SettingsDialog
+        from .ui.stats_dialog import StatsDialog
+        from .ui.tray import Tray
+
+        existing = QApplication.instance()
+        app = existing if isinstance(existing, QApplication) else QApplication([])
+        _ = Tray()
+        for widget in (SettingsDialog(Settings()), PreviewWindow(), StatsDialog()):
+            widget.show()
+            app.processEvents()
+            if widget.grab().isNull():
+                raise RuntimeError(f"{type(widget).__name__} did not draw")
+            widget.close()
+        return "tray, settings, preview and statistics windows drew"
+
+    print(f"habit-guard {__version__} selftest")
+    check("models", models)
+    check("vision", vision)
+    check("sound", tones)
+    check("windows", windows)
+    if failures:
+        print(f"selftest failed: {', '.join(failures)}", file=sys.stderr)
+        return 1
+    print("selftest passed")
+    return 0
 
 
 def _print_stats() -> int:

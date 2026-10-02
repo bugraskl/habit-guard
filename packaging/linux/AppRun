@@ -1,0 +1,8 @@
+#!/bin/sh
+# AppImage entry point: start the bundled PyInstaller executable.
+#
+# The PyInstaller bootloader sets LD_LIBRARY_PATH to its own library folder and
+# keeps the caller's value in LD_LIBRARY_PATH_ORIG, which the app restores for
+# the system tools it runs (loginctl, xset, gdbus, ...).
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/usr/lib/habit-guard/habit-guard" "$@"

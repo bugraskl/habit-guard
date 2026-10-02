@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import platform
+import sys
 import threading
 import time
 from pathlib import Path
@@ -32,9 +33,11 @@ def report(*, probe: bool = False) -> str:
     import cv2
     import numpy
 
+    packaging = "yes (frozen build)" if getattr(sys, "frozen", False) else "no (from source)"
     lines = [
         f"habit-guard      {__version__}",
         f"python           {platform.python_version()} ({platform.python_implementation()})",
+        f"packaged         {packaging}",
         f"platform         {platform.platform()}",
         f"opencv           {cv2.__version__}",
         f"numpy            {numpy.__version__}",

@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import logging
+import sys
 from datetime import date, datetime, timedelta
 
-from PySide6.QtCore import QLockFile, QObject, QTimer, Signal
+from PySide6.QtCore import QFileSystemWatcher, QLockFile, QObject, QTimer, Signal
 from PySide6.QtWidgets import QApplication
 
-from . import i18n, paths
+from . import __version__, control, i18n, paths
 from .alerts.curtain import Curtain
 from .alerts.manager import AlertManager
 from .alerts.sound import SoundPlayer
@@ -28,6 +29,10 @@ from .zones import FaceFrame, Zone, build_zones, evaluate
 log = logging.getLogger(__name__)
 
 STATS_SAVE_MS = 60_000
+#: How often the control folder is looked at besides the file watcher (a safety net).
+CONTROL_POLL_MS = 1500
+#: Same value as the installer's shortcut (packaging/windows/installer.iss).
+APP_USER_MODEL_ID = "io.github.bugraskl.habitguard"
 MS_PER_MINUTE = 60_000
 TEST_ALARM_MS = 2500
 
@@ -70,11 +75,26 @@ class Controller(QObject):
         self._preview: PreviewWindow | None = None
         self._previewing = False
         self._closed = False
+        self._state_name = "starting"
         self._stats_window: StatsDialog | None = None
 
         self._save_timer = QTimer(self)
         self._save_timer.timeout.connect(self._save_stats)
         self._save_timer.start(STATS_SAVE_MS)
+
+        # `habit-guard ctl ...` from the command line: a file watcher, with a slow timer in case
+        # the watcher misses an event, and a heartbeat file that says this app is running.
+        control_folder = control.control_dir()
+        control_folder.mkdir(parents=True, exist_ok=True)
+        self._watcher = QFileSystemWatcher(self)
+        self._watcher.addPath(str(control_folder))
+        self._watcher.directoryChanged.connect(lambda _path: self.poll_control())
+        self._control_timer = QTimer(self)
+        self._control_timer.timeout.connect(self.poll_control)
+        self._control_timer.start(CONTROL_POLL_MS)
+        self._heartbeat = QTimer(self)
+        self._heartbeat.timeout.connect(self.write_status)
+        self._heartbeat.start(int(control.HEARTBEAT_S * 1000))
 
         self.tray.pause_toggled.connect(self.toggle_pause)
         self.tray.pause_for_requested.connect(self.pause_for)
@@ -97,6 +117,7 @@ class Controller(QObject):
     def start(self) -> None:
         self.tray.show()
         self._refresh_tray()
+        self.write_status()
         if not self.settings.onboarded:
             self.tray.notify(i18n.tr("app.name"), i18n.tr("tray.first_run"))
             QTimer.singleShot(400, self.open_settings)
@@ -150,7 +171,11 @@ class Controller(QObject):
         self._last_ts = None
 
     def toggle_pause(self) -> None:
-        self._user_paused = not self._user_paused
+        self.set_paused(not self._user_paused)
+
+    def set_paused(self, paused: bool) -> None:
+        """Pause or resume tracking (a manual choice cancels a timed pause)."""
+        self._user_paused = paused
         self._cancel_timed_pause()
         self._sync_pipeline()
 
@@ -273,25 +298,31 @@ class Controller(QObject):
         self.tray.set_today(self.stats.count(date.today()))
         if self._status is Status.ERROR:
             text = i18n.tr("tray.status.error", detail=self._detail)
-            state = IconState.PROBLEM
+            state, state_name = IconState.PROBLEM, "error"
         elif self._status is Status.NO_CAMERA:
             text, state = i18n.tr("tray.status.no_camera"), IconState.PROBLEM
+            state_name = "no_camera"
         elif not self.settings.any_habit_enabled():
             text, state = i18n.tr("tray.status.nothing"), IconState.PAUSED
+            state_name = "nothing"
         elif self._user_paused or self._status is Status.PAUSED:
             if self._resume_at is not None:
                 text = i18n.tr("tray.status.paused_until", time=self._resume_at.strftime("%H:%M"))
             else:
                 text = i18n.tr("tray.status.paused")
-            state = IconState.PAUSED
+            state, state_name = IconState.PAUSED, "paused"
         elif self._status is Status.STARTING:
             text, state = i18n.tr("tray.status.starting"), IconState.ACTIVE
+            state_name = "starting"
         else:
             text, state = i18n.tr("tray.status.running"), IconState.ACTIVE
+            state_name = "watching"
         if self.engine.active_habits():
             state = IconState.ALERT
         self.tray.set_status(text)
         self.tray.set_state(state)
+        self._state_name = state_name
+        self.write_status()
 
     def _save_stats(self) -> None:
         if not self._stats_dirty and self.stats.watched_s == 0:
@@ -302,12 +333,52 @@ class Controller(QObject):
         except OSError:
             log.exception("could not save the statistics")
 
+    # ------------------------------------------------------------------------------- control
+    def write_status(self) -> None:
+        """Publish the state for ``habit-guard ctl status`` (and as the heartbeat)."""
+        if self._closed:
+            return
+        try:
+            control.write_status(
+                {
+                    "version": __version__,
+                    "state": self._state_name,
+                    "paused": self._user_paused,
+                    "alarm": bool(self.engine.active_habits()),
+                    "today": self.stats.count(date.today()),
+                }
+            )
+        except OSError:
+            log.debug("could not write the status file", exc_info=True)
+
+    def poll_control(self) -> None:
+        """Carry out the commands that ``habit-guard ctl`` has left in the control folder."""
+        actions = {
+            "pause": lambda: self.set_paused(True),
+            "resume": lambda: self.set_paused(False),
+            "toggle": self.toggle_pause,
+            "test": lambda: self.test_alarm(self.settings),
+            "settings": self.open_settings,
+            "preview": self.open_preview,
+            "stats": self.open_stats,
+        }
+        for path, command in control.pending():
+            control.consume(path)
+            log.info("control command: %s", command)
+            if command == "quit":
+                self.quit()
+                return
+            actions[command]()
+
     # ------------------------------------------------------------------------------ shutdown
     def shutdown(self) -> None:
         """Stop everything and save. Safe to call more than once."""
         if self._closed:
             return
         self._closed = True
+        self._control_timer.stop()
+        self._heartbeat.stop()
+        control.clear_status()
         self.pipeline.stop()
         self._calm_down()
         self._speech.stop()
@@ -322,6 +393,18 @@ class Controller(QObject):
             app.quit()
 
 
+def _set_windows_app_id() -> None:
+    """Group the taskbar entry and the notifications with the installer's Start menu shortcut."""
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_USER_MODEL_ID)  # type: ignore[attr-defined]
+    except (AttributeError, OSError):
+        log.debug("could not set the app user model id", exc_info=True)
+
+
 def acquire_lock() -> QLockFile | None:
     """Take the single-instance lock; ``None`` if another Habit Guard is running."""
     paths.config_dir().mkdir(parents=True, exist_ok=True)
@@ -332,8 +415,7 @@ def acquire_lock() -> QLockFile | None:
 
 def run(settings: Settings, source: int | str | None = None) -> int:
     """Start the tray app and run until quit. Returns the process exit code."""
-    import sys
-
+    _set_windows_app_id()
     existing = QApplication.instance()
     app = existing if isinstance(existing, QApplication) else QApplication(sys.argv[:1])
     app.setApplicationName("Habit Guard")

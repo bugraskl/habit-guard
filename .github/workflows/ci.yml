@@ -59,14 +59,21 @@ jobs:
       - name: Mypy (package, as on macOS)
         run: uv run --no-sync mypy --platform darwin
 
-      - name: Mypy (scripts)
-        run: uv run --no-sync mypy scripts
+      - name: Mypy (scripts and the PyInstaller entry point)
+        run: uv run --no-sync mypy scripts packaging/pyinstaller/entry.py
 
       - name: Privacy check (no network code, no pictures written)
         run: uv run --no-sync python scripts/check_privacy.py
 
       - name: Verify the bundled models
         run: uv run --no-sync python scripts/fetch_models.py --check
+
+      - name: Check packaging scripts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends desktop-file-utils shellcheck
+          shellcheck packaging/linux/build_appimage.sh packaging/linux/AppRun packaging/macos/make_dmg.sh
+          desktop-file-validate packaging/linux/habit-guard.desktop
 
       - name: README pictures are up to date
         run: |

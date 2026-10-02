@@ -1,0 +1,470 @@
+name: Build
+
+# The one definition of how Habit Guard is built, packaged and tested, so that what a pull request
+# checks is exactly what a release ships. Two workflows call it:
+#
+# * release.yml (a v* tag, or run manually) keeps the packages and the release notes as workflow
+#   artifacts (upload: true) and publishes them when it runs for a tag;
+# * bundle.yml (pull requests and pushes to main that change the packaging or the dependencies,
+#   or run manually) runs the same jobs and keeps nothing; its macOS app is signed ad hoc.
+#
+# Every platform builds the bundle with PyInstaller, checks it (scripts/check_bundle.py: no
+# networking or telemetry components, models and licences present), makes the packages and runs
+# `habit-guard selftest` from them the way users get them: Windows the bundle and the installed
+# copy (install, upgrade over a running app, uninstall); macOS the app inside the disk image;
+# Linux the AppImage and the tarball.
+on:
+  workflow_call:
+    inputs:
+      upload:
+        description: Keep the packages and the release notes as workflow artifacts.
+        type: boolean
+        default: false
+    secrets:
+      MACOS_SIGNING_CERT_P12:
+        description: Code-signing certificate (base64 .p12) that keeps the macOS camera permission across updates.
+        required: false
+      MACOS_SIGNING_CERT_PASSWORD:
+        description: Password of MACOS_SIGNING_CERT_P12.
+        required: false
+      MACOS_SIGNING_IDENTITY:
+        description: Identity to sign with (default the certificate's SHA-1).
+        required: false
+    outputs:
+      version:
+        description: The version that was built (__version__).
+        value: ${{ jobs.prepare.outputs.version }}
+      prerelease:
+        description: Whether that version is a pre-release ("true" or "false").
+        value: ${{ jobs.prepare.outputs.prerelease }}
+
+permissions:
+  contents: read
+
+env:
+  FORCE_COLOR: "1"
+  PYTHONUTF8: "1"
+  PYTHON_VERSION: "3.12"
+  # Release builds use the python.org / distro-style CPython from setup-python (a shared
+  # libpython everywhere), never a downloaded one.
+  UV_PYTHON_DOWNLOADS: never
+  UV_NO_PROGRESS: "1"
+  # The frozen selftest runs Qt headless.
+  QT_QPA_PLATFORM: offscreen
+  # The oldest macOS the DMG runs on; the spec writes it into LSMinimumSystemVersion and the
+  # smoke test fails when the two disagree.
+  MACOS_MINIMUM: "14.0"
+
+jobs:
+  prepare:
+    name: Version and release notes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      numeric: ${{ steps.version.outputs.numeric }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Reads __version__, checks the tag and CHANGELOG.md, writes the release notes.
+      - name: Read the version and write the release notes
+        id: version
+        env:
+          MACOS_STABLE_SIGNATURE: ${{ secrets.MACOS_SIGNING_CERT_P12 != '' }}
+        run: python3 scripts/release_notes.py --out release-notes.md
+
+      - name: Upload the release notes
+        if: inputs.upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-notes
+          path: release-notes.md
+          if-no-files-found: error
+          retention-days: 7
+
+  build-windows:
+    name: Windows x64
+    needs: prepare
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      VERSION_NUMERIC: ${{ needs.prepare.outputs.numeric }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --group build --python "${{ steps.python.outputs.python-path }}"
+
+      - name: Verify the models
+        run: uv run --no-sync python scripts/fetch_models.py --check
+
+      - name: Render the icons
+        run: uv run --no-sync python scripts/make_icons.py
+
+      - name: Build with PyInstaller
+        run: uv run --no-sync pyinstaller packaging/pyinstaller/habit-guard.spec --noconfirm --clean
+
+      - name: Check the bundle (no networking or telemetry components, models and licences present)
+        run: uv run --no-sync python scripts/check_bundle.py dist/HabitGuard
+
+      # What the portable ZIP contains: version, models, vision, tones, the Qt windows.
+      - name: Smoke-test the bundle
+        run: |
+          set -euo pipefail
+          test -f dist/HabitGuard/HabitGuard.exe
+          dist/HabitGuard/habit-guard-cli.exe --version | tee version.txt
+          grep -qF "$VERSION" version.txt
+          dist/HabitGuard/habit-guard-cli.exe selftest
+          dist/HabitGuard/habit-guard-cli.exe doctor
+
+      - name: Create the portable ZIP
+        run: |
+          cd dist
+          7z a -tzip -mx=9 -bd "HabitGuard-$VERSION-windows-x64-portable.zip" HabitGuard
+
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          $iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) {
+            $iscc = @(
+              "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+              "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
+              "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe"
+            ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          }
+          if (-not $iscc) {
+            choco install innosetup --no-progress -y
+            if ($LASTEXITCODE -ne 0) { throw "choco install innosetup failed" }
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
+          & $iscc "/DAppVersion=$env:VERSION" "/DAppVersionNumeric=$env:VERSION_NUMERIC" packaging\windows\installer.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
+
+      # Runs on the disposable CI machine: it installs, upgrades over a running app and
+      # uninstalls. The "habit-guard" command is put on (and taken off) the user's PATH; the
+      # running app is asked to quit by the setup and, in a silent upgrade, started again.
+      - name: Smoke-test the installer (install, upgrade over a running app, uninstall)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $setup = (Resolve-Path "dist\HabitGuard-$env:VERSION-windows-x64-setup.exe").Path
+          $dir = Join-Path $env:RUNNER_TEMP 'hg-installed'
+          $log = Join-Path $env:RUNNER_TEMP 'hg-setup.log'
+          $env:HABIT_GUARD_HOME = Join-Path $env:RUNNER_TEMP 'hg-home'
+          New-Item -ItemType Directory -Force $env:HABIT_GUARD_HOME | Out-Null
+          $uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{E04FC592-7BE2-49D0-B7A0-BAA64A24938E}_is1'
+
+          function Show-Log { if (Test-Path $log) { Get-Content $log -Tail 60 } }
+          function Fail($message) { Show-Log; throw $message }
+          function Run-Setup($tasks) {
+            # No -Wait: it would also wait for the app the setup starts again after an upgrade.
+            $p = Start-Process $setup -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/DIR=`"$dir`"", "/TASKS=$tasks", "/LOG=`"$log`""
+            if (-not $p.WaitForExit(240000)) { $p.Kill(); Fail 'the setup did not finish in 4 minutes' }
+            if ($p.ExitCode -ne 0) { Fail "the setup exited with $($p.ExitCode)" }
+          }
+          function Ctl-Status {
+            & "$dir\habit-guard-cli.exe" ctl status | Out-Null
+            return $LASTEXITCODE
+          }
+          function Wait-Running($seconds) {
+            $end = (Get-Date).AddSeconds($seconds)
+            while ((Get-Date) -lt $end) { if ((Ctl-Status) -eq 0) { return $true }; Start-Sleep -Milliseconds 500 }
+            return $false
+          }
+          function User-Path { [Environment]::GetEnvironmentVariable('Path', 'User') }
+
+          Write-Host '--- fresh install, with the PATH task'
+          Run-Setup 'addtopath'
+          foreach ($name in 'HabitGuard.exe', 'habit-guard-cli.exe', 'habit-guard.exe', 'unins000.exe') {
+            if (-not (Test-Path (Join-Path $dir $name))) { Fail "missing after install: $name" }
+          }
+          if (-not (Test-Path $uninstallKey)) { Fail 'no uninstall entry' }
+          if ((User-Path) -notlike "*$dir*") { Fail 'the install folder is not on the user PATH' }
+          & "$dir\habit-guard.exe" --version
+          & "$dir\habit-guard.exe" selftest
+          if ($LASTEXITCODE -ne 0) { Fail 'selftest of the installed copy failed' }
+          if ((Ctl-Status) -ne 3) { Fail 'ctl status should say "not running" (exit 3)' }
+
+          Write-Host '--- start the app, then upgrade over it'
+          $first = Start-Process "$dir\HabitGuard.exe" -PassThru
+          if (-not (Wait-Running 60)) { Fail 'the installed app did not start' }
+          Run-Setup ''   # the PATH task is deselected: an upgrade removes the entry again
+          if ($first.WaitForExit(30000) -eq $false) { Fail 'the old app was not closed by the upgrade' }
+          if (-not (Wait-Running 60)) { Fail 'a silent upgrade should start the app again' }
+          if ((User-Path) -like "*$dir*") { Fail 'unticking the PATH task should remove the entry' }
+
+          Write-Host '--- uninstall'
+          $p = Start-Process (Join-Path $dir 'unins000.exe') -PassThru -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART'
+          if (-not $p.WaitForExit(240000)) { $p.Kill(); Fail 'the uninstaller did not finish' }
+          Start-Sleep -Seconds 3
+          if (Test-Path $dir) { Fail 'the install folder is still there after uninstalling' }
+          if (Test-Path $uninstallKey) { Fail 'the uninstall entry is still there' }
+          if (Get-Process HabitGuard -ErrorAction SilentlyContinue) { Fail 'the app is still running after uninstalling' }
+          Write-Host 'installer smoke test passed'
+
+      - name: Upload the packages
+        if: inputs.upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-x64
+          path: |
+            dist/HabitGuard-${{ env.VERSION }}-windows-x64-setup.exe
+            dist/HabitGuard-${{ env.VERSION }}-windows-x64-portable.zip
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+  build-macos:
+    name: macOS arm64
+    needs: prepare
+    runs-on: macos-14
+    timeout-minutes: 60
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --group build --python "${{ steps.python.outputs.python-path }}"
+
+      - name: Verify the models
+        run: uv run --no-sync python scripts/fetch_models.py --check
+
+      - name: Render the icons
+        run: uv run --no-sync python scripts/make_icons.py
+
+      - name: Build with PyInstaller
+        run: uv run --no-sync pyinstaller packaging/pyinstaller/habit-guard.spec --noconfirm --clean
+
+      - name: Check the bundle (no networking or telemetry components, models and licences present)
+        run: uv run --no-sync python scripts/check_bundle.py "dist/Habit Guard.app"
+
+      # Optional: sign with a stable certificate so the camera permission survives updates (see
+      # packaging/macos/make_dmg.sh). Without the secrets the app is signed ad hoc and macOS asks
+      # for the camera again after each update.
+      - name: Import the signing certificate
+        id: signing
+        env:
+          CERT_P12: ${{ secrets.MACOS_SIGNING_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_SIGNING_CERT_PASSWORD }}
+          IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          UPLOAD: ${{ inputs.upload }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$CERT_P12" ]]; then
+            level="$([[ "$UPLOAD" == "true" ]] && echo warning || echo notice)"
+            echo "::$level::MACOS_SIGNING_CERT_P12 is not set: signing ad hoc, so macOS asks for the camera again after updating."
+            exit 0
+          fi
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password="$(uuidgen)"
+          p12="$RUNNER_TEMP/signing.p12"
+          base64 --decode <<<"$CERT_P12" > "$p12"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$p12" -k "$keychain" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          rm -f "$p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s \
+            -k "$keychain_password" "$keychain" > /dev/null
+          searched=()
+          while IFS= read -r entry; do
+            searched+=("$(sed -e 's/^[[:space:]]*"//' -e 's/"$//' <<<"$entry")")
+          done < <(security list-keychains -d user)
+          security list-keychains -d user -s "$keychain" "${searched[@]}"
+          if [[ -z "$IDENTITY" ]]; then
+            IDENTITY="$(security find-identity -p codesigning "$keychain" | awk '$1 == "1)" { print $2; exit }')"
+          fi
+          [[ -n "$IDENTITY" ]] || { echo "::error::no code-signing identity in MACOS_SIGNING_CERT_P12"; exit 1; }
+          {
+            echo "identity=$IDENTITY"
+            echo "keychain=$keychain"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Sign and create the disk image
+        env:
+          MACOS_SIGN_IDENTITY: ${{ steps.signing.outputs.identity }}
+          MACOS_SIGN_KEYCHAIN: ${{ steps.signing.outputs.keychain }}
+        run: |
+          bash packaging/macos/make_dmg.sh --app "dist/Habit Guard.app" --version "$VERSION" \
+            --out "dist/HabitGuard-$VERSION-macos-arm64.dmg"
+
+      - name: Remove the signing keychain
+        if: always() && steps.signing.outputs.keychain != ''
+        env:
+          KEYCHAIN: ${{ steps.signing.outputs.keychain }}
+        run: security delete-keychain "$KEYCHAIN" || true
+
+      - name: Smoke-test the app inside the disk image
+        run: |
+          set -euo pipefail
+          mnt="$RUNNER_TEMP/dmg"
+          mkdir -p "$mnt"
+          hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "dist/HabitGuard-$VERSION-macos-arm64.dmg"
+          trap 'hdiutil detach "$mnt" -force || true' EXIT
+          app="$mnt/Habit Guard.app"
+          test -L "$mnt/Applications"
+          broken="$(find -L "$app" -type l)"
+          if [[ -n "$broken" ]]; then
+            echo "::error::symbolic links without a target in the disk image:"
+            echo "$broken"
+            exit 1
+          fi
+          codesign --verify --deep --strict --verbose=2 "$app"
+          plist="$app/Contents/Info.plist"
+          plutil -p "$plist"
+          test "$(plutil -extract CFBundleIdentifier raw "$plist")" = "io.github.bugraskl.habit-guard"
+          test "$(plutil -extract LSUIElement raw "$plist")" = "true"
+          minimum="$(plutil -extract LSMinimumSystemVersion raw "$plist")"
+          if [[ "$minimum" != "$MACOS_MINIMUM" ]]; then
+            echo "::error::LSMinimumSystemVersion is $minimum, but MACOS_MINIMUM (and the README and release notes) say $MACOS_MINIMUM"
+            exit 1
+          fi
+          plutil -extract NSCameraUsageDescription raw "$plist" > /dev/null
+          test -x "$app/Contents/MacOS/Habit Guard"
+          cli="$app/Contents/MacOS/habit-guard-cli"
+          "$cli" --version | tee version.txt
+          grep -qF "$VERSION" version.txt
+          "$cli" selftest
+          "$cli" doctor
+
+      - name: Upload the package
+        if: inputs.upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: macos-arm64
+          path: dist/HabitGuard-${{ env.VERSION }}-macos-arm64.dmg
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+  build-linux:
+    name: Linux x86_64
+    needs: prepare
+    # The oldest supported runner: the bundle works on distributions with the same or a newer
+    # glibc (2.35).
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      # appimagetool (and the smoke test) run without FUSE.
+      APPIMAGE_EXTRACT_AND_RUN: "1"
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system libraries
+        # Qt's xcb platform plugin and its helpers; PyInstaller bundles what it finds, and
+        # libxcb-cursor0 in particular is missing on many desktops.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 libgl1 libxkbcommon0 libxkbcommon-x11-0 libfontconfig1 libdbus-1-3 \
+            libglib2.0-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+            libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xfixes0 libxcb-xinerama0 \
+            libxcb-xkb1 libx11-xcb1 libsm6 libice6 desktop-file-utils
+
+      - name: Set up Python
+        id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --group build --python "${{ steps.python.outputs.python-path }}"
+
+      - name: Verify the models
+        run: uv run --no-sync python scripts/fetch_models.py --check
+
+      - name: Render the icons
+        run: uv run --no-sync python scripts/make_icons.py
+
+      - name: Build with PyInstaller
+        run: uv run --no-sync pyinstaller packaging/pyinstaller/habit-guard.spec --noconfirm --clean
+
+      - name: Check the bundle (no networking or telemetry components, models and licences present)
+        run: uv run --no-sync python scripts/check_bundle.py dist/habit-guard
+
+      - name: Validate the desktop entry
+        run: desktop-file-validate packaging/linux/habit-guard.desktop
+
+      # appimagetool and the AppImage runtime are pinned (version and SHA-256) in the script; it
+      # refuses unverified downloads.
+      - name: Create the AppImage and the tarball
+        run: bash packaging/linux/build_appimage.sh --version "$VERSION"
+
+      - name: Smoke-test the AppImage and the tarball
+        run: |
+          set -euo pipefail
+          appimage="dist/HabitGuard-$VERSION-linux-x86_64.AppImage"
+          "$appimage" --version | tee version.txt
+          grep -qF "$VERSION" version.txt
+          "$appimage" selftest
+          tar -xzf "dist/HabitGuard-$VERSION-linux-x86_64.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/habit-guard/habit-guard" --version | tee version.txt
+          grep -qF "$VERSION" version.txt
+          "$RUNNER_TEMP/habit-guard/habit-guard" selftest
+          test -f "$RUNNER_TEMP/habit-guard/habit-guard.desktop"
+          find "$RUNNER_TEMP/habit-guard" -name 'libxcb-cursor.so.0*' | grep .
+          broken="$(find -L "$RUNNER_TEMP/habit-guard" -type l)"
+          if [[ -n "$broken" ]]; then
+            echo "::error::symbolic links without a target in the tarball:"
+            echo "$broken"
+            exit 1
+          fi
+
+      - name: Upload the packages
+        if: inputs.upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: linux-x86_64
+          path: |
+            dist/HabitGuard-${{ env.VERSION }}-linux-x86_64.AppImage
+            dist/HabitGuard-${{ env.VERSION }}-linux-x86_64.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14

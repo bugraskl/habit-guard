@@ -23,7 +23,7 @@ DESKTOP_NAME = "habit-guard.desktop"
 def launch_command() -> list[str]:
     """The command that starts the tray app without a console window."""
     if getattr(sys, "frozen", False):
-        return [sys.executable]
+        return [_frozen_gui_executable()]
     gui = shutil.which("habit-guard-gui")
     if gui:
         return [gui]
@@ -33,6 +33,24 @@ def launch_command() -> list[str]:
         if pythonw.is_file():
             python = pythonw
     return [str(python), "-m", "habit_guard"]
+
+
+def _frozen_gui_executable() -> str:
+    """The windowed program of an installed copy, whichever of its programs is running.
+
+    ``habit-guard-cli autostart enable`` runs the console program, but at login the windowed one
+    must start. An AppImage runs from a temporary mount, so its own path is used instead.
+    """
+    appimage = os.environ.get("APPIMAGE")
+    if appimage:
+        return appimage
+    exe = Path(sys.executable)
+    if exe.stem.endswith("-cli"):
+        for name in ("HabitGuard.exe", "Habit Guard"):
+            sibling = exe.with_name(name)
+            if sibling.is_file():
+                return str(sibling)
+    return str(exe)
 
 
 def _windows_command(command: list[str]) -> str:
