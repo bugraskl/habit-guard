@@ -792,6 +792,13 @@ pre {
   padding-top: 0;
 }
 
+.watch-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: center;
+}
+
 .watch-figure {
   margin: 0;
 }
@@ -814,9 +821,9 @@ pre {
 
 .watch-steps {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(20px, 3vw, 40px);
-  margin: clamp(28px, 4vw, 44px) 0 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(20px, 2.6vw, 30px);
+  margin: 0;
   padding: 0;
   list-style: none;
   counter-reset: watch;
@@ -861,6 +868,15 @@ pre {
 }
 
 @media (max-width: 1080px) {
+  /* One column: the video no wider than a comfortable player, the steps in two columns below */
+  .watch-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .watch-figure {
+    max-width: 640px;
+  }
+
   .watch-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
