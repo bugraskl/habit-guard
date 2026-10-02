@@ -58,7 +58,7 @@ Pick any combination in **Settings → Alarms**:
 
 | | Alarm | What it does |
 |---|---|---|
-| 🔔 | **Sound** | A soft chime, then three beeps, then a warbling alarm as you keep going. Volume is adjustable; your own WAV file can replace the built-in tones. |
+| 🔔 | **Sound** | A soft chime, then three beeps, then a warbling alarm as you keep going. Volume is adjustable; your own sound file (WAV, MP3, ...) can replace the built-in tones. |
 | 🌑 | **Screen curtain** | The screen dims, or a red frame pulses, on every monitor until your hand is down. Clicks pass straight through it, so it can never lock you out. |
 | 🗣️ | **Voice** | Says a phrase of your choice ("Hands down.") with your system's offline voice. |
 | 💬 | **Notification** | A desktop notification on the first alarm of each episode. |

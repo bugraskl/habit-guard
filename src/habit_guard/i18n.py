@@ -90,7 +90,7 @@ _STRINGS: dict[str, dict[str, str]] = {
     "settings.unit.seconds": {"en": "{n} s", "tr": "{n} sn"},
     "settings.alerts.sound": {"en": "Play an alarm sound", "tr": "Alarm sesi çal"},
     "settings.alerts.volume": {"en": "Volume", "tr": "Ses düzeyi"},
-    "settings.alerts.sound_file": {"en": "Own sound (WAV)", "tr": "Kendi sesiniz (WAV)"},
+    "settings.alerts.sound_file": {"en": "Own sound (WAV, MP3)", "tr": "Kendi sesiniz (WAV, MP3)"},
     "settings.alerts.browse": {"en": "Choose…", "tr": "Seç…"},
     "settings.alerts.clear": {"en": "Use built-in", "tr": "Yerleşiği kullan"},
     "settings.alerts.notification": {"en": "Show a notification", "tr": "Bildirim göster"},

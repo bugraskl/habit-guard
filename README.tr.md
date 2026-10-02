@@ -59,7 +59,7 @@ ederler.
 
 | | Uyarı | Ne yapar |
 |---|---|---|
-| 🔔 | **Ses** | Önce yumuşak bir çınlama, sonra üç bip, devam ederseniz çalkalanan bir alarm. Ses düzeyi ayarlanır; kendi WAV dosyanız yerleşik sesin yerine geçebilir. |
+| 🔔 | **Ses** | Önce yumuşak bir çınlama, sonra üç bip, devam ederseniz çalkalanan bir alarm. Ses düzeyi ayarlanır; kendi ses dosyanız (WAV, MP3, ...) yerleşik sesin yerine geçebilir. |
 | 🌑 | **Ekran perdesi** | El inene kadar tüm monitörlerde ekran kararır ya da kırmızı bir çerçeve yanıp söner. Tıklamalar perdeden geçer, bu yüzden sizi asla dışarıda bırakamaz. |
 | 🗣️ | **Sesli uyarı** | Sisteminizin çevrimdışı sesiyle seçtiğiniz bir cümleyi ("Elini indir.") söyler. |
 | 💬 | **Bildirim** | Her olayın ilk alarmında bir masaüstü bildirimi. |

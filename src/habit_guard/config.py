@@ -68,7 +68,7 @@ class AlertConfig:
     sound: bool = True
     #: 0 to 1; escalation plays louder on top of this.
     volume: float = 0.7
-    #: A WAV file to play instead of the built-in tones; empty uses the built-in ones.
+    #: A sound file (WAV, MP3, ...) to play instead of the built-in tones; empty uses those.
     sound_file: str = ""
     notification: bool = True
     #: Darken the screen (dim) or pulse a coloured frame (flash) until the hand leaves.

@@ -48,7 +48,7 @@ Under `alerts`.
 |---|---|---|---|
 | `sound` | `true` | | Play an alarm sound. |
 | `volume` | `0.7` | 0 to 1 | Volume. Each escalation level plays at 55 %, 80 % and 100 % of it. |
-| `sound_file` | empty | a path | A WAV file to play instead of the built-in tones. |
+| `sound_file` | empty | a path | A sound file to play instead of the built-in tones. WAV works everywhere and follows the volume setting exactly; MP3, M4A, OGG, FLAC and similar files work on Windows and macOS, and on Linux when `ffplay`, `mpv`, `mpg123` or VLC is installed. |
 | `notification` | `true` | | Desktop notification on the first alarm of each episode. |
 | `curtain` | `true` | | Cover the screen until the hand is down. |
 | `curtain_style` | `dim` | `dim`, `flash` | Darken the screen, or pulse a red frame. |

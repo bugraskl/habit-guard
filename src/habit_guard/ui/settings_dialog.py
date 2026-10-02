@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..alerts.sound import FILE_DIALOG_FILTER
 from ..config import CAMERA_APIS, CURTAIN_STYLES, LANGUAGES, PROFILES, Settings
 from ..i18n import habit_name, tr
 from ..types import Habit
@@ -217,7 +218,7 @@ class SettingsDialog(QDialog):
     # -------------------------------------------------------------------------------- logic
     def _browse_sound(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, tr("settings.alerts.sound_file"), "", "WAV (*.wav)"
+            self, tr("settings.alerts.sound_file"), "", FILE_DIALOG_FILTER
         )
         if path:
             self.sound_file.setText(path)
