@@ -86,6 +86,7 @@ class Controller(QObject):
         # the watcher misses an event, and a heartbeat file that says this app is running.
         control_folder = control.control_dir()
         control_folder.mkdir(parents=True, exist_ok=True)
+        control.discard_pending()  # whatever an earlier run left is out of date
         self._watcher = QFileSystemWatcher(self)
         self._watcher.addPath(str(control_folder))
         self._watcher.directoryChanged.connect(lambda _path: self.poll_control())
@@ -366,6 +367,7 @@ class Controller(QObject):
             control.consume(path)
             log.info("control command: %s", command)
             if command == "quit":
+                control.discard_pending()
                 self.quit()
                 return
             actions[command]()
@@ -378,13 +380,15 @@ class Controller(QObject):
         self._closed = True
         self._control_timer.stop()
         self._heartbeat.stop()
-        control.clear_status()
         self.pipeline.stop()
         self._calm_down()
         self._speech.stop()
         self._curtain.close()
         self._save_stats()
         self.tray.hide()
+        # Last, so that "ctl quit" (and the installer) only see the app gone once the camera
+        # is released and the statistics are saved.
+        control.clear_status()
 
     def quit(self) -> None:
         self.shutdown()
@@ -432,4 +436,5 @@ def run(settings: Settings, source: int | str | None = None) -> int:
     app.aboutToQuit.connect(controller.shutdown)  # also on logoff and system shutdown
     code = app.exec()
     lock.unlock()
+    control.clear_status()  # after the lock: "ctl quit && habit-guard" works
     return int(code)

@@ -190,7 +190,7 @@ class SoundPlayer:
         self._directory = directory
         self._clock = clock
         self._process: subprocess.Popen[bytes] | None = None
-        self._warned = False
+        self._warnings: set[str] = set()
         self._busy_until = 0.0
         self._busy_level = 0
         self._by_process = False  # the running sound is one of our own child processes
@@ -203,8 +203,9 @@ class SoundPlayer:
         gain = effective_volume(level, volume)
         custom = self._custom(custom_file)
         if custom is not None and not is_wav(custom):
-            self._start_compressed(custom, gain, level, now)
-            return
+            if self._start_compressed(custom, gain, level, now):
+                return
+            custom = None  # no player or an unreadable file: the built-in tone sounds instead
         path = self._render(level, volume, custom)
         if path is None:
             return
@@ -237,16 +238,23 @@ class SoundPlayer:
         return now < self._busy_until
 
     # ---------------------------------------------------------------------------- playing
-    def _start_compressed(self, path: Path, gain: float, level: int, now: float) -> None:
-        """An MP3 (or similar) of the user's own, played by what the system offers."""
-        self._busy_level = level
+    def _start_compressed(self, path: Path, gain: float, level: int, now: float) -> bool:
+        """An MP3 (or similar) of the user's own, played by what the system offers.
+
+        ``False`` when nothing could play it, so that the caller can sound the built-in tone.
+        """
         if sys.platform == "win32":
-            self._by_process = False
             seconds = self._play_mci(path, gain)
+            if seconds is None:
+                return False
+            self._by_process = False
             self._busy_until = now + seconds
         else:
+            if not self._play_command(path, gain):
+                return False
             self._by_process = True
-            self._play_command(path, gain)
+        self._busy_level = level
+        return True
 
     def _mci(self, command: str) -> str:
         """Send one Media Control Interface command (Windows); the reply text, or ``OSError``."""
@@ -270,11 +278,12 @@ class SoundPlayer:
                     self._mci(command)
             self._mci_open = False
 
-    def _play_mci(self, path: Path, gain: float) -> float:
-        """Play a compressed file on Windows; returns its length in seconds (0 if unknown)."""
+    def _play_mci(self, path: Path, gain: float) -> float | None:
+        """Play a compressed file on Windows; its length in seconds (0 if unknown), or
+        ``None`` when it could not be played."""
         if '"' in str(path):
-            log.warning("a sound file name with a double quote cannot be played: %s", path)
-            return 0.0
+            self._warn_once(f"a sound file name with a double quote cannot be played: {path}")
+            return None
         self._stop_mci()
         try:
             self._mci(f'open "{path}" type mpegvideo alias {MCI_ALIAS}')
@@ -287,10 +296,10 @@ class SoundPlayer:
                 return int(self._mci(f"status {MCI_ALIAS} length")) / 1000.0
             except (OSError, ValueError):
                 return 0.0
-        except OSError:
-            log.exception("could not play the sound file %s", path)
+        except OSError as exc:
+            self._warn_once(f"could not play the sound file {path}: {exc}")
             self._stop_mci()
-            return 0.0
+            return None
 
     def _play_windows(self, path: Path) -> None:
         if sys.platform != "win32":  # also lets type checkers on other systems skip the rest
@@ -303,14 +312,19 @@ class SoundPlayer:
         except (ImportError, RuntimeError):
             log.exception("could not play the alarm sound")
 
-    def _play_command(self, path: Path, volume: float | None) -> None:
+    def _warn_once(self, message: str) -> None:
+        """Log a playback problem the first time only: the alarm repeats while a hand stays."""
+        if message not in self._warnings:
+            self._warnings.add(message)
+            log.warning("%s", message)
+
+    def _play_command(self, path: Path, volume: float | None) -> bool:
+        """Start the system's command-line player; ``False`` when there is none or it fails."""
         command = build_command(sys.platform, path, volume)
         if command is None:
-            if not self._warned:
-                log.warning("no command-line audio player found for %s: the alarm is silent", path)
-                self._warned = True
+            self._warn_once(f"no command-line audio player found for {path.name}")
             self._by_process = False
-            return
+            return False
         if self._process is not None and self._process.poll() is None:
             self._process.terminate()  # a higher level replaces the lower one, never layers on it
         try:
@@ -320,16 +334,19 @@ class SoundPlayer:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-        except OSError:
-            log.exception("could not start the audio player")
+        except OSError as exc:
+            self._warn_once(f"could not start the audio player {command[0]}: {exc}")
             self._by_process = False
+            return False
+        return True
 
     # --------------------------------------------------------------------------- the file
     def _custom(self, custom_file: str) -> Path | None:
         """The user's own sound file, if one is set and exists."""
         if not custom_file:
             return None
-        custom = Path(custom_file).expanduser()
+        # Absolute, so that a name starting with "-" is never read as an option by a player.
+        custom = Path(custom_file).expanduser().absolute()
         if custom.is_file():
             return custom
         log.warning("sound file not found, using the built-in tone: %s", custom)

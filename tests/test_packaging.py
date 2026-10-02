@@ -183,6 +183,35 @@ def test_a_frozen_console_program_autostarts_the_windowed_one(tmp_path: Path, mo
     assert autostart.launch_command() == [str(gui)]
 
 
+def test_the_installers_path_copy_of_the_console_program_autostarts_the_windowed_one(
+    tmp_path: Path, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    """The installer adds a copy of the console build as habit-guard.exe next to HabitGuard.exe."""
+    gui = tmp_path / "HabitGuard.exe"
+    copy = tmp_path / "habit-guard.exe"
+    gui.write_bytes(b"")
+    copy.write_bytes(b"")
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.delenv("APPIMAGE", raising=False)
+    monkeypatch.setattr(sys, "executable", str(copy))
+    assert autostart.launch_command() == [str(gui)]
+
+
+def test_one_linux_program_serving_both_roles_autostarts_itself(
+    tmp_path: Path, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    program = tmp_path / "habit-guard"
+    program.write_bytes(b"")
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.delenv("APPIMAGE", raising=False)
+    monkeypatch.setattr(sys, "executable", str(program))
+    assert autostart.launch_command() == [str(program)]
+
+
+def test_autostart_and_the_entry_point_agree_on_which_programs_are_windowed() -> None:
+    assert autostart._GUI_STEMS == entry._GUI_EXECUTABLES
+
+
 def test_an_appimage_autostarts_itself_not_its_temporary_mount(monkeypatch) -> None:  # type: ignore[no-untyped-def]
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "executable", "/tmp/.mount_abc123/usr/lib/habit-guard/habit-guard")
@@ -338,3 +367,19 @@ def test_a_tag_build_needs_a_changelog_section(tmp_path: Path, monkeypatch, caps
     assert "no '## [" in capsys.readouterr().out
     monkeypatch.delenv("GITHUB_REF_TYPE")  # an ordinary build only warns
     assert notes_script.main(["--changelog", str(changelog)]) == 0
+
+
+# -------------------------------------------------------------------------------- workflows
+def test_a_release_waits_for_the_tests_and_the_privacy_scan() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+    verify = workflow[workflow.index("  verify:") : workflow.index("  build:")]
+    assert "check_privacy.py" in verify
+    assert "pytest" in verify
+    build = workflow[workflow.index("  build:") : workflow.index("  release:")]
+    assert "needs: verify" in build
+
+
+def test_the_installer_leaves_the_autostart_entry_alone_only_in_a_silent_upgrade() -> None:
+    text = ISS.decode("utf-8")
+    assert "Result := (not IsUpgrade) or (not WizardSilent);" in text
+    assert "IsUpgrade and (not WizardSilent) and (not WizardIsTaskSelected('startup'))" in text

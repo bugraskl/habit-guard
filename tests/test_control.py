@@ -43,6 +43,27 @@ def test_unknown_commands_are_refused_when_sending_and_dropped_when_found() -> N
     assert not stray.exists()  # junk is removed, never acted on
 
 
+def test_a_command_file_that_is_not_text_does_not_block_the_others() -> None:
+    folder = control.control_dir()
+    folder.mkdir(parents=True, exist_ok=True)
+    junk = folder / "00000000000000000001-000000-1-aaaaaa.cmd"
+    junk.write_bytes(b"\xff\xfe\x80 not utf-8")
+    control.send("quit")
+    assert [command for _, command in control.pending()] == ["quit"]
+    assert not junk.exists()
+
+
+def test_discard_pending_removes_every_waiting_command_and_leftover_part() -> None:
+    folder = control.control_dir()
+    folder.mkdir(parents=True, exist_ok=True)
+    control.send("quit")
+    control.send("pause")
+    (folder / "1-1.cmd.part").write_text("quit\n", encoding="utf-8")
+    control.discard_pending()
+    assert list(folder.iterdir()) == []
+    control.discard_pending()  # nothing left: not an error
+
+
 def test_half_written_commands_are_not_seen() -> None:
     folder = control.control_dir()
     folder.mkdir(parents=True, exist_ok=True)
@@ -171,6 +192,38 @@ def test_quit_through_ctl_stops_everything(qapp: QApplication) -> None:
     control.send("resume")  # after the quit: never reached
     controller.poll_control()
     assert controller._closed
+    assert control.read_status() is None
+    assert control.pending() == []  # nothing queued behind the quit survives for the next run
+
+
+def test_commands_left_by_an_earlier_run_are_not_carried_out(qapp: QApplication) -> None:
+    control.send("quit")  # a double "ctl quit", or one sent just after a crash
+    control.send("pause")
+    controller = make_controller()
+    try:
+        assert control.pending() == []
+        controller.poll_control()
+        assert not controller._closed
+        assert not controller.pipeline.paused
+    finally:
+        controller.shutdown()
+
+
+def test_the_status_stays_until_the_camera_is_released_and_the_statistics_saved(
+    qapp: QApplication, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    controller = make_controller()
+    controller.start()
+    seen: dict[str, bool] = {}
+    stop = controller.pipeline.stop
+
+    def stop_and_look() -> None:
+        seen["status_during_stop"] = control.read_status() is not None
+        stop()
+
+    monkeypatch.setattr(controller.pipeline, "stop", stop_and_look)
+    controller.shutdown()
+    assert seen == {"status_during_stop": True}  # "ctl quit" waits for the end of all this
     assert control.read_status() is None
 
 

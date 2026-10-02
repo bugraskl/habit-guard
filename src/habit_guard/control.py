@@ -105,6 +105,8 @@ def pending() -> list[tuple[Path, str]]:
             command = path.read_text(encoding="utf-8").strip()
         except OSError:
             continue
+        except ValueError:  # not UTF-8: no command, and it must not block the others
+            command = ""
         if command in COMMANDS:
             found.append((path, command))
         else:
@@ -116,6 +118,21 @@ def pending() -> list[tuple[Path, str]]:
 def consume(path: Path) -> None:
     with contextlib.suppress(OSError):
         path.unlink()
+
+
+def discard_pending() -> None:
+    """Delete the commands that are waiting.
+
+    A starting app drops what an earlier one left behind (a second ``quit`` from a double
+    click, or a command sent just after a crash), and a quitting app drops what is queued
+    behind its ``quit``, so none of it reaches the next run.
+    """
+    try:
+        files = [p for p in control_dir().iterdir() if p.suffix in (".cmd", ".part")]
+    except OSError:
+        return
+    for path in files:
+        consume(path)
 
 
 def write_status(state: dict[str, Any]) -> None:

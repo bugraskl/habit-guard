@@ -18,6 +18,9 @@ RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 RUN_VALUE = "HabitGuard"
 PLIST_NAME = "io.github.bugraskl.habit-guard.plist"
 DESKTOP_NAME = "habit-guard.desktop"
+#: Case-folded stems of the windowed programs of a frozen build; keep in sync with
+#: ``_GUI_EXECUTABLES`` in packaging/pyinstaller/entry.py.
+_GUI_STEMS = frozenset({"habitguard", "habit guard"})
 
 
 def launch_command() -> list[str]:
@@ -38,19 +41,21 @@ def launch_command() -> list[str]:
 def _frozen_gui_executable() -> str:
     """The windowed program of an installed copy, whichever of its programs is running.
 
-    ``habit-guard-cli autostart enable`` runs the console program, but at login the windowed one
-    must start. An AppImage runs from a temporary mount, so its own path is used instead.
+    ``habit-guard autostart enable`` runs a console program (``habit-guard.exe`` and
+    ``habit-guard-cli.exe`` on Windows), but at login the windowed one must start. An
+    AppImage runs from a temporary mount, so its own path is used instead.
     """
     appimage = os.environ.get("APPIMAGE")
     if appimage:
         return appimage
     exe = Path(sys.executable)
-    if exe.stem.endswith("-cli"):
-        for name in ("HabitGuard.exe", "Habit Guard"):
-            sibling = exe.with_name(name)
-            if sibling.is_file():
-                return str(sibling)
-    return str(exe)
+    if exe.stem.casefold() in _GUI_STEMS:
+        return str(exe)
+    for name in ("HabitGuard.exe", "Habit Guard"):
+        sibling = exe.with_name(name)
+        if sibling.is_file():
+            return str(sibling)
+    return str(exe)  # Linux: one program serves both roles
 
 
 def _windows_command(command: list[str]) -> str:

@@ -142,9 +142,9 @@ Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: 
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; AppUserModelID: "{#AppUserModelID}"; Comment: "{cm:ShortcutComment}"; Tasks: desktopicon
 
 [Registry]
-; The same entry "habit-guard autostart enable" writes. Only a new installation writes it: an
-; upgrade never turns start-at-sign-in back on by itself, because the user may have turned it
-; off in the meantime.
+; The same entry "habit-guard autostart enable" writes. A new installation and an upgrade with
+; the wizard (where the box is on screen) write it as chosen; a silent upgrade never turns
+; start-at-sign-in back on by itself, because the user may have turned it off in the meantime.
 Root: HKCU; Subkey: "{#RunKey}"; ValueType: string; ValueName: "{#RunValueName}"; ValueData: """{app}\{#AppExeName}"""; Flags: uninsdeletevalue; Tasks: startup; Check: ShouldWriteAutostart
 
 [Run]
@@ -177,10 +177,11 @@ begin
   Result := True;
 end;
 
-{ Check for the [Registry] autostart entry: a new installation writes it as chosen. }
+{ Check for the [Registry] autostart entry: written as chosen, except in a silent upgrade,
+  where the earlier choice (which the user may have changed since) is left alone. }
 function ShouldWriteAutostart: Boolean;
 begin
-  Result := not IsUpgrade;
+  Result := (not IsUpgrade) or (not WizardSilent);
 end;
 
 { Ask a running Habit Guard to quit through its control folder; "ctl quit" waits (up to about
@@ -324,6 +325,9 @@ begin
       AddAppToPath
     else
       RemoveAppFromPath;
+    { The start-at-sign-in box was unticked in an upgrade wizard. }
+    if IsUpgrade and (not WizardSilent) and (not WizardIsTaskSelected('startup')) then
+      RemoveAutostartIfOurs;
   end;
 end;
 

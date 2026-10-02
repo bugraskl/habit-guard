@@ -184,7 +184,7 @@ def test_a_file_name_with_a_double_quote_is_refused_not_injected(
 ) -> None:  # type: ignore[no-untyped-def]
     mci = FakeMci()
     player = make_windows_player(tmp_path, monkeypatch, mci)
-    assert player._play_mci(Path('evil" alias x'), 1.0) == 0.0
+    assert player._play_mci(Path('evil" alias x'), 1.0) is None
     assert mci.commands == []
 
 
@@ -204,3 +204,90 @@ def test_mci_is_not_available_off_windows(tmp_path: Path) -> None:
         pytest.skip("this is the Windows machine")
     with pytest.raises(OSError, match="Windows"):
         SoundPlayer(tmp_path)._mci("play x")
+
+
+def test_a_custom_file_that_cannot_be_played_sounds_the_built_in_tone(
+    tmp_path: Path, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    mci = FakeMci(fail_on="open")
+    player = make_windows_player(tmp_path, monkeypatch, mci)
+    played: list[object] = []
+    monkeypatch.setattr(player, "_play_windows", played.append)
+    song = tmp_path / "broken.mp3"
+    song.write_bytes(b"not audio")
+    player.play(2, 1.0, str(song))
+    assert played, "a silent alarm defeats the program"
+    assert Path(str(played[0])).name.startswith("alarm-2-")
+
+
+def test_a_playback_problem_is_logged_once_not_at_every_repeat(
+    tmp_path: Path, monkeypatch, caplog
+) -> None:  # type: ignore[no-untyped-def]
+    mci = FakeMci(fail_on="open")
+    player = make_windows_player(tmp_path, monkeypatch, mci)
+    monkeypatch.setattr(player, "_play_windows", lambda path: None)
+    song = tmp_path / "broken.mp3"
+    song.write_bytes(b"not audio")
+    for _ in range(4):
+        player.play(1, 1.0, str(song))
+    warnings = [r for r in caplog.records if "could not play the sound file" in r.getMessage()]
+    assert len(warnings) == 1
+
+
+def test_a_compressed_file_without_a_player_sounds_the_built_in_tone(
+    tmp_path: Path, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    started: list[list[str]] = []
+
+    class Process:
+        def __init__(self, command, **kwargs):  # type: ignore[no-untyped-def]
+            started.append(command)
+
+        def poll(self):  # type: ignore[no-untyped-def]
+            return None
+
+        def terminate(self) -> None:
+            pass
+
+    monkeypatch.setattr(sound.sys, "platform", "linux")
+    # only a WAV player exists: nothing can decode the MP3
+    monkeypatch.setattr(
+        sound.shutil, "which", lambda name: "/bin/paplay" if name == "paplay" else None
+    )
+    monkeypatch.setattr(sound.subprocess, "Popen", Process)
+    song = tmp_path / "mine.mp3"
+    song.write_bytes(b"ID3")
+    player = SoundPlayer(tmp_path / "sounds", clock=stepping_clock())
+    player.play(1, 0.8, str(song))
+    assert len(started) == 1
+    assert started[0][0] == "/bin/paplay"
+    assert Path(started[0][-1]).name.startswith("alarm-1-")
+
+
+def test_a_relative_sound_name_starting_with_a_dash_is_not_read_as_an_option(
+    tmp_path: Path, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    started: list[list[str]] = []
+
+    class Process:
+        def __init__(self, command, **kwargs):  # type: ignore[no-untyped-def]
+            started.append(command)
+
+        def poll(self):  # type: ignore[no-untyped-def]
+            return None
+
+        def terminate(self) -> None:
+            pass
+
+    monkeypatch.setattr(sound.sys, "platform", "linux")
+    monkeypatch.setattr(
+        sound.shutil, "which", lambda name: "/bin/ffplay" if name == "ffplay" else None
+    )
+    monkeypatch.setattr(sound.subprocess, "Popen", Process)
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "-x.mp3").write_bytes(b"ID3")
+    SoundPlayer(tmp_path / "sounds").play(1, 1.0, "-x.mp3")
+    assert started
+    target = started[0][-1]
+    assert not target.startswith("-")
+    assert Path(target).is_absolute()
