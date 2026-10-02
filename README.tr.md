@@ -149,10 +149,24 @@ Windows 11, AMD Ryzen 7 3700X (8 çekirdek, 16 iş parçacığı) üzerinde `hab
 Bunlar oynatılan klip sayılarıdır: canlı kamera kendi sürücü maliyetini ekler. Kendi makinenizde
 ölçmek için `habit-guard bench` çalıştırın. Profili **Ayarlar → Genel → Performans** altından seçin.
 
-## Kurulum
+## İndirme
 
-Henüz kurulum paketi yok; kaynaktan çalıştırın. [uv](https://docs.astral.sh/uv/) gerekir (doğru
-Python'u kendisi getirir).
+| Platform | Paket | |
+|---|---|---|
+| **Windows** 10/11 x64 | Kurucu `.exe` ya da taşınabilir `.zip` | [İndir](https://github.com/bugraskl/habit-guard/releases/latest) |
+| **macOS** 14+ Apple silicon | `.dmg` | [İndir](https://github.com/bugraskl/habit-guard/releases/latest) |
+| **Linux** x86_64 | `.AppImage` ya da `.tar.gz` | [İndir](https://github.com/bugraskl/habit-guard/releases/latest) |
+
+Her sürümle birlikte `SHA256SUMS.txt` ve GitHub yapı kaynağı (provenance) doğrulamaları gelir.
+Paketler henüz kod imzalı değil: Windows'ta SmartScreen uyarabilir (*Ek bilgi*, sonra *Yine de
+çalıştır*); macOS'ta ilk seferde uygulamaya sağ tıklayıp *Aç*'ı seçin, sonra kameraya izin verin.
+Windows kurucusu kullanıcı başınadır (yönetici hakkı gerekmez) ve `habit-guard` komutunu PATH'inize
+ekleyebilir. Paketleri kendiniz derlemek için: [derleme](docs/building.md).
+
+## Kaynaktan çalıştırma
+
+[uv](https://docs.astral.sh/uv/) gerekir (doğru Python'u kendisi getirir). Intel Mac'te Habit
+Guard'ı çalıştırmanın yolu da budur.
 
 ```bash
 git clone https://github.com/bugraskl/habit-guard.git
@@ -168,21 +182,35 @@ sizi iyi görüp görmediğini denetlemek için tepsi menüsünden **Kamera öni
 Linux'ta dağıtımınızın `libxcb-cursor0` (Debian/Ubuntu) ya da `xcb-util-cursor` (Fedora, Arch)
 paketi ve sistem tepsisi olan bir masaüstü gerekir (GNOME tepsi simgeleri için bir eklenti ister).
 
-Bilgisayarla birlikte başlatmak için: `uv run habit-guard autostart enable`.
+Bilgisayarla birlikte başlatmak için: `habit-guard autostart enable` ya da Windows kurucusundaki
+kutuyu işaretleyin.
 
 ## Komut satırı
+
+Örneklerde `habit-guard` kullanılıyor; kaynaktan bu `uv run habit-guard`, Windows kurucusuyla yeni bir
+terminalde `habit-guard` (PATH seçeneği işaretliyse) ya da kurulum klasöründeki
+`habit-guard-cli.exe` olur.
 
 ```bash
 habit-guard                       # tepsi uygulamasını başlat
 habit-guard doctor                # hata bildirimleri için tanılama (içinde görüntü yok)
 habit-guard doctor --probe-cameras
+habit-guard selftest              # modelleri, görüntü kodunu, sesleri ve pencereleri denetle
 habit-guard bench                 # işlemci kullanımını ve inceleme süresini ölç
 habit-guard stats                 # sayaçlarınızı yazdır
 habit-guard autostart enable      # oturum açılışında başlat (enable | disable | status)
 habit-guard reset                 # ayarları ve istatistikleri unut
+habit-guard ctl pause             # çalışan uygulamayı yönet: status, pause, resume, toggle,
+                                  # test, settings, preview, stats, quit
 habit-guard --camera 1            # başka bir kamera, ya da --camera klip.mp4 ile video oynat
 habit-guard --config-dir KLASÖR   # ayarları ve istatistikleri seçtiğiniz klasörde tut
 ```
+
+`habit-guard ctl` ile eylemleri kendi klavye kısayollarınıza bağlayabilirsiniz. Windows'ta
+`habit-guard-cli.exe ctl toggle` için bir kısayol oluşturup özelliklerinden kısayol tuşu verin;
+macOS'ta Kısayollar ya da Automator ("Kabuk Komutu Çalıştır"); Linux'ta masaüstünüzün özel
+kısayolları. Çalışan uygulamayla ağ üzerinden değil, ayarlar klasöründeki küçük dosyalarla
+konuşur. Çalışmayan bir uygulamaya komut 3 koduyla çıkar.
 
 ## Bilmeniz gerekenler
 
@@ -213,7 +241,7 @@ engelleyebilir. Böyle olursa uyarı ayarlarından kapatın.
 ## Dokümantasyon
 
 [Bölgeler ve ayar](docs/zones.md) · [Yapılandırma](docs/configuration.md) ·
-[Mimari](docs/architecture.md) · [Gizlilik](docs/privacy.md) ·
+[Derleme](docs/building.md) · [Mimari](docs/architecture.md) · [Gizlilik](docs/privacy.md) ·
 [Sorun giderme](docs/troubleshooting.md) · [Katkı](CONTRIBUTING.md) ·
 [Değişiklik günlüğü](CHANGELOG.md)
 

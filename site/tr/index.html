@@ -67,6 +67,9 @@
     <symbol id="i-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M10 9v6M14 9v6"/></symbol>
     <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></symbol>
     <symbol id="i-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V6a1.5 1.5 0 0 1 3 0v5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-2-3a1.5 1.5 0 0 1 2.3-1.8L8 14"/></symbol>
+    <symbol id="i-windows" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5.1 10.4 4v7.2H3V5.1Zm0 13.8 7.4 1.1v-7.1H3v6Zm8.3 1.2L21 21.5V13h-9.7v7.1Zm0-16.2v7.3H21V2.5l-9.7 1.4Z"/></symbol>
+    <symbol id="i-apple" viewBox="0 0 24 24"><path fill="currentColor" d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9a5 5 0 0 0-4.2 2.6c-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.5 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4a10 10 0 0 0 1.4-2.8 4.2 4.2 0 0 1-2.2-4.2ZM14 5c.7-.8 1.1-1.9 1-3-1 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.5 2.8-1.3Z"/></symbol>
+    <symbol id="i-linux" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-2.2 0-3.6 1.8-3.6 4.3 0 1.2.2 2.1-.4 3.2-.9 1.6-2.8 3.8-3 6.3-.1 1.2.3 2 .9 2.4-.3.5-.4 1.2.2 1.7.9.8 2.6.2 3.6.7.9.5 1.4.4 2-.1.3-.3.7-.4 1.3-.4s1 .1 1.3.4c.6.5 1.1.6 2 .1 1-.5 2.7.1 3.6-.7.6-.5.5-1.2.2-1.7.6-.4 1-1.2.9-2.4-.2-2.5-2.1-4.7-3-6.3-.6-1.1-.4-2-.4-3.2C15.6 3.8 14.2 2 12 2Zm-1.4 4.3c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1Zm2.8 0c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1ZM12 9.4c.9 0 2 .6 2 1 0 .5-1.1 1.1-2 1.1s-2-.6-2-1.1c0-.4 1.1-1 2-1Z"/></symbol>
   </svg>
 
   <header class="topbar">
@@ -103,7 +106,14 @@
           <h1><span>Eliniz ağzınıza yarı yolda.</span> <span>Habit Guard önce fark etti.</span></h1>
           <p class="lead">Habit Guard webcam'inizi izler; eliniz ağzınıza, bıyığınıza, kaşınıza ya da saçınıza gittiğinde alışkanlığı yaklaşık bir saniye içinde böler: ses, kararan ekran, sesli bir cümle ya da bildirim, siz seçersiniz. Bilgisayarınızda çalışır, işlemcinizin yüzde birinin bir kesrini kullanır ve hiçbir görüntüyü kaydetmez.</p>
           <div class="actions">
-            <a class="btn btn-accent" href="#install"><svg aria-hidden="true"><use href="#i-download"/></svg>Habit Guard'ı edinin</a>
+            <a class="btn btn-accent" href="#install" data-download
+               data-windows-href="{{WIN_SETUP_URL}}" data-windows-label="Windows için indir" data-windows-meta="{{WIN_SETUP_SIZE}}"
+               data-macos-href="{{MAC_DMG_URL}}" data-macos-label="macOS için indir" data-macos-meta="{{MAC_DMG_SIZE}}"
+               data-linux-href="{{LINUX_APPIMAGE_URL}}" data-linux-label="Linux için indir" data-linux-meta="{{LINUX_APPIMAGE_SIZE}}">
+              <svg aria-hidden="true"><use href="#i-download"/></svg>
+              <span class="btn-label">Habit Guard'ı edinin</span>
+              <span class="btn-meta"></span>
+            </a>
             <a class="btn" href="https://github.com/bugraskl/habit-guard"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub'da yıldızlayın</a>
           </div>
           <p class="hero-meta">Sürüm {{VERSION}} · Ücretsiz ve açık kaynak, <a href="https://github.com/bugraskl/habit-guard/blob/main/LICENSE">MIT lisansı</a> · Windows, macOS, Linux · Çevrimdışı</p>
@@ -328,21 +338,73 @@
             </tbody>
           </table>
         </div>
-        <p class="settings-note">Henüz kurulum paketi yok: kaynaktan çalıştırın (aşağıda). Çoğu webcam aynı anda tek programca kullanılabilir; kamerayı başka bir uygulama tutuyorsa Habit Guard bekler ve yeniden dener. <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Sorun giderme kılavuzu</a> bunu anlatır.</p>
+        <p class="settings-note">Üç sistem için kurucular aşağıda; tepsi uygulaması kaynaktan da çalışır. Çoğu webcam aynı anda tek programca kullanılabilir; kamerayı başka bir uygulama tutuyorsa Habit Guard bekler ve yeniden dener. <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Sorun giderme kılavuzu</a> bunu anlatır.</p>
       </div>
     </section>
 
     <section class="section band" id="install">
       <div class="wrap">
         <div class="section-head">
-          <h2>Habit Guard {{VERSION}} çalıştırın</h2>
-          <p>Ücretsiz ve açık kaynak. Git ve doğru Python'u kendisi getiren <a href="https://docs.astral.sh/uv/">uv</a> gerekir.</p>
+          <h2>Habit Guard {{VERSION}} edinin</h2>
+          <p>Ücretsiz ve açık kaynak. Yayın tarihi: {{RELEASE_DATE}}. Sisteminiz seçili.</p>
         </div>
-        <div class="install">
+        <div class="downloads">
+          <article class="download" id="download-windows">
+            <div class="download-screen">
+              <svg aria-hidden="true"><use href="#i-windows"/></svg>
+              <span class="badge">Sisteminiz</span>
+            </div>
+            <div class="download-body">
+              <h3>Windows</h3>
+              <p class="req">Windows 10 ya da 11, 64 bit</p>
+              <div class="download-files">
+                <a class="btn btn-accent" href="{{WIN_SETUP_URL}}"><span>Kurucu (.exe)</span><span class="btn-meta">{{WIN_SETUP_SIZE}}</span></a>
+                <a class="btn" href="{{WIN_ZIP_URL}}"><span>Taşınabilir (.zip)</span><span class="btn-meta">{{WIN_ZIP_SIZE}}</span></a>
+              </div>
+              <p class="note">Kullanıcı başına kurulum, yönetici hakkı gerekmez. Paketler henüz imzalı değil: SmartScreen uyarırsa <em>Ek bilgi → Yine de çalıştır</em>'ı seçin.</p>
+            </div>
+          </article>
+          <article class="download" id="download-macos">
+            <div class="download-screen">
+              <svg aria-hidden="true"><use href="#i-apple"/></svg>
+              <span class="badge">Sisteminiz</span>
+            </div>
+            <div class="download-body">
+              <h3>macOS</h3>
+              <p class="req">macOS 14 ya da üstü, Apple silicon</p>
+              <div class="download-files">
+                <a class="btn btn-accent" href="{{MAC_DMG_URL}}"><span>Disk görüntüsü (.dmg)</span><span class="btn-meta">{{MAC_DMG_SIZE}}</span></a>
+              </div>
+              <p class="note">Henüz noter onaylı değil: ilk seferde uygulamaya sağ tıklayıp <em>Aç</em>'ı seçin, sonra kameraya izin verin. Intel Mac'ler <a href="https://github.com/bugraskl/habit-guard#install">kaynaktan çalıştırabilir</a>.</p>
+            </div>
+          </article>
+          <article class="download" id="download-linux">
+            <div class="download-screen">
+              <svg aria-hidden="true"><use href="#i-linux"/></svg>
+              <span class="badge">Sisteminiz</span>
+            </div>
+            <div class="download-body">
+              <h3>Linux</h3>
+              <p class="req">x86_64, glibc 2.35+ (Ubuntu 22.04 ve üstü)</p>
+              <div class="download-files">
+                <a class="btn btn-accent" href="{{LINUX_APPIMAGE_URL}}"><span>AppImage</span><span class="btn-meta">{{LINUX_APPIMAGE_SIZE}}</span></a>
+                <a class="btn" href="{{LINUX_TAR_URL}}"><span>Tarball (.tar.gz)</span><span class="btn-meta">{{LINUX_TAR_SIZE}}</span></a>
+              </div>
+              <p class="note">Sistem tepsisi olan bir masaüstü gerekir (GNOME bir eklenti ister). AppImage FUSE ister; yoksa <code>--appimage-extract-and-run</code> ile çalıştırın.</p>
+            </div>
+          </article>
+        </div>
+        <div class="download-foot">
+          <a href="{{SHA256SUMS_URL}}">SHA256SUMS.txt</a>
+          <a href="{{RELEASE_URL}}">Sürüm notları</a>
+          <a href="https://github.com/bugraskl/habit-guard/releases">Tüm sürümler</a>
+          <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Sorun giderme</a>
+        </div>
+        <div class="install source">
           <div>
-            <h3>Kaynaktan, dört satırda</h3>
+            <h3>Kaynaktan çalıştırmayı mı tercih edersiniz?</h3>
+            <p>Git ve doğru Python'u kendisi getiren <a href="https://docs.astral.sh/uv/">uv</a> gerekir. Intel Mac'ler de bu yolu kullanır.</p>
             <ol>
-              <li>Sağdaki komutları bir terminalde çalıştırın.</li>
               <li>Tepsiye (macOS'ta menü çubuğuna) bir el simgesi gelir. Ayarlar penceresi ilk seferde açılır.</li>
               <li>İzlenecek alışkanlıkları seçin, sonra sizi iyi görüp görmediğini denetlemek için tepsi menüsünden <em>Kamera önizleme</em>'yi açın.</li>
               <li>İsteğe bağlı: <code>uv run habit-guard autostart enable</code> oturum açılışında başlatır.</li>
@@ -352,12 +414,6 @@
 cd habit-guard
 uv sync
 uv run habit-guard</code></pre>
-        </div>
-        <div class="install-foot">
-          <a href="{{RELEASE_URL}}">Sürümler</a>
-          <a href="https://github.com/bugraskl/habit-guard/blob/main/CHANGELOG.md">Değişiklik günlüğü</a>
-          <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Sorun giderme</a>
-          <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/configuration.md">Yapılandırma</a>
         </div>
       </div>
     </section>
@@ -408,7 +464,14 @@ uv run habit-guard</code></pre>
           <p>Ücretsiz, açık kaynak ve tasarımı gereği gizli. Kurulum yaklaşık bir dakika sürer.</p>
         </div>
         <div class="actions">
-          <a class="btn btn-accent" href="#install"><svg aria-hidden="true"><use href="#i-download"/></svg>Habit Guard'ı edinin</a>
+          <a class="btn btn-accent" href="#install" data-download
+               data-windows-href="{{WIN_SETUP_URL}}" data-windows-label="Windows için indir" data-windows-meta="{{WIN_SETUP_SIZE}}"
+               data-macos-href="{{MAC_DMG_URL}}" data-macos-label="macOS için indir" data-macos-meta="{{MAC_DMG_SIZE}}"
+               data-linux-href="{{LINUX_APPIMAGE_URL}}" data-linux-label="Linux için indir" data-linux-meta="{{LINUX_APPIMAGE_SIZE}}">
+              <svg aria-hidden="true"><use href="#i-download"/></svg>
+              <span class="btn-label">Habit Guard'ı edinin</span>
+              <span class="btn-meta"></span>
+            </a>
           <a class="btn" href="https://github.com/bugraskl/habit-guard"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub'da yıldızlayın</a>
         </div>
       </div>

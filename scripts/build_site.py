@@ -41,6 +41,16 @@ REPO_ASSETS = {"hero.png": "og.png", "zones.svg": "zones.svg", "icon.svg": "icon
 #: Whole folders copied from assets/.
 REPO_FOLDERS = ("screenshots",)
 
+#: Placeholder prefix -> regular expression for the release asset's file name.
+ASSETS: dict[str, str] = {
+    "WIN_SETUP": r"-windows-x64-setup\.exe$",
+    "WIN_ZIP": r"-windows-x64-portable\.zip$",
+    "MAC_DMG": r"-macos-arm64\.dmg$",
+    "LINUX_APPIMAGE": r"-linux-x86_64\.AppImage$",
+    "LINUX_TAR": r"-linux-x86_64\.tar\.gz$",
+    "SHA256SUMS": r"^SHA256SUMS\.txt$",
+}
+
 MONTHS = {
     "en": "January February March April May June July August September October November December",
     "tr": "Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık",
@@ -48,6 +58,15 @@ MONTHS = {
 
 PLACEHOLDER = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
 SIZE = re.compile(r"\{\{SIZE:([^}]+)\}\}")
+
+
+def human_size(size: int) -> str:
+    """``63204271`` becomes ``"63 MB"`` (decimal units, like most download pages)."""
+    if size <= 0:
+        return ""
+    if size >= 1_000_000:
+        return f"{size / 1_000_000:.0f} MB"
+    return f"{max(size / 1000, 1):.0f} kB"
 
 
 def human_date(value: str, lang: str) -> str:
@@ -72,7 +91,7 @@ def values_for(release: dict[str, Any], lang: str) -> dict[str, str]:
     """Placeholder values for one language."""
     tag = str(release.get("tag_name") or "")
     face, targets = demo_markup()
-    return {
+    values = {
         "SITE_URL": SITE_URL,
         "VERSION": tag.removeprefix("v") or __version__,
         "RELEASE_URL": str(release.get("html_url") or RELEASES_URL),
@@ -81,6 +100,12 @@ def values_for(release: dict[str, Any], lang: str) -> dict[str, str]:
         "DEMO_FACE": face,
         "DEMO_TARGETS": targets,
     }
+    assets = [a for a in release.get("assets") or [] if isinstance(a, dict)]
+    for key, pattern in ASSETS.items():
+        match = next((a for a in assets if re.search(pattern, str(a.get("name", "")))), None)
+        values[f"{key}_URL"] = str(match["browser_download_url"]) if match else RELEASES_URL
+        values[f"{key}_SIZE"] = human_size(int(match.get("size") or 0)) if match else ""
+    return values
 
 
 def image_size(match: re.Match[str]) -> str:

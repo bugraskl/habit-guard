@@ -161,3 +161,44 @@ def test_release_data_fills_the_version_and_the_date(tmp_path: Path) -> None:
 def test_unknown_placeholders_stop_the_build(tmp_path: Path) -> None:
     with pytest.raises(SystemExit):
         builder.render("{{NO_SUCH_THING}}", {"VERSION": "1"}, tmp_path / "x.html")
+
+
+def test_release_assets_fill_the_download_buttons(tmp_path: Path) -> None:
+    base = "https://github.com/bugraskl/habit-guard/releases/download/v0.1.0"
+    names = {
+        "HabitGuard-0.1.0-windows-x64-setup.exe": 52_000_000,
+        "HabitGuard-0.1.0-windows-x64-portable.zip": 81_000_000,
+        "HabitGuard-0.1.0-macos-arm64.dmg": 75_000_000,
+        "HabitGuard-0.1.0-linux-x86_64.AppImage": 90_000_000,
+        "HabitGuard-0.1.0-linux-x86_64.tar.gz": 85_000_000,
+        "SHA256SUMS.txt": 600,
+    }
+    release = {
+        "tag_name": "v0.1.0",
+        "html_url": f"{base.replace('/download/v0.1.0', '/tag/v0.1.0')}",
+        "published_at": "2026-10-05T08:00:00Z",
+        "assets": [
+            {"name": n, "size": s, "browser_download_url": f"{base}/{n}"} for n, s in names.items()
+        ],
+    }
+    builder.build(release, tmp_path / "out")
+    for page in ("index.html", "tr/index.html"):
+        text = (tmp_path / "out" / page).read_text(encoding="utf-8")
+        for name in names:
+            assert f"{base}/{name}" in text, (page, name)
+        assert "52 MB" in text
+        assert "1 kB" in text or "SHA256SUMS" in text
+    en = (tmp_path / "out" / "index.html").read_text(encoding="utf-8")
+    assert "October 5, 2026" in en
+
+
+def test_without_a_release_the_buttons_point_at_the_releases_page(site: Path) -> None:
+    text = (site / "index.html").read_text(encoding="utf-8")
+    assert 'href="https://github.com/bugraskl/habit-guard/releases"' in text
+    assert "data-windows-href" in text  # the primary button still picks the visitor's system
+
+
+def test_human_size() -> None:
+    assert builder.human_size(0) == ""
+    assert builder.human_size(600) == "1 kB"
+    assert builder.human_size(52_400_000) == "52 MB"

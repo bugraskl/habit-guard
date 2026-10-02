@@ -10,6 +10,34 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
+  function detectPlatform() {
+    var uaData = navigator.userAgentData;
+    var platform = ((uaData && uaData.platform) || navigator.platform || "").toLowerCase();
+    var ua = (navigator.userAgent || "").toLowerCase();
+    if (/android|iphone|ipad|ipod/.test(ua)) return "mobile";
+    if (platform.indexOf("win") !== -1 || ua.indexOf("windows") !== -1) return "windows";
+    if (platform.indexOf("mac") !== -1 || ua.indexOf("mac os") !== -1) return "macos";
+    if (platform.indexOf("linux") !== -1 || ua.indexOf("linux") !== -1) return "linux";
+    return "";
+  }
+
+  // Point every [data-download] button at the visitor's system and select the matching tile in
+  // the downloads section. Without JavaScript the buttons keep pointing at the section.
+  var platform = detectPlatform();
+  document.querySelectorAll("[data-download]").forEach(function (button) {
+    var target = platform && button.getAttribute("data-" + platform + "-href");
+    var label = platform && button.getAttribute("data-" + platform + "-label");
+    var meta = platform && button.getAttribute("data-" + platform + "-meta");
+    if (!target || !label) return;
+    button.setAttribute("href", target);
+    var text = button.querySelector(".btn-label");
+    if (text) text.textContent = label;
+    var small = button.querySelector(".btn-meta");
+    if (small) small.textContent = meta || "";
+  });
+  var card = platform && document.getElementById("download-" + platform);
+  if (card) card.classList.add("recommended");
+
   document.querySelectorAll("[data-demo]").forEach(demo);
 
   // The hero demo: a face with the real zones, and a hand that goes to each of them in turn. A

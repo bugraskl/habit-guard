@@ -86,7 +86,11 @@ a = Analysis(  # noqa: F821
 _DROP = (
     "opengl32sw",
     "qt6network",
+    "qtnetwork",  # macOS frameworks (QtNetwork.framework)
+    "libqt6network",  # Linux (libQt6Network.so.6)
     "qt6svg",
+    "qtsvg",
+    "libqt6svg",
     "qt6pdf",
     "qt6quick",
     "qt6qml",

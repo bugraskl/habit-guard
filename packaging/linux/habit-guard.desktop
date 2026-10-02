@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Version=1.5
+Version=1.0
 Name=Habit Guard
 GenericName=Habit Alarm
 Comment=Catches nail biting, mustache pulling, hair pulling and face touching through your webcam
@@ -8,7 +8,7 @@ Comment[tr]=Tırnak yeme, bıyık ve kıl yolma, yüze dokunmayı webcam ile yak
 Exec=habit-guard
 Icon=habit-guard
 Terminal=false
-Categories=Utility;Accessibility;Health;
+Categories=Utility;Accessibility;
 Keywords=habit;nail;biting;hair;pulling;trichotillomania;bfrb;webcam;hand;wellbeing;
 StartupNotify=false
 X-GNOME-UsesNotifications=true

@@ -148,10 +148,24 @@ a 640×480 clip so the run is repeatable. CPU use includes the whole process.
 These are replayed-clip numbers: the live camera adds its own driver cost. Run `habit-guard bench`
 on your machine to measure yours. Choose a profile under **Settings → General → Performance**.
 
-## Install
+## Download
 
-There are no installers yet; run it from source. You need [uv](https://docs.astral.sh/uv/) (it
-fetches the right Python itself).
+| Platform | Package | |
+|---|---|---|
+| **Windows** 10/11 x64 | Installer `.exe` or portable `.zip` | [Download](https://github.com/bugraskl/habit-guard/releases/latest) |
+| **macOS** 14+ Apple silicon | `.dmg` | [Download](https://github.com/bugraskl/habit-guard/releases/latest) |
+| **Linux** x86_64 | `.AppImage` or `.tar.gz` | [Download](https://github.com/bugraskl/habit-guard/releases/latest) |
+
+Every release ships `SHA256SUMS.txt` and GitHub build-provenance attestations. Builds are not
+code-signed yet: on Windows, SmartScreen may warn (*More info*, then *Run anyway*); on macOS,
+right-click the app and choose *Open* the first time, then allow the camera. The Windows installer
+is per user (no administrator rights) and can add the `habit-guard` command to your PATH. Building
+the packages yourself: [building](docs/building.md).
+
+## Run from source
+
+You need [uv](https://docs.astral.sh/uv/) (it fetches the right Python itself). This is also the way
+to run Habit Guard on an Intel Mac.
 
 ```bash
 git clone https://github.com/bugraskl/habit-guard.git
@@ -167,21 +181,34 @@ face and to check that the camera sees you well.
 On Linux you need your distribution's `libxcb-cursor0` (Debian/Ubuntu) or `xcb-util-cursor`
 (Fedora, Arch) package, and a desktop with a system tray (GNOME needs an extension for tray icons).
 
-Start with your computer: `uv run habit-guard autostart enable`.
+Start with your computer: `habit-guard autostart enable`, or tick the box in the Windows installer.
 
 ## Command line
+
+The examples use `habit-guard`; from source that is `uv run habit-guard`, from the Windows
+installer it is `habit-guard` in a new terminal (with the PATH option ticked) or
+`habit-guard-cli.exe` in the install folder.
 
 ```bash
 habit-guard                       # start the tray app
 habit-guard doctor                # diagnostics for bug reports (no pictures in it)
 habit-guard doctor --probe-cameras
+habit-guard selftest              # check the models, the vision code, the tones and the windows
 habit-guard bench                 # measure CPU use and analysis time
 habit-guard stats                 # print your counters
 habit-guard autostart enable      # start at login (enable | disable | status)
 habit-guard reset                 # forget settings and statistics
+habit-guard ctl pause             # control the running app: status, pause, resume, toggle,
+                                  # test, settings, preview, stats, quit
 habit-guard --camera 1            # use another camera, or --camera clip.mp4 to replay a video
 habit-guard --config-dir DIR      # keep settings and statistics in a folder of your choice
 ```
+
+`habit-guard ctl` lets you bind actions to your own keyboard shortcuts. On Windows, make a shortcut
+to `habit-guard-cli.exe ctl toggle` and give it a shortcut key in its properties; on macOS use
+Shortcuts or Automator ("Run Shell Script"); on Linux use your desktop's custom shortcuts. It talks
+to the running app through small files in the settings folder, not through the network. A command
+to an app that is not running exits with code 3.
 
 ## Good to know
 
@@ -212,7 +239,7 @@ it off in the alarm settings if that happens.
 ## Documentation
 
 [Zones and tuning](docs/zones.md) · [Configuration](docs/configuration.md) ·
-[Architecture](docs/architecture.md) · [Privacy](docs/privacy.md) ·
+[Building](docs/building.md) · [Architecture](docs/architecture.md) · [Privacy](docs/privacy.md) ·
 [Troubleshooting](docs/troubleshooting.md) · [Contributing](CONTRIBUTING.md) ·
 [Changelog](CHANGELOG.md)
 
