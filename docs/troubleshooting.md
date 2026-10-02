@@ -59,3 +59,22 @@ curtain off in **Settings → Alarms** and use sound, voice or notification inst
 
 `habit-guard reset` removes the settings and the statistics. The folder is shown by `habit-guard
 doctor`.
+
+## Installing
+
+- **Windows: "Windows protected your PC".** The builds are not code-signed yet. Choose *More info*,
+  then *Run anyway*. The installer works per user and needs no administrator rights.
+- **Windows: `habit-guard` is not found in a terminal.** Open a *new* terminal after installing
+  (the PATH entry only reaches terminals started later), and tick *Add the "habit-guard" command to
+  PATH* in the installer, or use `habit-guard-cli.exe` in the install folder.
+- **macOS: "Habit Guard cannot be opened".** The app is not notarised yet. Right-click it, choose
+  *Open*, confirm once, then allow the camera when asked. If you declined the camera, enable it
+  under *System Settings → Privacy & Security → Camera*. Without a stable signing certificate macOS
+  asks again after every update.
+- **Linux AppImage does not start.** It needs FUSE 2 (`sudo apt install libfuse2`); without it run
+  `./HabitGuard-*.AppImage --appimage-extract-and-run`. A missing tray icon or a Qt error about
+  `xcb` usually means `libxcb-cursor0` (Debian/Ubuntu) or `xcb-util-cursor` (Fedora, Arch) is
+  not installed.
+- **Check an installed copy.** `habit-guard selftest` tests the models, the vision code, the tones
+  and the windows without opening one, and `habit-guard doctor` prints the report for a bug
+  report.

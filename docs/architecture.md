@@ -80,3 +80,23 @@ on a command line.
 rotated crops, round trips), the analyzer with fake detectors, the camera thread with a fake camera,
 the Qt windows and the controller offscreen (`QT_QPA_PLATFORM=offscreen`), the privacy scan and the
 model manifest. Model-dependent tests are skipped when the model files are missing.
+
+## Controlling a running app (`control.py`)
+
+`habit-guard ctl` and the Windows installer talk to a running app without a socket, which keeps the
+"no networking code" promise checkable. `ctl` writes a small file into `control/` in the settings
+folder (one command per file, written under a temporary name and renamed, so the app never sees a
+half-written one); the app watches that folder (`QFileSystemWatcher`, with a 1.5 s timer as a safety
+net), reads the commands oldest first, carries them out and deletes the files. The app writes
+`status.json` when its state changes and every 5 s as a heartbeat: that file is what `ctl status`
+reads, and a file older than 15 s counts as "not running" (a crash leaves one behind). Only the
+fixed vocabulary in `control.COMMANDS` is accepted; anything else is deleted unread. The folder is in
+the user's own profile, so a program that can write there could already change the settings.
+
+## Packaging
+
+PyInstaller builds one folder per system from `packaging/pyinstaller/habit-guard.spec`; every
+program in it starts at `packaging/pyinstaller/entry.py`, which picks the windowed tray app or the
+command line from the name it was started as. `habit-guard selftest` exercises the frozen copy
+(models, vision, tones, the Qt windows) and `scripts/check_bundle.py` checks what ships. See
+[building](building.md).

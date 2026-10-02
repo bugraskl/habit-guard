@@ -11,6 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/bugraskl/habit-guard/actions/workflows/ci.yml"><img src="https://github.com/bugraskl/habit-guard/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/bugraskl/habit-guard/releases"><img src="https://img.shields.io/github/v/release/bugraskl/habit-guard?include_prereleases" alt="Latest release"></a>
   <a href="docs/privacy.md"><img src="https://img.shields.io/badge/network-off%20(verified%20in%20CI)-22D3EE" alt="No network access, verified in CI"></a>
   <a href="docs/privacy.md"><img src="https://img.shields.io/badge/camera%20pictures-never%20saved-6366F1" alt="Camera pictures are never saved"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License"></a>
@@ -230,9 +231,9 @@ to an app that is not running exits with code 3.
 | Screen curtain | ✅ | ⚠️ | ⚠️ | ❌¹ |
 | Voice | ✅ | ✅ (`say`) | ⚠️ (`spd-say` or `espeak`) | ⚠️ |
 
-✅ developed on Windows 11: the app starts, the models run and detection was checked on sample
-photos and replayed video. ⚠️ built for it and covered by the automated tests on all three
-systems, but not yet tried with a real camera by the author; reports are welcome.
+✅ developed and used on Windows 11 with a real camera. ⚠️ built for it: CI builds the packages on
+all three systems and runs `habit-guard selftest` from them (models, vision code, tones and
+windows), but the author has not tried them with a real camera yet; reports are welcome.
 ¹ Some Wayland compositors ignore click-through windows; the curtain may then block clicks. Turn
 it off in the alarm settings if that happens.
 

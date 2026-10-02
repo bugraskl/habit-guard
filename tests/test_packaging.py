@@ -33,18 +33,26 @@ bundle_check = load("check_bundle", ROOT / "scripts" / "check_bundle.py")
 notes_script = load("release_notes", ROOT / "scripts" / "release_notes.py")
 
 
-def _bash_works() -> bool:
-    """A usable bash: on Windows, ``bash`` may be the stub of the Windows Subsystem for Linux."""
+def _find_bash() -> str | None:
+    """A usable bash, as a full path, or ``None``.
+
+    On Windows a bare ``bash`` handed to ``subprocess`` is looked up in System32 first, where it can
+    be the stub of the Windows Subsystem for Linux, while ``shutil.which`` may find Git's bash. So
+    the path that was tried is the path that is used.
+    """
     found = shutil.which("bash")
     if found is None:
-        return False
+        return None
     try:
         result = subprocess.run(
             [found, "-c", "echo ok"], capture_output=True, text=True, timeout=20, check=False
         )
     except (OSError, subprocess.TimeoutExpired):
-        return False
-    return result.returncode == 0 and result.stdout.strip() == "ok"
+        return None
+    return found if result.returncode == 0 and result.stdout.strip() == "ok" else None
+
+
+BASH = _find_bash()
 
 
 SPEC = (ROOT / "packaging" / "pyinstaller" / "habit-guard.spec").read_text(encoding="utf-8")
@@ -137,7 +145,7 @@ def test_linux_desktop_entry() -> None:
     assert text.startswith("[Desktop Entry]")
 
 
-@pytest.mark.skipif(not _bash_works(), reason="needs a working bash")
+@pytest.mark.skipif(BASH is None, reason="needs a working bash")
 @pytest.mark.parametrize(
     "script",
     ["packaging/macos/make_dmg.sh", "packaging/linux/build_appimage.sh", "packaging/linux/AppRun"],
@@ -145,8 +153,9 @@ def test_linux_desktop_entry() -> None:
 def test_shell_scripts_have_valid_syntax_and_unix_line_endings(script: str) -> None:
     path = ROOT / script
     assert b"\r" not in path.read_bytes(), "shell scripts need LF line endings"
+    assert BASH is not None
     result = subprocess.run(
-        ["bash", "-n", script], cwd=ROOT, capture_output=True, text=True, check=False
+        [BASH, "-n", script], cwd=ROOT, capture_output=True, text=True, check=False
     )
     assert result.returncode == 0, result.stderr
 

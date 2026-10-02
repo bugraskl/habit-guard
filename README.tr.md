@@ -11,6 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/bugraskl/habit-guard/actions/workflows/ci.yml"><img src="https://github.com/bugraskl/habit-guard/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/bugraskl/habit-guard/releases"><img src="https://img.shields.io/github/v/release/bugraskl/habit-guard?include_prereleases" alt="Latest release"></a>
   <a href="docs/privacy.md"><img src="https://img.shields.io/badge/ağ-kapalı%20(CI'da%20doğrulanır)-22D3EE" alt="Ağ erişimi yok, CI'da doğrulanır"></a>
   <a href="docs/privacy.md"><img src="https://img.shields.io/badge/kamera%20görüntüsü-asla%20kaydedilmez-6366F1" alt="Kamera görüntüsü asla kaydedilmez"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/Lisans-MIT-yellow.svg" alt="MIT Lisansı"></a>
@@ -232,9 +233,10 @@ konuşur. Çalışmayan bir uygulamaya komut 3 koduyla çıkar.
 | Ekran perdesi | ✅ | ⚠️ | ⚠️ | ❌¹ |
 | Sesli uyarı | ✅ | ✅ (`say`) | ⚠️ (`spd-say` ya da `espeak`) | ⚠️ |
 
-✅ Windows 11'de geliştirildi: uygulama açılıyor, modeller çalışıyor ve algılama örnek fotoğraflarda
-ve oynatılan videoda denendi. ⚠️ bunun için yazıldı ve üç sistemde otomatik testlerle kapsandı, ama
-yazar tarafından henüz gerçek kamerayla denenmedi; bildirimler memnuniyetle karşılanır.
+✅ Windows 11'de gerçek bir kameranın karşısında geliştirildi ve kullanıldı. ⚠️ bunun için yazıldı:
+CI üç sistemde paketleri derliyor ve paketlerden `habit-guard selftest` çalıştırıyor (modeller,
+görüntü kodu, sesler ve pencereler), ama yazar gerçek kamerayla henüz denemedi; bildirimler
+memnuniyetle karşılanır.
 ¹ Bazı Wayland bileşenleri tıklamayı geçiren pencereleri yok sayar; perde o zaman tıklamaları
 engelleyebilir. Böyle olursa uyarı ayarlarından kapatın.
 
