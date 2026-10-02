@@ -176,6 +176,8 @@ class SoundPlayer:
 
     # ---------------------------------------------------------------------------- playing
     def _play_windows(self, path: Path) -> None:
+        if sys.platform != "win32":  # also lets type checkers on other systems skip the rest
+            return
         try:
             import winsound
 
