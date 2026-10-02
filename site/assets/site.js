@@ -211,4 +211,58 @@
       figure.classList.add("ready");
     });
   }
+
+  // The video plays (muted) while it is on screen, and waits for its play button when the visitor
+  // prefers reduced motion or has asked the browser to save data. A visitor who pressed pause
+  // keeps it paused until it leaves the screen. Without JavaScript the poster and the controls
+  // still work.
+  document.querySelectorAll("video[data-autoplay]").forEach(function (video) {
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var connection = navigator.connection || {};
+    var onScreen = false;
+    var held = false; // the visitor paused it
+    var requested = ""; // a play or pause that this code asked for, until its event arrives
+
+    function wanted() {
+      return onScreen && !document.hidden && !reduceMotion.matches && !connection.saveData;
+    }
+
+    function sync() {
+      if (wanted()) {
+        if (video.paused && !held) {
+          requested = "play";
+          var started = video.play();
+          if (started && started.catch) {
+            started.catch(function () {
+              requested = "";
+            });
+          }
+        }
+      } else if (!video.paused) {
+        requested = "pause";
+        video.pause();
+      }
+    }
+
+    video.addEventListener("pause", function () {
+      if (requested === "pause") requested = "";
+      else if (onScreen) held = true; // off screen the browser itself may have paused it
+    });
+    video.addEventListener("play", function () {
+      if (requested === "play") requested = "";
+      else held = false;
+    });
+    document.addEventListener("visibilitychange", sync);
+    if (reduceMotion.addEventListener) reduceMotion.addEventListener("change", sync);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(
+        function (entries) {
+          onScreen = entries[0].isIntersecting;
+          if (!onScreen) held = false; // it starts again the next time it comes into view
+          sync();
+        },
+        { threshold: 0.35 }
+      ).observe(video);
+    }
+  });
 })();

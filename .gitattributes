@@ -21,6 +21,7 @@ packaging/linux/AppRun text eol=lf
 *.jpeg binary
 *.gif binary
 *.webp binary
+*.mp4 binary
 *.onnx binary
 *.tflite binary
 *.binarypb binary

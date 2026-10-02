@@ -37,7 +37,13 @@ SITE_URL = "https://bugraskl.github.io/habit-guard/"
 RELEASES_URL = f"{REPO_URL}/releases"
 
 #: Files copied from the repository's assets/ folder: source -> published name.
-REPO_ASSETS = {"hero.png": "og.png", "zones.svg": "zones.svg", "icon.svg": "icon.svg"}
+REPO_ASSETS = {
+    "hero.png": "og.png",
+    "zones.svg": "zones.svg",
+    "icon.svg": "icon.svg",
+    "video/demo.mp4": "demo.mp4",
+    "video/demo-poster.jpg": "demo-poster.jpg",
+}
 #: Whole folders copied from assets/.
 REPO_FOLDERS = ("screenshots",)
 

@@ -6,6 +6,11 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A ten-second animation that shows what Habit Guard does, on the website (English and
+  Turkish) and in both READMEs. It is an illustration, not a screen recording.
+
 ## [0.1.0] - 2026-10-02
 
 First public version (alpha).

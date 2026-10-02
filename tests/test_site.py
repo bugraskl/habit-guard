@@ -73,7 +73,15 @@ def test_the_site_builds_both_languages(site: Path) -> None:
     assert (site / "index.html").is_file()
     assert (site / "tr" / "index.html").is_file()
     assert (site / ".nojekyll").is_file()
-    for name in ("style.css", "site.js", "favicon.png", "og.png", "zones.svg"):
+    for name in (
+        "style.css",
+        "site.js",
+        "favicon.png",
+        "og.png",
+        "zones.svg",
+        "demo.mp4",
+        "demo-poster.jpg",
+    ):
         assert (site / "assets" / name).is_file(), name
 
 
@@ -202,3 +210,52 @@ def test_human_size() -> None:
     assert builder.human_size(0) == ""
     assert builder.human_size(600) == "1 kB"
     assert builder.human_size(52_400_000) == "52 MB"
+
+
+def test_the_video_is_local_muted_posted_and_described_on_both_pages(site: Path) -> None:
+    for page in (site / "index.html", site / "tr" / "index.html"):
+        text = page.read_text(encoding="utf-8")
+        video = re.search(r"<video\b[^>]*>", text)
+        assert video, page.name
+        tag = video.group(0)
+        for attribute in ("controls", "muted", "playsinline", "loop", "data-autoplay"):
+            assert re.search(rf"\s{attribute}[\s>=]", tag), (page.name, attribute)
+        # No bare "autoplay": the script starts it, and not for visitors who prefer less motion.
+        assert not re.search(r"\sautoplay[\s>=]", tag), page.name
+        assert 'preload="none"' in tag
+        prefix = "../" if page.parent.name == "tr" else ""
+        assert f'poster="{prefix}assets/demo-poster.jpg"' in tag
+        assert 'width="1280"' in tag
+        assert 'height="720"' in tag
+        assert f'src="{prefix}assets/demo.mp4"' in text
+        assert 'aria-describedby="watch-steps"' in tag
+        assert text.count("<li><strong>") == 4  # the text description of what the video shows
+    js = (site / "assets" / "site.js").read_text(encoding="utf-8")
+    assert "prefers-reduced-motion" in js
+    assert "saveData" in js
+
+
+def test_the_video_files_are_small_and_a_real_mp4_with_a_matching_poster(site: Path) -> None:
+    video = (site / "assets" / "demo.mp4").read_bytes()
+    assert video[4:8] == b"ftyp"  # an MP4
+    assert len(video) < 5_000_000  # a visitor on a slow link only pays for it when it plays
+    poster = (site / "assets" / "demo-poster.jpg").read_bytes()
+    assert poster[:2] == b"\xff\xd8"  # a JPEG
+    assert len(poster) < 200_000
+    # "faststart": the index (moov) comes before the pictures (mdat), so playback begins at once
+    assert video.find(b"moov") < video.find(b"mdat")
+
+
+def test_the_readmes_show_the_animation_and_link_the_video() -> None:
+    for name in ("README.md", "README.tr.md"):
+        text = (ROOT / name).read_text(encoding="utf-8")
+        assert 'src="assets/video/demo.webp"' in text, name
+        assert 'href="assets/video/demo.mp4"' in text, name
+        assert 'alt="' in text.split("demo.webp")[1].split(">")[0], name
+    for name in ("demo.webp", "demo.mp4", "demo-poster.jpg"):
+        assert (ROOT / "assets" / "video" / name).is_file(), name
+    webp = (ROOT / "assets" / "video" / "demo.webp").read_bytes()
+    assert webp[:4] == b"RIFF"
+    assert webp[8:12] == b"WEBP"
+    assert b"ANIM" in webp  # animated, so GitHub plays it in the README
+    assert len(webp) < 2_000_000

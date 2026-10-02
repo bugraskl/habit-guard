@@ -26,6 +26,11 @@
 > live webcams and real desks so far, so reports about false alarms and misses are the most useful
 > contribution right now ([how to report](CONTRIBUTING.md#reporting-a-problem)).
 
+<p align="center">
+  <a href="assets/video/demo.mp4"><img src="assets/video/demo.webp" alt="A ten-second animation: a hand drifts to the mouth, Habit Guard finds it in the mouth zone, a ring fills while it stays, then the screen flashes red with sound waves, and everything calms the moment the hand is down." width="760"></a><br>
+  <sub>Ten seconds, start to finish. An illustration made with an AI video tool, not a recording of the app. <a href="assets/video/demo.mp4">Open the MP4</a>.</sub>
+</p>
+
 ## Why Habit Guard
 
 Biting nails, pulling at a mustache, plucking brows or lashes, picking at skin: these habits run on
