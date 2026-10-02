@@ -102,6 +102,17 @@ def test_playback_command_per_platform(monkeypatch) -> None:  # type: ignore[no-
     assert build_command("darwin", Path("a.wav")) is None
 
 
+def stepping_clock(step: float = 100.0):  # type: ignore[no-untyped-def]
+    """A clock that jumps ahead on every reading, so each play() finds the last sound over."""
+    now = [0.0]
+
+    def clock() -> float:
+        now[0] += step
+        return now[0]
+
+    return clock
+
+
 class FakeWinsound:
     SND_FILENAME = 1
     SND_ASYNC = 2
@@ -122,7 +133,7 @@ def test_windows_playback_uses_winsound_with_the_volume_baked_in(
     fake = FakeWinsound()
     monkeypatch.setitem(sys.modules, "winsound", fake)
     monkeypatch.setattr(sound.sys, "platform", "win32")
-    player = SoundPlayer(tmp_path / "sounds")
+    player = SoundPlayer(tmp_path / "sounds", clock=stepping_clock())
     player.play(2, 0.7)
     ((played, flags),) = fake.calls
     assert flags == FakeWinsound.SND_FILENAME | FakeWinsound.SND_ASYNC
@@ -145,7 +156,7 @@ def test_custom_sound_file_is_used_and_scaled(tmp_path: Path, monkeypatch) -> No
     monkeypatch.setattr(sound.sys, "platform", "win32")
     custom = tmp_path / "mine.wav"
     custom.write_bytes(wav_bytes(3, 1.0))
-    player = SoundPlayer(tmp_path / "sounds")
+    player = SoundPlayer(tmp_path / "sounds", clock=stepping_clock())
     player.play(1, 1.0, str(custom))
     played = Path(fake.calls[0][0])
     assert played.name.startswith("custom-")
@@ -178,7 +189,7 @@ def test_command_line_playback_starts_the_player_and_replaces_it(
         sound.shutil, "which", lambda name: "/bin/paplay" if name == "paplay" else None
     )
     monkeypatch.setattr(sound.subprocess, "Popen", FakeProcess)
-    player = SoundPlayer(tmp_path)
+    player = SoundPlayer(tmp_path, clock=stepping_clock())
     player.play(3, 1.0)
     first = player._process
     assert started[0][0] == "/bin/paplay"
@@ -373,3 +384,58 @@ def test_every_habit_has_names() -> None:
 def test_duration_formatting(seconds: int, expected: str) -> None:
     i18n.set_language("en")
     assert i18n.format_duration(seconds) == expected
+
+
+def test_a_sound_that_is_still_playing_is_not_restarted(tmp_path: Path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """Two habits raise their alarms half a second apart: the sound must not stutter."""
+    from habit_guard.alerts import sound
+
+    fake = FakeWinsound()
+    monkeypatch.setitem(sys.modules, "winsound", fake)
+    monkeypatch.setattr(sound.sys, "platform", "win32")
+    custom = tmp_path / "long.wav"
+    with wave.open(str(custom), "wb") as wav:  # a 6 second sound of its own
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(8000)
+        wav.writeframes(b"\0" * 8000 * 6)
+    now = [100.0]
+    player = SoundPlayer(tmp_path / "sounds", clock=lambda: now[0])
+
+    player.play(1, 0.7, str(custom))  # nail biting at 1.0 s
+    assert len(fake.calls) == 1
+    now[0] += 0.5
+    player.play(1, 0.7, str(custom))  # mustache pulling at 1.5 s
+    now[0] += 3.5
+    player.play(1, 0.7, str(custom))  # a repeat at the same level while it still plays
+    assert len(fake.calls) == 1  # one start, no stutter
+    now[0] += 0.1
+    player.play(2, 0.7, str(custom))  # escalation: louder, so it starts again
+    assert len(fake.calls) == 2
+    player.play(2, 0.7, str(custom))
+    assert len(fake.calls) == 2
+    now[0] += 7.0  # the sound is over: the next alarm plays it again
+    player.play(2, 0.7, str(custom))
+    assert len(fake.calls) == 3
+
+
+def test_stopping_lets_the_next_alarm_play_at_once(tmp_path: Path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from habit_guard.alerts import sound
+
+    fake = FakeWinsound()
+    monkeypatch.setitem(sys.modules, "winsound", fake)
+    monkeypatch.setattr(sound.sys, "platform", "win32")
+    now = [10.0]
+    player = SoundPlayer(tmp_path, clock=lambda: now[0])
+    player.play(3, 1.0)
+    player.play(3, 1.0)
+    assert len(fake.calls) == 1
+    player.stop()  # the hand came down
+    player.play(1, 1.0)
+    assert len([c for c in fake.calls if c[0] is not None]) == 2
+
+
+def test_wav_seconds() -> None:
+    from habit_guard.alerts.sound import wav_seconds
+
+    assert wav_seconds(Path("does-not-exist.wav")) == 0.0

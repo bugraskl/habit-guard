@@ -19,7 +19,9 @@ import logging
 import shutil
 import subprocess
 import sys
+import time
 import wave
+from collections.abc import Callable
 from pathlib import Path
 
 import numpy as np
@@ -118,24 +120,49 @@ def build_command(platform: str, path: Path) -> list[str] | None:
     return None
 
 
-class SoundPlayer:
-    """Plays the alarm tone for a level, or the user's own WAV file."""
+def wav_seconds(path: Path) -> float:
+    """The length of a WAV file in seconds; 0 when it cannot be read."""
+    try:
+        with wave.open(str(path)) as wav:
+            return wav.getnframes() / float(wav.getframerate())
+    except (wave.Error, EOFError, OSError, ZeroDivisionError):
+        return 0.0
 
-    def __init__(self, directory: Path):
+
+class SoundPlayer:
+    """Plays the alarm tone for a level, or the user's own WAV file.
+
+    A sound that is still playing is left alone when another alarm of the same or a lower level
+    asks for it (two habits can raise their alarms half a second apart, and the alarm repeats while
+    the hand stays): restarting it would cut a long sound off and make it stutter. Only a higher
+    level starts it again, louder.
+    """
+
+    def __init__(self, directory: Path, clock: Callable[[], float] = time.monotonic):
         self._directory = directory
+        self._clock = clock
         self._process: subprocess.Popen[bytes] | None = None
         self._warned = False
+        self._busy_until = 0.0
+        self._busy_level = 0
 
     def play(self, level: int, volume: float, custom_file: str = "") -> None:
+        now = self._clock()
+        if now < self._busy_until and level <= self._busy_level:
+            return
         path = self._render(level, volume, custom_file)
         if path is None:
             return
+        self._busy_until = now + wav_seconds(path)
+        self._busy_level = level
         if sys.platform == "win32":
             self._play_windows(path)
         else:
             self._play_command(path)
 
     def stop(self) -> None:
+        self._busy_until = 0.0
+        self._busy_level = 0
         if sys.platform == "win32":
             try:
                 import winsound
@@ -163,7 +190,8 @@ class SoundPlayer:
                 log.warning("no command-line audio player found: the alarm will be silent")
                 self._warned = True
             return
-        self.stop()
+        if self._process is not None and self._process.poll() is None:
+            self._process.terminate()  # a higher level replaces the lower one, never layers on it
         try:
             self._process = subprocess.Popen(
                 command,
