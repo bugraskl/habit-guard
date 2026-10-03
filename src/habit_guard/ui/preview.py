@@ -22,6 +22,9 @@ HABIT_COLORS = {
     Habit.MUSTACHE: QColor(0, 170, 255),
     Habit.HAIR_PULLING: QColor(170, 90, 255),
     Habit.FACE_TOUCH: QColor(80, 200, 120),
+    Habit.CUSTOM_1: QColor(255, 90, 160),
+    Habit.CUSTOM_2: QColor(0, 205, 205),
+    Habit.CUSTOM_3: QColor(225, 195, 40),
 }
 
 #: The bones of a hand, as pairs of landmark indices.

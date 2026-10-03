@@ -223,9 +223,14 @@ def _print_stats() -> int:
     print(f"clean for    {stats.clean_s / 60:.0f} min (best {stats.best_clean_s / 60:.0f} min)")
     for d, n in stats.last_days(today, 7):
         print(f"  {d.isoformat()}  {'#' * n} {n}")
+    from .config import Settings
+    from .i18n import set_custom_names
     from .types import Habit
 
+    set_custom_names(Settings.load(paths.settings_path()).custom_names())
     for habit in Habit:
+        if habit.is_custom and stats.total(habit) == 0:
+            continue  # a zone the user drew, with nothing counted yet
         print(f"{habit_name(habit):<36}{stats.total(habit)}")
     return 0
 

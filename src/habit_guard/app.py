@@ -49,6 +49,7 @@ class Controller(QObject):
         super().__init__()
         self.settings = settings
         i18n.set_language(settings.language)
+        i18n.set_custom_names(settings.custom_names())
         self.stats = Stats.load(paths.stats_path())
         self.engine = HabitEngine(settings.dwell_map(), settings.engine_settings())
         self.tray = Tray()
@@ -234,6 +235,7 @@ class Controller(QObject):
         except OSError:
             log.exception("could not save the settings")
         i18n.set_language(new.language)
+        i18n.set_custom_names(new.custom_names())
         self.engine.dwell = new.dwell_map()
         self.engine.settings = new.engine_settings()
         self.alerts.settings = new

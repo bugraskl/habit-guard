@@ -18,7 +18,30 @@ Zones are kept from overlapping so that one movement raises one habit's alarm:
 
 - the lips belong to *nail biting*; *mustache* is the band between the nose and the lips (when nail
   biting is turned off, the lips belong to *mustache*, since lip picking is part of it);
-- *face touching* is whatever the other enabled habits do not own.
+- *face touching* is whatever the other enabled habits do not own;
+- a [custom zone](#custom-zones) you drew wins over all of them, and an earlier custom zone
+  wins over a later one.
+
+## Custom zones
+
+The built-in habits cover the usual places. For anything else (picking at the ears, the cheeks or
+the neck, biting the lip, a place of your own) **Settings → Custom zones** has three zones you draw
+yourself.
+
+1. Pick a zone (1 to 3), tick **Watch for this** and give it a **name**, for example `ear picking`.
+   The name is what the notification, the statistics and the preview call it.
+2. Drag the shape on the drawing of the face to move it, and the square handles on its edge to
+   resize it. The arrow keys move the shape and Shift with the arrow keys resizes it. The built-in
+   zones are shown as dashed outlines so you can see where they are.
+3. Tick **Also on the other side of the face** for ears or cheeks: the mirror image follows and
+   can be dragged as well.
+4. Set the **alarm time** (the dwell time) and press **Save**. **Camera preview** then shows your
+   zone on your own face, in its own colour, so you can check it.
+
+The drawing is of an average face, but the zones are measured in eye distances like the built-in
+ones, so they land on the same place of *your* face and follow it when you lean in or tilt your
+head. A custom zone counts fingertips only. Where it overlaps a built-in zone, yours wins and the
+built-in zone steps around it.
 
 ## Tuning
 

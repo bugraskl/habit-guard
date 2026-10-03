@@ -30,6 +30,12 @@ _STRINGS: dict[str, dict[str, str]] = {
     "habit.mustache.short": {"en": "mustache pulling", "tr": "bıyık koparma"},
     "habit.hair_pulling.short": {"en": "hair pulling", "tr": "kıl yolma"},
     "habit.face_touch.short": {"en": "face touching", "tr": "yüze dokunma"},
+    "habit.custom_1": {"en": "Custom zone 1", "tr": "Özel bölge 1"},
+    "habit.custom_2": {"en": "Custom zone 2", "tr": "Özel bölge 2"},
+    "habit.custom_3": {"en": "Custom zone 3", "tr": "Özel bölge 3"},
+    "habit.custom_1.short": {"en": "custom zone 1", "tr": "özel bölge 1"},
+    "habit.custom_2.short": {"en": "custom zone 2", "tr": "özel bölge 2"},
+    "habit.custom_3.short": {"en": "custom zone 3", "tr": "özel bölge 3"},
     "habit.wide.mustache": {
         "en": "Also the chin and beard line",
         "tr": "Çene ve sakal bölgesini de kapsa",
@@ -78,6 +84,30 @@ _STRINGS: dict[str, dict[str, str]] = {
     "settings.tab.habits": {"en": "Habits", "tr": "Alışkanlıklar"},
     "settings.tab.alerts": {"en": "Alarms", "tr": "Uyarılar"},
     "settings.tab.general": {"en": "General", "tr": "Genel"},
+    "settings.tab.custom": {"en": "Custom zones", "tr": "Özel bölgeler"},
+    "settings.custom.intro": {
+        "en": "A habit that is not on the list? Draw its zone on the face: drag the shape to "
+        "move it and its square handles to resize it.",
+        "tr": "Listede olmayan bir alışkanlık mı var? Bölgesini yüzün üzerine çizin: şekli "
+        "sürükleyerek taşıyın, kare tutamaçlarından çekerek boyutlandırın.",
+    },
+    "settings.custom.slot": {"en": "Zone", "tr": "Bölge"},
+    "settings.custom.name": {"en": "Name", "tr": "Ad"},
+    "settings.custom.name_hint": {"en": "e.g. ear picking", "tr": "örneğin kulak karıştırma"},
+    "settings.custom.mirror": {
+        "en": "Also on the other side of the face",
+        "tr": "Yüzün öbür tarafında da",
+    },
+    "settings.custom.reset": {"en": "Reset the shape", "tr": "Şekli sıfırla"},
+    "settings.custom.keys": {
+        "en": "The arrow keys move the zone; Shift with the arrow keys resizes it.",
+        "tr": "Ok tuşları bölgeyi taşır; Shift ile ok tuşları boyutunu değiştirir.",
+    },
+    "settings.custom.overlap": {
+        "en": "Where zones overlap, your zone wins over the built-in ones (dashed lines).",
+        "tr": "Bölgeler çakışırsa sizin çizdiğiniz bölge, yerleşik olanların (kesikli çizgiler) "
+        "önüne geçer.",
+    },
     "settings.habits.intro": {
         "en": "Choose what to watch for. A hand has to stay in the zone for the dwell time "
         "before the alarm goes off, so a quick scratch or a sip of water is ignored.",
@@ -180,6 +210,8 @@ _STRINGS: dict[str, dict[str, str]] = {
 }
 
 _state = {"language": "en"}
+#: What the user called their custom zones; set from the settings (see ``set_custom_names``).
+_custom_names: dict[Habit, str] = {}
 
 
 def detect_language() -> str:
@@ -213,11 +245,35 @@ def tr(key: str, **values: object) -> str:
     return text.format(**values) if values else text
 
 
+def set_custom_names(names: dict[Habit, str]) -> None:
+    """Remember the names the user gave their custom zones; an empty name keeps the default."""
+    _custom_names.clear()
+    _custom_names.update({h: n for h, n in names.items() if n.strip()})
+
+
+def upper_first(text: str) -> str:
+    """``text`` with its first letter in capitals (the Turkish dotted and dotless i included)."""
+    if not text:
+        return text
+    first = text[0]
+    if _state["language"] == "tr":
+        first = {"i": "İ", "ı": "I"}.get(first, first.upper())
+    else:
+        first = first.upper()
+    return first + text[1:]
+
+
 def habit_name(habit: Habit) -> str:
+    name = _custom_names.get(habit)
+    if name:
+        return upper_first(name)
     return tr(f"habit.{habit.value}")
 
 
 def habit_short(habit: Habit) -> str:
+    name = _custom_names.get(habit)
+    if name:
+        return name
     return tr(f"habit.{habit.value}.short")
 
 

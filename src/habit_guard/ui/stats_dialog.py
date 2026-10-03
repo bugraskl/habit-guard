@@ -83,8 +83,9 @@ class StatsDialog(QWidget):
         self._chart = WeekChart()
         self._by_habit = QFormLayout()
         self._habit_labels = {h: QLabel() for h in Habit}
+        self._habit_titles = {h: QLabel() for h in Habit}
         for habit, label in self._habit_labels.items():
-            self._by_habit.addRow(habit_name(habit), label)
+            self._by_habit.addRow(self._habit_titles[habit], label)
         reset = QPushButton(tr("stats.reset"))
         reset.clicked.connect(self._confirm_reset)
         layout = QVBoxLayout(self)
@@ -102,10 +103,13 @@ class StatsDialog(QWidget):
         self._clean.setText(format_duration(stats.clean_s))
         self._best.setText(format_duration(stats.best_clean_s))
         self._chart.set_days(stats.last_days(today, 7))
-        for habit, label in self._habit_labels.items():
+        for index, (habit, label) in enumerate(self._habit_labels.items()):
+            self._habit_titles[habit].setText(habit_name(habit))
             label.setText(
                 f"{stats.total(habit)}  ({tr('stats.today').lower()}: {stats.count(today, habit)})"
             )
+            # The zones the user drew only get a line once they have counted something.
+            self._by_habit.setRowVisible(index, not habit.is_custom or stats.total(habit) > 0)
         self._watched.setText(tr("stats.watched", t=format_duration(stats.watched_s)))
 
     def _confirm_reset(self) -> None:

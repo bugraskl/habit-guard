@@ -18,7 +18,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from habit_guard.types import FaceInfo, Habit  # noqa: E402
+from habit_guard.types import BUILT_IN_HABITS, FaceInfo, Habit  # noqa: E402
 from habit_guard.zones import Ellipse, FaceFrame, Zone, ZoneSpec, build_zones  # noqa: E402
 
 ASSETS = REPO_ROOT / "assets"
@@ -103,7 +103,7 @@ def _legend() -> list[str]:
         '<text x="500" y="110" font-size="24" font-weight="700">Where each habit is watched</text>'
     )
     y = 165
-    for habit in Habit:
+    for habit in BUILT_IN_HABITS:
         out.append(
             f'<rect x="500" y="{y - 18}" width="26" height="26" rx="6" fill="{COLORS[habit]}" '
             f'fill-opacity="0.35" stroke="{COLORS[habit]}" stroke-width="2.5"/>'
@@ -208,7 +208,7 @@ def zones_svg() -> str:
 
 def hero_svg() -> str:
     """The social preview picture (1920 x 960): name, promise and the zones on a face."""
-    colors = [COLORS[h] for h in Habit]
+    colors = [COLORS[h] for h in BUILT_IN_HABITS]
     bars = "".join(
         f'<rect x="{i * 480}" y="0" width="480" height="10" fill="{c}"/>'
         for i, c in enumerate(colors)

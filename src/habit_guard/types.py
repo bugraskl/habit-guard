@@ -13,12 +13,34 @@ import numpy as np
 
 
 class Habit(StrEnum):
-    """The behaviours Habit Guard can watch for. The value is the settings key."""
+    """The behaviours Habit Guard can watch for. The value is the settings key.
+
+    The first four have zones that are built in. The ``CUSTOM_*`` slots are zones the user draws
+    (and names) for a habit that is not on the list; see ``Settings.custom_zones``.
+    """
 
     NAIL_BITING = "nail_biting"
     MUSTACHE = "mustache"
     HAIR_PULLING = "hair_pulling"
     FACE_TOUCH = "face_touch"
+    CUSTOM_1 = "custom_1"
+    CUSTOM_2 = "custom_2"
+    CUSTOM_3 = "custom_3"
+
+    @property
+    def is_custom(self) -> bool:
+        return self.value.startswith("custom_")
+
+
+#: The habits with zones of their own design, in the order the interface shows them.
+BUILT_IN_HABITS: tuple[Habit, ...] = (
+    Habit.NAIL_BITING,
+    Habit.MUSTACHE,
+    Habit.HAIR_PULLING,
+    Habit.FACE_TOUCH,
+)
+#: The slots for zones the user draws.
+CUSTOM_HABITS: tuple[Habit, ...] = (Habit.CUSTOM_1, Habit.CUSTOM_2, Habit.CUSTOM_3)
 
 
 #: MediaPipe hand landmark indices.

@@ -27,7 +27,8 @@ from PySide6.QtWidgets import (
 from ..alerts.sound import FILE_DIALOG_FILTER
 from ..config import CAMERA_APIS, CURTAIN_STYLES, LANGUAGES, PROFILES, Settings
 from ..i18n import habit_name, tr
-from ..types import Habit
+from ..types import BUILT_IN_HABITS, Habit
+from .custom_zones_tab import CustomZonesTab
 
 #: Habits that have a "wider area" option.
 WIDE_HABITS = (Habit.MUSTACHE, Habit.HAIR_PULLING)
@@ -97,6 +98,8 @@ class SettingsDialog(QDialog):
         self.setMinimumWidth(480)
         tabs = QTabWidget()
         tabs.addTab(self._habits_tab(), tr("settings.tab.habits"))
+        self._custom_tab = CustomZonesTab(self._settings)
+        tabs.addTab(self._custom_tab, tr("settings.tab.custom"))
         tabs.addTab(self._alerts_tab(), tr("settings.tab.alerts"))
         tabs.addTab(self._general_tab(), tr("settings.tab.general"))
         save = QPushButton(tr("settings.ok"))
@@ -119,7 +122,7 @@ class SettingsDialog(QDialog):
         intro = QLabel(tr("settings.habits.intro"))
         intro.setWordWrap(True)
         layout.addWidget(intro)
-        self._habit_boxes = [_HabitBox(h, self._settings) for h in Habit]
+        self._habit_boxes = [_HabitBox(h, self._settings) for h in BUILT_IN_HABITS]
         for box in self._habit_boxes:
             layout.addWidget(box)
         layout.addStretch(1)
@@ -228,6 +231,7 @@ class SettingsDialog(QDialog):
         out = copy.deepcopy(self._settings)
         for box in self._habit_boxes:
             box.apply(out)
+        self._custom_tab.apply(out)
         a = out.alerts
         a.sound = self.sound.isChecked()
         a.volume = self.volume.value() / 100.0

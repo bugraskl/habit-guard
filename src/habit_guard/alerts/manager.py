@@ -10,7 +10,7 @@ from collections.abc import Callable
 from typing import Protocol
 
 from ..config import Settings
-from ..i18n import current_language, habit_short, tr
+from ..i18n import current_language, habit_short, tr, upper_first
 from ..types import Habit
 
 
@@ -58,7 +58,7 @@ class AlertManager:
         self._raised.add(habit)
         message = tr("alert.title")
         if cfg.notification and first:
-            self._notify(message, tr("alert.body", habit=habit_short(habit)).capitalize())
+            self._notify(message, upper_first(tr("alert.body", habit=habit_short(habit))))
         if cfg.curtain:
             self._curtain.show(cfg.curtain_style, level, message)
         if cfg.sound:

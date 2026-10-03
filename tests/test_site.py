@@ -142,10 +142,10 @@ def test_nothing_is_loaded_from_other_sites(site: Path) -> None:
 
 
 def test_the_demo_zones_come_from_the_real_geometry(site: Path) -> None:
-    from habit_guard.types import Habit
+    from habit_guard.types import BUILT_IN_HABITS
 
     text = (site / "index.html").read_text(encoding="utf-8")
-    for habit in Habit:
+    for habit in BUILT_IN_HABITS:
         assert f'data-habit="{habit.value}"' in text
         assert f"data-{habit.value.replace('_', '-')}=" in text  # a fingertip target for each
     assert text.count('class="zone zone-') == 4

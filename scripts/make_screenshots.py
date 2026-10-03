@@ -54,7 +54,13 @@ from habit_guard import i18n  # noqa: E402
 from habit_guard.alerts.curtain import CurtainWindow  # noqa: E402
 from habit_guard.config import Settings  # noqa: E402
 from habit_guard.stats import Stats  # noqa: E402
-from habit_guard.types import FaceInfo, Habit, HandInfo, Observation  # noqa: E402
+from habit_guard.types import (  # noqa: E402
+    BUILT_IN_HABITS,
+    FaceInfo,
+    Habit,
+    HandInfo,
+    Observation,
+)
 from habit_guard.ui.icons import IconState, pixmap  # noqa: E402
 from habit_guard.ui.preview import PreviewWindow  # noqa: E402
 from habit_guard.ui.settings_dialog import SettingsDialog  # noqa: E402
@@ -275,7 +281,7 @@ def preview_shot() -> QImage:
     hand = HandInfo(landmarks=landmarks, score=0.96)
     frame = FaceFrame.from_face(face)
     assert frame is not None
-    specs = {h: ZoneSpec(enabled=h is not Habit.FACE_TOUCH) for h in Habit}
+    specs = {h: ZoneSpec(enabled=h is not Habit.FACE_TOUCH) for h in BUILT_IN_HABITS}
     zones = build_zones(frame, specs)
     hits = evaluate(frame, zones, [hand])
     obs = Observation(

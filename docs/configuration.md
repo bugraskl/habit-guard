@@ -16,7 +16,7 @@ statistics and the generated alarm sounds in a folder of your choice, for exampl
 | `camera_index` | `0` | 0 to 16 | Which camera, as the operating system numbers them. `habit-guard doctor --probe-cameras` lists them. |
 | `camera_api` | `auto` | `auto`, `dshow`, `msmf`, `any` | The capture interface. On Windows `dshow` opens fastest and `msmf` may let two programs share a camera; `auto` tries them in turn. |
 | `profile` | `balanced` | `eco`, `balanced`, `responsive` | How often pictures are analysed, see below. |
-| `onboarded` | `false` | `true`, `false` | Set once the first-run settings window has been shown. |
+| `onboarded` | `false` | `true`, `false` | Set once the first-run setup has been shown. |
 
 ### Performance profiles
 
@@ -31,14 +31,35 @@ moved, or at least every "forced" interval.
 
 ## Habits
 
-One block per habit under `habits`: `nail_biting`, `mustache`, `hair_pulling`, `face_touch`.
+One block per habit under `habits`: `nail_biting`, `mustache`, `hair_pulling`, `face_touch`
+and the three custom zones `custom_1`, `custom_2`, `custom_3` (below).
 
 | Key | Default | Range | What it does |
 |---|---|---|---|
 | `enabled` | on for `nail_biting` and `mustache`, off for the others | `true`, `false` | Watch for this habit. |
-| `dwell_s` | `1.0` nail biting, `1.5` mustache, `1.5` hair pulling, `4.0` face touch | 0.3 to 30 | Seconds a hand must stay in the zone before the alarm goes off. |
-| `zone_scale` | `1.0` | 0.5 to 2.0 | Zone size: below 1 is stricter, above 1 more generous. |
+| `dwell_s` | `1.0` nail biting, `1.5` mustache, `1.5` hair pulling, `4.0` face touch, `1.5` custom zones | 0.3 to 30 | Seconds a hand must stay in the zone before the alarm goes off. |
+| `zone_scale` | `1.0` | 0.5 to 2.0 | Zone size: below 1 is stricter, above 1 more generous. (A custom zone is sized by drawing it; leave this at 1.) |
 | `wide_area` | `false` | `true`, `false` | Mustache: also the chin and beard line. Hair pulling: also the scalp. No effect on the others. |
+
+## Custom zones
+
+Three zones you draw yourself, for a habit that is not on the list. They live under `custom_zones`
+(`custom_1`, `custom_2`, `custom_3`) and are switched on, and given a dwell time, in the `habits`
+block under the same key (`habits` → `custom_1` and so on), like the built-in habits. In the
+settings window all of this is the **Custom zones** tab.
+
+| Key | Default | Range | What it does |
+|---|---|---|---|
+| `name` | empty | up to 40 characters | What the habit is called, for example `ear picking`; it appears in the notification, the statistics and the preview. Empty gives "Custom zone 1" and so on. |
+| `cu` | see below | -3 to 3 | The shape's centre across the face, in eye distances from the point between the eyes (positive is to the right in the picture). |
+| `cv` | see below | -3 to 4 | The centre along the face, in eye distances; positive is toward the chin. |
+| `rx` | see below | 0.1 to 2 | Half the width of the ellipse, in eye distances. |
+| `ry` | see below | 0.1 to 2 | Half the height of the ellipse, in eye distances. |
+| `mirror` | see below | `true`, `false` | Also watch the same shape on the other side of the face (ears, cheeks). |
+
+The starting shapes are an ear (`custom_1`: `cu` 1.3, `cv` 0.35, `rx` 0.32, `ry` 0.5, mirrored), a
+cheek (`custom_2`: 0.95, 0.95, 0.4, 0.4, mirrored) and the neck (`custom_3`: 0, 2.5, 1.0, 0.45).
+They watch nothing until they are switched on. See [zones and tuning](zones.md#custom-zones).
 
 ## Alarms
 

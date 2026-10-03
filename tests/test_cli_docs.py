@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from habit_guard import __version__, autostart, cli, diagnostics, paths
-from habit_guard.config import AlertConfig, HabitConfig, Settings
+from habit_guard.config import AlertConfig, CustomZone, HabitConfig, Settings
 from habit_guard.stats import Stats
 from habit_guard.types import Habit
 
@@ -122,6 +122,7 @@ def test_short_path() -> None:
 # --------------------------------------------------------------------------------- docs
 def _setting_keys() -> set[str]:
     keys = {f.name for f in dataclasses.fields(Settings)} - {"habits", "alerts"}
+    keys |= {f.name for f in dataclasses.fields(CustomZone)}
     keys |= {f.name for f in dataclasses.fields(HabitConfig)}
     keys |= {f.name for f in dataclasses.fields(AlertConfig)}
     keys |= {h.value for h in Habit}

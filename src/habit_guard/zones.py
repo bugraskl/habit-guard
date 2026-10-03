@@ -10,7 +10,8 @@ when the head turns or nods.
 A hand "is in" a zone when one of its tracked points (the fingertips, plus the
 middle of the palm for plain face touching) falls inside one of the zone's
 ellipses and outside every excluded one. Zones of different habits are kept
-from overlapping, so one movement raises one habit's alarm, not two.
+from overlapping, so one movement raises one habit's alarm, not two. Where the user has drawn a
+custom zone it wins over the built-in ones, and an earlier custom zone wins over a later one.
 
 This module is pure geometry on numbers; it imports neither Qt nor OpenCV.
 """
@@ -23,7 +24,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .types import FaceInfo, Habit, HandInfo
+from .types import CUSTOM_HABITS, FaceInfo, Habit, HandInfo
 
 #: Faces whose eyes are closer than this (in frame pixels) are too small to trust.
 MIN_EYE_DISTANCE_PX = 6.0
@@ -68,6 +69,8 @@ class ZoneSpec:
     scale: float = 1.0
     #: Also cover the wider area: the chin and beard line, or the scalp.
     wide: bool = False
+    #: The shape of a custom zone, in face coordinates (empty for the built-in habits).
+    shape: tuple[Ellipse, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -185,17 +188,27 @@ def build_zones(frame: FaceFrame, specs: Mapping[Habit, ZoneSpec]) -> list[Zone]
     zones: list[Zone] = []
     mouth_zone: Zone | None = None
 
+    # Zones the user drew come first: they own their area, and every other zone steps around it.
+    drawn: list[Ellipse] = []
+    for habit in CUSTOM_HABITS:
+        custom = spec(habit)
+        if custom.enabled and custom.shape:
+            shape = tuple(e.scaled(custom.scale) for e in custom.shape)
+            zones.append(Zone(habit, shape, tuple(drawn)))
+            drawn.extend(shape)
+    owned_by_user = tuple(drawn)
+
     nail = spec(Habit.NAIL_BITING)
     if nail.enabled:
-        mouth_zone = Zone(Habit.NAIL_BITING, (_mouth(frame).scaled(nail.scale),))
+        mouth_zone = Zone(Habit.NAIL_BITING, (_mouth(frame).scaled(nail.scale),), owned_by_user)
         zones.append(mouth_zone)
 
     mustache = spec(Habit.MUSTACHE)
     if mustache.enabled:
         include = [_upper_lip(frame)]
-        exclude: tuple[Ellipse, ...] = ()
+        exclude: tuple[Ellipse, ...] = owned_by_user
         if mouth_zone is not None:
-            exclude = mouth_zone.include  # a fingertip at the lips is nail biting's
+            exclude += mouth_zone.include  # a fingertip at the lips is nail biting's
         else:
             include.append(_mouth(frame))  # lip picking belongs here when nothing else owns it
         if mustache.wide:
@@ -209,7 +222,9 @@ def build_zones(frame: FaceFrame, specs: Mapping[Habit, ZoneSpec]) -> list[Zone]
         include = list(_eyes_and_brows(frame))
         if hair.wide:
             include.append(_scalp())
-        zones.append(Zone(Habit.HAIR_PULLING, tuple(e.scaled(hair.scale) for e in include)))
+        zones.append(
+            Zone(Habit.HAIR_PULLING, tuple(e.scaled(hair.scale) for e in include), owned_by_user)
+        )
 
     touch = spec(Habit.FACE_TOUCH)
     if touch.enabled:
