@@ -31,7 +31,8 @@ diff -u "$SRC/.SRCINFO" /tmp/srcinfo
 
 echo "==> Build the package (the download is checked against the sha256sums)"
 as_builder "makepkg --syncdeps --noconfirm --force"
-package="$(ls "$BUILD"/habit-guard-bin-*.pkg.tar.zst | head -n 1)"
+package="$(find "$BUILD" -maxdepth 1 -name 'habit-guard-bin-*.pkg.tar.zst' -print -quit)"
+[[ -n "$package" ]] || { echo "validate: makepkg built no package" >&2; exit 1; }
 echo "built $package"
 
 echo "==> namcap (information only)"
