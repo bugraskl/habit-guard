@@ -1,7 +1,7 @@
 # Created by scripts/make_package_manifests.py from packaging/templates; do not edit by hand.
 cask "habit-guard" do
-  version "0.1.0"
-  sha256 "3cef98798da748ea5c4028619a5e30ca78b6d163a1e2c9219458199fcdb06ef2"
+  version "0.2.0"
+  sha256 "ba998d2262e41ce0be4919a635897837edcd2f2f3d2d289ee3d7b7f79539e52b"
 
   url "https://github.com/bugraskl/habit-guard/releases/download/v#{version}/HabitGuard-#{version}-macos-arm64.dmg"
   name "Habit Guard"

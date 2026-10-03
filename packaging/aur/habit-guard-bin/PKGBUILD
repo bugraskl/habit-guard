@@ -2,7 +2,7 @@
 # Created by scripts/make_package_manifests.py from packaging/templates; do not edit by hand.
 pkgname=habit-guard-bin
 _name=habit-guard
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc='Catches nail biting, mustache and hair pulling and face touching through your webcam'
 arch=('x86_64')
@@ -14,7 +14,7 @@ conflicts=('habit-guard')
 # The PyInstaller bundle must not be stripped.
 options=('!strip' '!debug')
 source=("$_name-$pkgver-linux-x86_64.tar.gz::$url/releases/download/v$pkgver/HabitGuard-$pkgver-linux-x86_64.tar.gz")
-sha256sums=('d0ff2c45b231f3edc689f8a4111c47c49a34ebef33160cb6157fa36a28e86d5f')
+sha256sums=('1458af521261c5d0adb519ae47217f9849e9b06257e102e692089fa3719148b5')
 
 package() {
   cd "$srcdir/habit-guard"
