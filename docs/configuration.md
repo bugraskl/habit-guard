@@ -40,6 +40,7 @@ and the three custom zones `custom_1`, `custom_2`, `custom_3` (below).
 | `dwell_s` | `1.0` nail biting, `1.5` mustache, `1.5` hair pulling, `4.0` face touch, `1.5` custom zones | 0.3 to 30 | Seconds a hand must stay in the zone before the alarm goes off. |
 | `zone_scale` | `1.0` | 0.5 to 2.0 | Zone size: below 1 is stricter, above 1 more generous. (A custom zone is sized by drawing it; leave this at 1.) |
 | `wide_area` | `false` | `true`, `false` | Mustache: also the chin and beard line. Hair pulling: also the scalp. No effect on the others. |
+| `hidden_tips` | `true` | `true`, `false` | Nail biting: also count a hand lying on the mouth when its fingertips are hidden, for example a finger in the mouth (see [zones and tuning](zones.md#how-a-zone-works)). Turn it off if it gives false alarms. No effect on the others. |
 
 ## Custom zones
 

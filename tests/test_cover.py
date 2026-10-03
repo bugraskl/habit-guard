@@ -138,3 +138,61 @@ def test_a_zone_the_user_drew_over_the_mouth_takes_the_area_from_the_fallback() 
     shape = (Ellipse(0.0, 1.15, 1.2, 0.8),)
     specs = {**NAIL, Habit.CUSTOM_1: ZoneSpec(shape=shape)}
     assert Habit.NAIL_BITING not in counts(specs, hand())
+
+
+# ------------------------------------------------------------------ the limits found in review
+def test_the_joints_of_two_hands_do_not_add_up_to_a_hand_on_the_mouth() -> None:
+    assert FRAME is not None
+    lips = FRAME.to_image(0.0, 1.16)
+    one = np.full((21, 2), 5000.0)
+    other = np.full((21, 2), 5000.0)
+    one[6] = one[10] = lips  # two joints on the lips
+    other[14] = lips  # one more, on the other hand
+    zones = build_zones(FRAME, NAIL)
+    assert evaluate(FRAME, zones, [HandInfo(one, 0.9), HandInfo(other, 0.9)]) == {
+        Habit.NAIL_BITING: 0
+    }
+    one[14] = lips  # three on the same hand
+    assert evaluate(FRAME, zones, [HandInfo(one, 0.9)])[Habit.NAIL_BITING] >= COVER_MIN_POINTS
+
+
+def test_a_fist_on_the_mouth_is_nail_biting_and_not_also_face_touching() -> None:
+    both = {Habit.NAIL_BITING: ZoneSpec(), Habit.FACE_TOUCH: ZoneSpec()}
+    result = counts(both, hand())
+    assert set(result) == {Habit.NAIL_BITING}  # one movement, one habit, one alarm
+    assert counts({Habit.FACE_TOUCH: ZoneSpec()}, hand()) != {}  # on its own it is face touching
+
+
+def test_a_visible_fingertip_in_a_zone_still_wins_over_face_touching_elsewhere() -> None:
+    assert FRAME is not None
+    points = np.full((21, 2), 5000.0)
+    points[8] = FRAME.to_image(0.0, 1.16)  # the index tip on the lips
+    result = counts(
+        {Habit.NAIL_BITING: ZoneSpec(), Habit.FACE_TOUCH: ZoneSpec()}, HandInfo(points, 0.9)
+    )
+    assert result == {Habit.NAIL_BITING: 1}
+
+
+def test_switching_the_fallback_off_leaves_only_the_fingertips() -> None:
+    off = {Habit.NAIL_BITING: ZoneSpec(hidden_tips=False)}
+    assert counts(off, hand()) == {}
+    assert Habit.NAIL_BITING in counts({Habit.NAIL_BITING: ZoneSpec(hidden_tips=True)}, hand())
+    visible_tip = np.full((21, 2), 5000.0)
+    assert FRAME is not None
+    visible_tip[8] = FRAME.to_image(0.0, 1.16)
+    assert Habit.NAIL_BITING in counts(off, HandInfo(visible_tip, 0.9))  # tips never need it
+
+
+def test_a_larger_mouth_zone_does_not_widen_the_fallback_with_it() -> None:
+    assert FRAME is not None
+    far = np.full((21, 2), 5000.0)
+    # Three joints 0.7 eye distances below the mouth zone's centre: inside 1.5 x (1.0 x), but
+    # outside 1.5 x 2.0 would have been, had the scale been multiplied in.
+    spot = FRAME.to_image(0.0, 1.16 + 0.62)
+    for i in (6, 10, 14):
+        far[i] = spot
+    zones = build_zones(FRAME, {Habit.NAIL_BITING: ZoneSpec(scale=2.0)})
+    below = zones[0].cover[0]
+    assert below.ry == pytest.approx(0.3 * 1.0 * 1.5)  # the cap: scale 2.0 counts as 1.0 here
+    result = evaluate(FRAME, zones, [HandInfo(far, 0.9)])
+    assert result == {Habit.NAIL_BITING: 0}

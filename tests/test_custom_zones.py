@@ -535,3 +535,42 @@ def test_the_statistics_list_a_drawn_zone_once_it_has_counted(qapp: QApplication
     assert rows.isRowVisible(list(Habit).index(Habit.CUSTOM_1))
     assert window._habit_titles[Habit.CUSTOM_1].text() == "Ear picking"
     window.close()
+
+
+def test_numbers_that_are_not_numbers_fall_back_to_the_defaults() -> None:
+    raw = json.loads(
+        '{"custom_zones": {"custom_1": {"cu": NaN, "rx": Infinity, "cv": -Infinity}},'
+        ' "habits": {"nail_biting": {"dwell_s": NaN, "zone_scale": Infinity}}, "camera_index": NaN}'
+    )
+    settings = Settings.from_dict(raw)
+    default = Settings()
+    zone, expected = settings.custom_zones["custom_1"], default.custom_zones["custom_1"]
+    assert (zone.cu, zone.rx, zone.cv) == (expected.cu, expected.rx, expected.cv)
+    assert settings.habit(Habit.NAIL_BITING).dwell_s == default.habit(Habit.NAIL_BITING).dwell_s
+    assert settings.habit(Habit.NAIL_BITING).zone_scale == 1.0
+    assert settings.camera_index == default.camera_index
+
+
+def test_the_hidden_fingertips_switch_is_on_by_default_and_reaches_the_zones() -> None:
+    settings = Settings()
+    assert settings.habit(Habit.NAIL_BITING).hidden_tips
+    assert settings.zone_specs()[Habit.NAIL_BITING].hidden_tips
+    settings.habit(Habit.NAIL_BITING).hidden_tips = False
+    assert not settings.zone_specs()[Habit.NAIL_BITING].hidden_tips
+    assert Settings.from_dict(settings.to_dict()) == settings  # it is saved and read back
+    assert (
+        Settings.from_dict({"habits": {"nail_biting": {"hidden_tips": "yes"}}})
+        .habit(Habit.NAIL_BITING)
+        .hidden_tips
+    )  # junk: the default
+
+
+def test_the_settings_window_has_the_hidden_fingertips_box_for_nail_biting_only(
+    qapp: QApplication,
+) -> None:
+    dialog = SettingsDialog(Settings())
+    boxes = {b.habit: b for b in dialog._habit_boxes}
+    assert boxes[Habit.NAIL_BITING].hidden_tips is not None
+    assert all(b.hidden_tips is None for h, b in boxes.items() if h is not Habit.NAIL_BITING)
+    boxes[Habit.NAIL_BITING].hidden_tips.setChecked(False)  # type: ignore[union-attr]
+    assert not dialog.result_settings().habit(Habit.NAIL_BITING).hidden_tips

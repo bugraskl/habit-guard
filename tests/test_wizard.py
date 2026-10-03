@@ -488,3 +488,72 @@ def test_the_wizard_can_be_opened_with_ctl(qapp: QApplication) -> None:
         assert controller._wizard is not None
     finally:
         controller.shutdown()
+
+
+def test_the_wizard_and_the_settings_window_are_never_open_together(qapp: QApplication) -> None:
+    controller, _ = make_controller()
+    try:
+        controller.open_settings()
+        settings_window = controller._settings_dialog
+        assert settings_window is not None
+        controller.open_wizard()  # refused: the settings window comes forward instead
+        assert controller._wizard is None
+        assert controller._settings_dialog is settings_window
+        settings_window.reject()
+        assert controller._settings_dialog is None
+        controller.open_wizard()
+        wizard = controller._wizard
+        assert wizard is not None
+        controller.open_settings()  # refused the other way round
+        assert controller._settings_dialog is None
+        assert controller._wizard is wizard
+    finally:
+        controller.shutdown()
+
+
+def test_saving_the_settings_cannot_undo_a_finished_wizard(qapp: QApplication) -> None:
+    """The old race: both open, the wizard finished, then the settings saved a stale copy."""
+    controller, _ = make_controller()
+    try:
+        controller.open_wizard()
+        wizard = controller._wizard
+        assert wizard is not None
+        wizard.habit_boxes[Habit.HAIR_PULLING].setChecked(True)
+        to_page(wizard, PAGE_DONE)
+        wizard.finish.click()
+        assert controller.settings.habit(Habit.HAIR_PULLING).enabled
+        controller.open_settings()
+        assert controller._settings_dialog is not None
+        assert controller._settings_dialog.result_settings().habit(Habit.HAIR_PULLING).enabled
+    finally:
+        controller.shutdown()
+
+
+def test_a_first_run_without_a_tray_gets_the_settings_window_after_the_wizard(
+    qapp: QApplication, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    controller, _ = make_controller(Settings(onboarded=False))
+    try:
+        monkeypatch.setattr(type(controller.tray), "available", property(lambda self: False))
+        controller.open_wizard()
+        assert controller._settings_dialog is None
+        controller._wizard.skip.click()  # type: ignore[union-attr]
+        assert controller._wizard is None
+        assert controller._settings_dialog is not None  # nothing else to open it from
+    finally:
+        controller.shutdown()
+
+
+def test_the_tray_and_ctl_say_so_while_the_wizard_is_open(qapp: QApplication) -> None:
+    controller, _ = make_controller()
+    try:
+        controller.open_wizard()
+        assert controller._state_name == "setup"
+        assert controller.tray._status == i18n.tr("tray.status.setup")
+        status = control.read_status()
+        assert status is not None
+        assert status["state"] == "setup"
+        controller._wizard.skip.click()  # type: ignore[union-attr]
+        assert controller._state_name != "setup"
+    finally:
+        controller.shutdown()

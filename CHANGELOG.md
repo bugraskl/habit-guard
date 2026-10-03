@@ -31,7 +31,14 @@ All notable changes are listed here. The format follows
 
 - A finger in the mouth was not detected when the hand model put the hidden fingertips on the
   palm, below the chin. A hand lying on the mouth now counts for nail biting when at least three
-  knuckles or finger joints are on the (widened) mouth zone and no fingertip is in any zone.
+  knuckles or finger joints of one hand are on the (widened) mouth zone and no fingertip is in any
+  zone. It can be turned off per habit (`hidden_tips`).
+- The setup wizard and the settings window are never open together (each edited its own copy and
+  the last one saved won), the tray says so while the wizard is open and no alarm can fire, and
+  numbers that are not numbers (NaN, infinity) in `settings.json` fall back to the default.
+- The release workflow downloads the packages by name, so that with signing on the unsigned
+  installer can never replace the signed one; signing runs for tags only, waits up to an hour for
+  the manual approval, and can be re-run.
 
 ## [0.1.0] - 2026-10-02
 

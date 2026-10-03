@@ -358,7 +358,13 @@ def test_a_release_starts_the_packages_workflow_unless_it_is_a_pre_release() -> 
 
 def test_windows_signing_is_optional_and_off_without_the_signpath_settings() -> None:
     text = workflow("build.yml")
-    assert "SIGNPATH_ENABLED: ${{ inputs.upload && vars.SIGNPATH_ORGANIZATION_ID != ''" in text
+    switch = text.split("SIGNPATH_ENABLED:")[1].split("\n")[0]
+    for part in (
+        "inputs.upload",
+        "github.ref_type == 'tag'",
+        "vars.SIGNPATH_ORGANIZATION_ID != ''",
+    ):
+        assert part in switch, part
     assert "secrets.SIGNPATH_API_TOKEN != '' }}" in text
     sign_steps = [
         block
@@ -387,3 +393,19 @@ def test_the_signed_files_are_checked_before_they_are_packaged() -> None:
         text.index("Smoke-test the installer"),
     ]
     assert order == sorted(order)
+
+
+def test_the_release_downloads_the_packages_by_name_never_everything() -> None:
+    text = workflow("release.yml")
+    assert (
+        "merge-multiple" not in text
+    )  # the unsigned files must not be able to replace signed ones
+    for name in ("windows-x64", "macos-arm64", "linux-x86_64", "release-notes"):
+        assert f"name: {name}\n" in text, name
+
+
+def test_signing_can_be_rerun_waits_for_the_manual_approval_and_only_runs_for_tags() -> None:
+    text = workflow("build.yml")
+    assert text.count("overwrite: true") == 2  # the two unsigned uploads keep fixed names
+    assert text.count("wait-for-completion-timeout-in-seconds: 3600") == 2
+    assert "github.ref_type == 'tag'" in text.split("SIGNPATH_ENABLED:")[1].split("\n")[0]

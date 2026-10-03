@@ -99,7 +99,7 @@ jobs:
       VERSION_NUMERIC: ${{ needs.prepare.outputs.numeric }}
       # Windows code signing through SignPath: only for release builds, and only once the
       # organisation id (a repository variable) and the API token (a secret) are set.
-      SIGNPATH_ENABLED: ${{ inputs.upload && vars.SIGNPATH_ORGANIZATION_ID != '' && secrets.SIGNPATH_API_TOKEN != '' }}
+      SIGNPATH_ENABLED: ${{ inputs.upload && github.ref_type == 'tag' && vars.SIGNPATH_ORGANIZATION_ID != '' && secrets.SIGNPATH_API_TOKEN != '' }}
     defaults:
       run:
         shell: bash
@@ -148,6 +148,7 @@ jobs:
             dist/HabitGuard/habit-guard-cli.exe
           if-no-files-found: error
           retention-days: 1
+          overwrite: true
 
       - name: Sign the program files (SignPath)
         if: ${{ env.SIGNPATH_ENABLED == 'true' }}
@@ -160,6 +161,8 @@ jobs:
           artifact-configuration-slug: ${{ vars.SIGNPATH_PROGRAMS_CONFIGURATION_SLUG || 'programs' }}
           github-artifact-id: ${{ steps.unsigned-programs.outputs.artifact-id }}
           wait-for-completion: true
+          # A release is approved by hand in SignPath: the default wait is 10 minutes.
+          wait-for-completion-timeout-in-seconds: 3600
           output-artifact-directory: signed-programs
 
       - name: Put the signed programs into the bundle
@@ -218,6 +221,7 @@ jobs:
           path: dist/HabitGuard-${{ env.VERSION }}-windows-x64-setup.exe
           if-no-files-found: error
           retention-days: 1
+          overwrite: true
 
       - name: Sign the installer (SignPath)
         if: ${{ env.SIGNPATH_ENABLED == 'true' }}
@@ -230,6 +234,7 @@ jobs:
           artifact-configuration-slug: ${{ vars.SIGNPATH_INSTALLER_CONFIGURATION_SLUG || 'installer' }}
           github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
           wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
           output-artifact-directory: signed-installer
 
       - name: Put the signed installer in place

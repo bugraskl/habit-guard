@@ -8,6 +8,7 @@ it falls back to the default for that one value.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import asdict, dataclass, field, fields, is_dataclass
 from pathlib import Path
 from typing import Any, TypeVar
@@ -53,6 +54,9 @@ class HabitConfig:
     zone_scale: float = 1.0
     #: Also cover the chin and beard line (moustache) or the scalp (hair pulling).
     wide_area: bool = False
+    #: Nail biting: also count a hand lying on the mouth when its fingertips are hidden (a finger
+    #: in the mouth), which the hand model cannot see. Turn it off if it gives false alarms.
+    hidden_tips: bool = True
 
 
 DEFAULT_HABITS: dict[Habit, HabitConfig] = {
@@ -158,6 +162,7 @@ class Settings:
                 enabled=self.habit(h).enabled,
                 scale=self.habit(h).zone_scale,
                 wide=self.habit(h).wide_area,
+                hidden_tips=self.habit(h).hidden_tips,
                 shape=self.custom_zones[h.value].ellipses() if h.is_custom else (),
             )
             for h in Habit
@@ -253,13 +258,13 @@ def _coerce_value(name: str, default: Any, raw: Any) -> Any:
     if isinstance(default, bool):
         return raw if isinstance(raw, bool) else default
     if isinstance(default, int):
-        if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+        if isinstance(raw, bool) or not isinstance(raw, (int, float)) or not math.isfinite(raw):
             return default
         lo, hi = LIMITS.get(name, (-(2**31), 2**31))
         return int(min(max(raw, lo), hi))
     if isinstance(default, float):
-        if isinstance(raw, bool) or not isinstance(raw, (int, float)):
-            return default
+        if isinstance(raw, bool) or not isinstance(raw, (int, float)) or not math.isfinite(raw):
+            return default  # a number that is not one (NaN, infinity) is as good as a missing one
         lo, hi = LIMITS.get(name, (float("-inf"), float("inf")))
         return float(min(max(raw, lo), hi))
     if isinstance(default, str):

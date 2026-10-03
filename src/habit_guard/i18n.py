@@ -30,6 +30,14 @@ _STRINGS: dict[str, dict[str, str]] = {
     "habit.mustache.short": {"en": "mustache pulling", "tr": "bıyık koparma"},
     "habit.hair_pulling.short": {"en": "hair pulling", "tr": "kıl yolma"},
     "habit.face_touch.short": {"en": "face touching", "tr": "yüze dokunma"},
+    "settings.habit.hidden_tips": {
+        "en": "Also when a finger is in the mouth (fingertips hidden)",
+        "tr": "Parmak ağzın içindeyken de (parmak uçları görünmüyorsa)",
+    },
+    "tray.status.setup": {
+        "en": "Setup is open: no alarms until it is finished",
+        "tr": "Kurulum açık: bitene kadar alarm çalmaz",
+    },
     "habit.custom_1": {"en": "Custom zone 1", "tr": "Özel bölge 1"},
     "habit.custom_2": {"en": "Custom zone 2", "tr": "Özel bölge 2"},
     "habit.custom_3": {"en": "Custom zone 3", "tr": "Özel bölge 3"},

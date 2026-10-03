@@ -32,6 +32,8 @@ from .custom_zones_tab import CustomZonesTab
 
 #: Habits that have a "wider area" option.
 WIDE_HABITS = (Habit.MUSTACHE, Habit.HAIR_PULLING)
+#: Habits that can also count a hand lying on the mouth when the fingertips are hidden.
+HIDDEN_TIPS_HABITS = (Habit.NAIL_BITING,)
 
 
 def _combo(options: list[tuple[str, str]], current: str) -> QComboBox:
@@ -75,6 +77,11 @@ class _HabitBox(QGroupBox):
             self.wide = QCheckBox(tr(f"habit.wide.{habit.value}"))
             self.wide.setChecked(cfg.wide_area)
             form.addRow(self.wide)
+        self.hidden_tips: QCheckBox | None = None
+        if habit in HIDDEN_TIPS_HABITS:
+            self.hidden_tips = QCheckBox(tr("settings.habit.hidden_tips"))
+            self.hidden_tips.setChecked(cfg.hidden_tips)
+            form.addRow(self.hidden_tips)
 
     def apply(self, settings: Settings) -> None:
         cfg = settings.habit(self.habit)
@@ -83,6 +90,8 @@ class _HabitBox(QGroupBox):
         cfg.zone_scale = self.scale.value() / 100.0
         if self.wide is not None:
             cfg.wide_area = self.wide.isChecked()
+        if self.hidden_tips is not None:
+            cfg.hidden_tips = self.hidden_tips.isChecked()
 
 
 class SettingsDialog(QDialog):

@@ -89,6 +89,8 @@ class ZoneSpec:
     wide: bool = False
     #: The shape of a custom zone, in face coordinates (empty for the built-in habits).
     shape: tuple[Ellipse, ...] = ()
+    #: Nail biting only: also count a hand lying on the mouth when its fingertips are hidden.
+    hidden_tips: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -219,11 +221,10 @@ def build_zones(frame: FaceFrame, specs: Mapping[Habit, ZoneSpec]) -> list[Zone]
     nail = spec(Habit.NAIL_BITING)
     if nail.enabled:
         mouth = _mouth(frame)
+        # A larger zone does not widen the fallback with it (a hand beside the mouth is not on it).
+        cover = (mouth.scaled(min(nail.scale, 1.0) * COVER_SCALE),) if nail.hidden_tips else ()
         mouth_zone = Zone(
-            Habit.NAIL_BITING,
-            (mouth.scaled(nail.scale),),
-            owned_by_user,
-            cover=(mouth.scaled(nail.scale * COVER_SCALE),),
+            Habit.NAIL_BITING, (mouth.scaled(nail.scale),), owned_by_user, cover=cover
         )
         zones.append(mouth_zone)
 
@@ -273,8 +274,8 @@ def evaluate(
     """How many tracked hand points are inside each zone, summed over all hands.
 
     Only when no fingertip is in any zone, a hand lying on the mouth with its tips hidden still
-    counts for the zone that has a ``cover`` (nail biting): at least ``COVER_MIN_POINTS`` of its
-    knuckles and finger joints (``COVER_POINTS``) on the widened zone.
+    counts for the zone that has a ``cover`` (nail biting): at least ``COVER_MIN_POINTS`` of one
+    hand's knuckles and finger joints (``COVER_POINTS``) on the widened zone.
     """
     hands = list(hands)
     counts: dict[Habit, int] = {z.habit: 0 for z in zones}
@@ -282,18 +283,27 @@ def evaluate(
         for zone in zones:
             uv = frame.to_uv(tracked_points(zone.habit, hand))
             counts[zone.habit] += sum(1 for u, v in uv if zone.contains(float(u), float(v)))
-    if not any(counts.values()):
+    # Touching the face somewhere else does not count as "a zone was hit" here.
+    if not any(n for habit, n in counts.items() if habit is not Habit.FACE_TOUCH):
         for zone in zones:
             if not zone.cover:
                 continue
-            on_it = sum(
-                1
-                for hand in hands
-                for u, v in frame.to_uv(hand.landmarks[list(COVER_POINTS)])
-                if zone.covered_at(float(u), float(v))
+            # One hand has to do it: the joints of two hands do not add up to a hand on the mouth.
+            on_it = max(
+                (
+                    sum(
+                        1
+                        for u, v in frame.to_uv(hand.landmarks[list(COVER_POINTS)])
+                        if zone.covered_at(float(u), float(v))
+                    )
+                    for hand in hands
+                ),
+                default=0,
             )
             if on_it >= COVER_MIN_POINTS:
                 counts[zone.habit] += on_it
+                if Habit.FACE_TOUCH in counts:
+                    counts[Habit.FACE_TOUCH] = 0  # the same movement: one habit, one alarm
     return counts
 
 

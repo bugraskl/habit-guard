@@ -220,10 +220,13 @@ class Controller(QObject):
 
     # ------------------------------------------------------------------------------ windows
     def open_settings(self) -> None:
-        if self._settings_dialog is not None:
-            self._settings_dialog.raise_()
-            self._settings_dialog.activateWindow()
-            return
+        # Each of the two windows edits its own copy and the last one saved wins, so only one is
+        # open at a time.
+        for open_window in (self._settings_dialog, self._wizard):
+            if open_window is not None:
+                open_window.raise_()
+                open_window.activateWindow()
+                return
         dialog = SettingsDialog(self.settings)
         dialog.applied.connect(self.apply_settings)
         dialog.test_requested.connect(self.test_alarm)
@@ -282,10 +285,11 @@ class Controller(QObject):
     # ------------------------------------------------------------------------------- wizard
     def open_wizard(self) -> None:
         """The setup: camera check, habits, alarms. Raises no real alarm while it is open."""
-        if self._wizard is not None:
-            self._wizard.raise_()
-            self._wizard.activateWindow()
-            return
+        for open_window in (self._wizard, self._settings_dialog):
+            if open_window is not None:
+                open_window.raise_()
+                open_window.activateWindow()
+                return
         wizard = SetupWizard(self.settings)
         wizard.setWindowIcon(icon(IconState.ACTIVE))
         wizard.applied.connect(self.apply_settings)
@@ -313,6 +317,8 @@ class Controller(QObject):
         self.pipeline.apply_settings(self.settings)  # the saved camera again if it was skipped
         self.pipeline.set_preview(self._previewing)
         self._sync_pipeline()
+        if not self.tray.available:
+            self.open_settings()  # no tray icon to open it from: it is the only window there is
 
     def open_stats(self) -> None:
         if self._stats_window is None:
@@ -346,7 +352,10 @@ class Controller(QObject):
 
     def _refresh_tray(self) -> None:
         self.tray.set_today(self.stats.count(date.today()))
-        if self._status is Status.ERROR:
+        if self._wizard is not None:
+            text, state = i18n.tr("tray.status.setup"), IconState.PAUSED
+            state_name = "setup"
+        elif self._status is Status.ERROR:
             text = i18n.tr("tray.status.error", detail=self._detail)
             state, state_name = IconState.PROBLEM, "error"
         elif self._status is Status.NO_CAMERA:
@@ -481,7 +490,8 @@ def run(settings: Settings, source: int | str | None = None) -> int:
     controller = Controller(settings, source)
     if not controller.tray.available:
         log.warning("no system tray here: the settings window opens instead")
-        controller.open_settings()
+        if settings.onboarded:  # a first run starts with the setup, which opens it when done
+            controller.open_settings()
     controller.start()
     app.aboutToQuit.connect(controller.shutdown)  # also on logoff and system shutdown
     code = app.exec()
