@@ -8,7 +8,7 @@ pkgdesc='Catches nail biting, mustache and hair pulling and face touching throug
 arch=('x86_64')
 url='https://github.com/bugraskl/habit-guard'
 license=('MIT')
-depends=('dbus' 'fontconfig' 'libxkbcommon-x11' 'xcb-util-cursor')
+depends=('dbus' 'fontconfig' 'libglvnd' 'libxkbcommon-x11' 'xcb-util-cursor')
 provides=("habit-guard=$pkgver")
 conflicts=('habit-guard')
 # The PyInstaller bundle must not be stripped.
