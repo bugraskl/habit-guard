@@ -117,7 +117,7 @@ def test_every_local_link_and_image_exists(site: Path) -> None:
 def test_screenshots_match_the_page_language_and_have_sizes_and_alt_text(site: Path) -> None:
     for lang, page in (("en", site / "index.html"), ("tr", site / "tr" / "index.html")):
         shots = [i for i in parse(page).images if "screenshots" in str(i.get("src"))]
-        assert len(shots) == 8
+        assert len(shots) == 10
         for image in shots:
             assert f"/screenshots/{lang}/" in str(image["src"])
             assert image.get("width")

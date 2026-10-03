@@ -18,6 +18,14 @@ All notable changes are listed here. The format follows
   checklist (face found, light, distance, room for the hands, a hand seen) and says in words what
   to change. No real alarm is raised while it is open.
 - The camera preview shows the same advice in a line under the picture.
+- Package managers: the repository is a Scoop bucket (`bucket/`) and a Homebrew tap (`Casks/`),
+  an Arch `habit-guard-bin` PKGBUILD is in `packaging/aur/`, and winget manifests are made for
+  every release. `scripts/make_package_manifests.py` writes them from the release's checksums, and
+  the packages workflow installs each release with Scoop, Homebrew and `makepkg` and runs it
+  (see [package managers](docs/package-managers.md)).
+- Optional Windows code signing through SignPath in the release build (off until its settings
+  are made, then the programs and the installer are signed and their signatures checked).
+- `actionlint` checks the workflows in CI.
 
 ### Fixed
 

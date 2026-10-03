@@ -210,7 +210,7 @@
           <li class="step">
             <span class="identify" aria-hidden="true">1</span>
             <h3>Kamerayı yerleştirin</h3>
-            <p>Yüzünüz ve elinizi kaldırdığınızda iki eliniz de görüntüde olsun, yüzünüze de ışık gelsin. Kamera önizlemesi, Habit Guard'ın tam olarak ne gördüğünü gösterir.</p>
+            <p>Yüzünüz ve elinizi kaldırdığınızda iki eliniz de görüntüde olsun, yüzünüze de ışık gelsin. Kurulum sihirbazı ilk açılışta bunu denetler ve neyi değiştirmeniz gerektiğini söyler; kamera önizlemesi Habit Guard'ın tam olarak ne gördüğünü gösterir.</p>
           </li>
           <li class="step">
             <span class="identify" aria-hidden="true">2</span>
@@ -241,6 +241,16 @@
             <figure class="shot">
               <a href="../assets/screenshots/tr/stats.png"><img src="../assets/screenshots/tr/stats.png" {{SIZE:screenshots/tr/stats.png}} alt="İstatistik penceresi: bugünkü ve toplam alarm sayısı, temiz süre, 7 günlük çubuk grafik ve alışkanlıklara göre dağılım" loading="lazy"></a>
               <figcaption><strong>İstatistikler</strong>Günlere ve alışkanlıklara göre alarm sayıları, 7 günlük grafik ve temiz süre seriniz. Bilgisayarınızda yalnızca düz sayılar olarak saklanır.</figcaption>
+            </figure>
+          </div>
+          <div class="shot-row two">
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/wizard.png"><img src="../assets/screenshots/tr/wizard.png" {{SIZE:screenshots/tr/wizard.png}} alt="Kurulum sihirbazı, kamera sayfası: bölgelerin çizildiği canlı görüntü ve yanında bir denetim listesi (yüz bulundu, ışık, mesafe, eller için yer, el algılandı)" loading="lazy"></a>
+              <figcaption><strong>Kurulum sihirbazı</strong>İlk açılışta kamerayı denetler; ışık, mesafe ve ellerinize yer gibi neyi değiştirmeniz gerektiğini yazıyla söyler.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="../assets/screenshots/tr/settings-custom.png"><img src="../assets/screenshots/tr/settings-custom.png" {{SIZE:screenshots/tr/settings-custom.png}} alt="Ayarlar, Özel bölgeler sekmesi: her kulağında bir bölge olan yüz çizimi; bölgenin adı, bekleme süresi ve karşı tarafa yansıtma seçeneği" loading="lazy"></a>
+              <figcaption><strong>Kendi bölgeleriniz</strong>Listede olmayan bir alışkanlık mı var? Bölgesini çizin: sürükleyerek taşıyın, tutamaçlardan çekerek boyutlandırın.</figcaption>
             </figure>
           </div>
           <div class="shot-row three">
@@ -297,7 +307,7 @@
             <li class="habit" style="--c: var(--touch)"><span class="swatch"></span><div><strong>Yüze dokunma ve cilt kaşıma</strong><p>Yüzün geri kalanı; diğer alışkanlıkların kapsamadığı her yer.</p></div><span class="value">4 sn · kapalı</span></li>
           </ul>
         </div>
-        <p class="settings-note">Tırnak yeme ve bıyık varsayılan olarak açık; diğer ikisini tek bir tikle açabilirsiniz. Boyutlar, bekleme süreleri ve geniş alanlar ayarlanabilir. Ayrıntılar için <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/zones.md">bölgeler ve ayar</a> sayfasına bakın.</p>
+        <p class="settings-note">Tırnak yeme ve bıyık varsayılan olarak açık; diğer ikisini tek bir tikle açabilirsiniz. Boyutlar, bekleme süreleri ve geniş alanlar ayarlanabilir. Ayrıntılar için <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/zones.md">bölgeler ve ayar</a> sayfasına bakın. Listede yok mu? <strong>Ayarlar → Özel bölgeler</strong> altında kendi bölgenizi çizin.</p>
       </div>
     </section>
 
@@ -423,6 +433,19 @@
           <a href="{{RELEASE_URL}}">Sürüm notları</a>
           <a href="https://github.com/bugraskl/habit-guard/releases">Tüm sürümler</a>
           <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Sorun giderme</a>
+        </div>
+        <div class="install source">
+          <div>
+            <h3>Paket yöneticisini mi tercih edersiniz?</h3>
+            <p>Scoop ve Homebrew doğrudan GitHub deposundan kurar; CI her sürümü duyurulmadan önce bu araçlarla gerçekten kurar. Arch Linux ve winget için <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/package-managers.md">kılavuza</a> bakın.</p>
+          </div>
+          <pre><code># Windows (Scoop)
+scoop bucket add habit-guard https://github.com/bugraskl/habit-guard
+scoop install habit-guard/habit-guard
+
+# macOS (Homebrew, Apple silicon)
+brew tap bugraskl/habit-guard https://github.com/bugraskl/habit-guard
+brew install --cask bugraskl/habit-guard/habit-guard</code></pre>
         </div>
         <div class="install source">
           <div>

@@ -209,7 +209,7 @@
           <li class="step">
             <span class="identify" aria-hidden="true">1</span>
             <h3>Place the camera</h3>
-            <p>Where your face and both raised hands are in the picture, with light on your face. The camera preview shows exactly what Habit Guard sees.</p>
+            <p>Where your face and both raised hands are in the picture, with light on your face. The setup wizard checks it on the first run and says what to change; the camera preview shows exactly what Habit Guard sees.</p>
           </li>
           <li class="step">
             <span class="identify" aria-hidden="true">2</span>
@@ -240,6 +240,16 @@
             <figure class="shot">
               <a href="assets/screenshots/en/stats.png"><img src="assets/screenshots/en/stats.png" {{SIZE:screenshots/en/stats.png}} alt="The statistics window: alarms today and in total, the clean time, a 7-day bar chart and totals per habit" loading="lazy"></a>
               <figcaption><strong>Statistics</strong>Alarms per day and habit, a 7-day chart and your clean streak. Kept as plain numbers on your computer.</figcaption>
+            </figure>
+          </div>
+          <div class="shot-row two">
+            <figure class="shot">
+              <a href="assets/screenshots/en/wizard.png"><img src="assets/screenshots/en/wizard.png" {{SIZE:screenshots/en/wizard.png}} alt="The setup wizard on the camera page: the live picture with the zones, and a checklist of face found, light, distance, room for the hands and a hand seen" loading="lazy"></a>
+              <figcaption><strong>Setup wizard</strong>Checks the camera on the first run and says in words what to change: the light, the distance, room for your hands.</figcaption>
+            </figure>
+            <figure class="shot">
+              <a href="assets/screenshots/en/settings-custom.png"><img src="assets/screenshots/en/settings-custom.png" {{SIZE:screenshots/en/settings-custom.png}} alt="Settings, Custom zones tab: a drawing of a face with a zone on each ear, and the name, dwell time and mirror option of the zone" loading="lazy"></a>
+              <figcaption><strong>Your own zones</strong>A habit that is not on the list? Draw its zone: drag to move it, drag the handles to resize it.</figcaption>
             </figure>
           </div>
           <div class="shot-row three">
@@ -296,7 +306,7 @@
             <li class="habit" style="--c: var(--touch)"><span class="swatch"></span><div><strong>Face touching and skin picking</strong><p>The rest of the face, whatever the other habits do not own.</p></div><span class="value">4 s · off</span></li>
           </ul>
         </div>
-        <p class="settings-note">Nail biting and mustache are on by default; the other two are one tick away. Sizes, dwell times and the wider areas are all settings. See <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/zones.md">zones and tuning</a>.</p>
+        <p class="settings-note">Nail biting and mustache are on by default; the other two are one tick away. Sizes, dwell times and the wider areas are all settings. See <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/zones.md">zones and tuning</a>. Not on the list? Draw your own zone under <strong>Settings → Custom zones</strong>.</p>
       </div>
     </section>
 
@@ -422,6 +432,19 @@
           <a href="{{RELEASE_URL}}">Release notes</a>
           <a href="https://github.com/bugraskl/habit-guard/releases">All releases</a>
           <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/troubleshooting.md">Troubleshooting</a>
+        </div>
+        <div class="install source">
+          <div>
+            <h3>Prefer a package manager?</h3>
+            <p>Scoop and Homebrew install straight from the GitHub repository, and CI installs every release with them before it is announced. For Arch Linux and winget see <a href="https://github.com/bugraskl/habit-guard/blob/main/docs/package-managers.md">the guide</a>.</p>
+          </div>
+          <pre><code># Windows (Scoop)
+scoop bucket add habit-guard https://github.com/bugraskl/habit-guard
+scoop install habit-guard/habit-guard
+
+# macOS (Homebrew, Apple silicon)
+brew tap bugraskl/habit-guard https://github.com/bugraskl/habit-guard
+brew install --cask bugraskl/habit-guard/habit-guard</code></pre>
         </div>
         <div class="install source">
           <div>

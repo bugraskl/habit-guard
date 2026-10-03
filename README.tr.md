@@ -95,6 +95,13 @@ Bunlar uygulamanın gerçek pencereleri (İngilizce ve Türkçe). Önizlemedeki 
 <p align="center">**Ayarlar**: her biri kendi bekleme süresi ve bölge boyutuyla alışkanlıklar, uyarılar ve genel seçenekler.</p>
 
 <p align="center">
+  <img src="assets/screenshots/tr/wizard.png" width="440" alt="Kurulum sihirbazı, kamera sayfası: bölgelerin çizildiği canlı görüntü ve yanında bir denetim listesi (yüz bulundu, ışık, mesafe, eller için yer, el algılandı)">
+  <img src="assets/screenshots/tr/settings-custom.png" width="440" alt="Ayarlar, Özel bölgeler sekmesi: her kulağında bir bölge olan yüz çizimi; bölgenin adı, bekleme süresi ve karşı tarafa yansıtma seçeneği">
+</p>
+
+<p align="center">**Kurulum sihirbazı** ilk açılışta kamerayı denetler ve neyi değiştirmeniz gerektiğini söyler. **Özel bölgeler**: listede olmayan bir alışkanlık için kendi bölgenizi çizin.</p>
+
+<p align="center">
   <img src="assets/screenshots/tr/alarm-dim.png" width="440" alt="Ekran kararır ve “Elini indir!” mesajı görünür">
   <img src="assets/screenshots/tr/alarm-flash.png" width="440" alt="Ekranın kenarlarında yanıp sönen kırmızı çerçeve">
 </p>
@@ -171,6 +178,21 @@ ardından *Yine de çalıştır*); macOS'ta ilk açılışta uygulamaya sağ tı
 kamera iznini verin. Windows kurulum dosyası yalnızca bulunduğunuz kullanıcı için kurar (yönetici
 yetkisi gerekmez) ve isterseniz `habit-guard` komutunu PATH'inize ekler. Paketleri kendiniz
 derlemek için: [derleme](docs/building.md).
+
+**Paket yöneticileri.** Scoop (Windows) ve Homebrew (macOS) doğrudan bu depodan kurar; CI her
+sürümü bu araçlarla gerçekten kurup çalıştırarak denetler:
+
+```powershell
+scoop bucket add habit-guard https://github.com/bugraskl/habit-guard
+scoop install habit-guard/habit-guard
+```
+
+```bash
+brew tap bugraskl/habit-guard https://github.com/bugraskl/habit-guard
+brew install --cask bugraskl/habit-guard/habit-guard
+```
+
+Arch Linux, winget ve kod imzalama: [paket yöneticileri](docs/package-managers.md).
 
 ## Kaynaktan çalıştırma
 
@@ -254,7 +276,8 @@ durumda perde tıklamaları engelleyebilir. Böyle olursa ekran perdesini uyarı
 ## Belgeler
 
 [Bölgeler ve ayar](docs/zones.md) · [Yapılandırma](docs/configuration.md) ·
-[Derleme](docs/building.md) · [Mimari](docs/architecture.md) · [Gizlilik](docs/privacy.md) ·
+[Derleme](docs/building.md) · [Paket yöneticileri](docs/package-managers.md) ·
+[Mimari](docs/architecture.md) · [Gizlilik](docs/privacy.md) ·
 [Sorun giderme](docs/troubleshooting.md) · [Katkıda bulunma](CONTRIBUTING.md) ·
 [Değişiklik günlüğü](CHANGELOG.md)
 

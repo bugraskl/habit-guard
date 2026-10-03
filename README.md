@@ -94,6 +94,13 @@ The windows are the real ones, in English and Turkish. The camera picture in the
 <p align="center">**Settings**: habits with their own dwell time and zone size, alarms, and general options.</p>
 
 <p align="center">
+  <img src="assets/screenshots/en/wizard.png" width="440" alt="The setup wizard on the camera page: the live picture with the zones, and a checklist of face found, light, distance, room for the hands and a hand seen">
+  <img src="assets/screenshots/en/settings-custom.png" width="440" alt="Settings, Custom zones tab: a drawing of a face with a zone on each ear, and the name, dwell time and mirror option of the zone">
+</p>
+
+<p align="center">**The setup wizard** checks the camera on the first run and says what to change. **Custom zones**: draw a zone for a habit that is not on the list.</p>
+
+<p align="center">
   <img src="assets/screenshots/en/alarm-dim.png" width="440" alt="The screen dims with the message Hands down!">
   <img src="assets/screenshots/en/alarm-flash.png" width="440" alt="A pulsing red frame around the screen">
 </p>
@@ -167,6 +174,21 @@ code-signed yet: on Windows, SmartScreen may warn (*More info*, then *Run anyway
 right-click the app and choose *Open* the first time, then allow the camera. The Windows installer
 is per user (no administrator rights) and can add the `habit-guard` command to your PATH. Building
 the packages yourself: [building](docs/building.md).
+
+**Package managers.** Scoop (Windows) and Homebrew (macOS) install straight from this repository;
+CI installs every release with them and runs it before anything is announced:
+
+```powershell
+scoop bucket add habit-guard https://github.com/bugraskl/habit-guard
+scoop install habit-guard/habit-guard
+```
+
+```bash
+brew tap bugraskl/habit-guard https://github.com/bugraskl/habit-guard
+brew install --cask bugraskl/habit-guard/habit-guard
+```
+
+Arch Linux, winget and code signing: [package managers](docs/package-managers.md).
 
 ## Run from source
 
@@ -245,7 +267,8 @@ it off in the alarm settings if that happens.
 ## Documentation
 
 [Zones and tuning](docs/zones.md) · [Configuration](docs/configuration.md) ·
-[Building](docs/building.md) · [Architecture](docs/architecture.md) · [Privacy](docs/privacy.md) ·
+[Building](docs/building.md) · [Package managers](docs/package-managers.md) ·
+[Architecture](docs/architecture.md) · [Privacy](docs/privacy.md) ·
 [Troubleshooting](docs/troubleshooting.md) · [Contributing](CONTRIBUTING.md) ·
 [Changelog](CHANGELOG.md)
 

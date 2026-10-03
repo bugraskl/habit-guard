@@ -66,6 +66,7 @@ from habit_guard.ui.preview import PreviewWindow  # noqa: E402
 from habit_guard.ui.settings_dialog import SettingsDialog  # noqa: E402
 from habit_guard.ui.stats_dialog import StatsDialog  # noqa: E402
 from habit_guard.ui.tray import Tray  # noqa: E402
+from habit_guard.ui.wizard import SetupWizard  # noqa: E402
 from habit_guard.zones import FaceFrame, ZoneSpec, build_zones, evaluate  # noqa: E402
 
 OUT = REPO_ROOT / "assets" / "screenshots"
@@ -260,7 +261,8 @@ def hand_to_the_mouth(mouth: tuple[float, float], d: float) -> tuple[np.ndarray,
     return points, length
 
 
-def preview_shot() -> QImage:
+def scene() -> tuple[FaceInfo, Observation, FaceFrame, list, dict]:  # type: ignore[type-arg]
+    """The illustrated person with a hand at the mouth: face, observation, frame, zones, hits."""
     d = 84.0
     cx, ey = 320.0, 196.0
 
@@ -287,12 +289,33 @@ def preview_shot() -> QImage:
     obs = Observation(
         ts=1.0, face=face, hands=(hand,), hand_near=True, frame_size=(640, 480), frame=picture
     )
+    return face, obs, frame, zones, hits
+
+
+def preview_shot() -> QImage:
+    _, obs, frame, zones, hits = scene()
     window = PreviewWindow()
     window.resize(680, 570)
     window.show()
     window.show_observation(obs, frame, zones, hits)
     QApplication.processEvents()
     return framed(window.grab(), i18n.tr("preview.title"))
+
+
+def wizard_shot() -> QImage:
+    """The setup wizard on its camera page, with the checklist ticked."""
+    _, obs, _, _, _ = scene()
+    wizard = SetupWizard(Settings())
+    wizard.resize(720, 560)
+    wizard.show()
+    wizard.next.click()
+    wizard.next.setFocus()  # no text cursor in the camera number box
+    for _ in range(6):
+        wizard.show_observation(obs)
+    QApplication.processEvents()
+    image = framed(wizard.grab(), i18n.tr("wizard.title"))
+    wizard.close()
+    return image
 
 
 # ----------------------------------------------------------------------------- the alarm
@@ -407,9 +430,11 @@ def settings_shots(settings: Settings) -> dict[str, QImage]:
     dialog.show()
     QApplication.processEvents()
     height = dialog.sizeHint().height()
-    for index, name in enumerate(("settings-habits", "settings-alarms", "settings-general")):
+    names = ("settings-habits", "settings-custom", "settings-alarms", "settings-general")
+    for index, name in enumerate(names):
         tabs.setCurrentIndex(index)
-        out[name] = shot(dialog, i18n.tr("settings.title"), size=(520, height))
+        width = 760 if name == "settings-custom" else 520
+        out[name] = shot(dialog, i18n.tr("settings.title"), size=(width, height))
     dialog.close()
     return out
 
@@ -473,9 +498,14 @@ def main() -> int:
         folder = OUT / lang
         settings = Settings()
         settings.alerts.speech = True
+        settings.habits["custom_1"].enabled = True  # the custom zones tab shows an ear, named
+        settings.custom_zones["custom_1"].name = (
+            "ear picking" if lang == "en" else "kulak karıştırma"
+        )
         for name, image in settings_shots(settings).items():
             optimise(image, folder / f"{name}.png")
         optimise(preview_shot(), folder / "preview.png")
+        optimise(wizard_shot(), folder / "wizard.png")
         stats_window = StatsDialog()
         stats_window.show()
         stats_window.refresh(demo_stats(), TODAY)
