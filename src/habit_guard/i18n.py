@@ -76,9 +76,12 @@ _STRINGS: dict[str, dict[str, str]] = {
     "tray.today": {"en": "Today: {n} alarms", "tr": "Bugün: {n} alarm"},
     "tray.tooltip": {"en": "Habit Guard: {status}", "tr": "Habit Guard: {status}"},
     "tray.first_run": {
-        "en": "Pick the habits to watch in Settings. Nothing leaves your computer.",
-        "tr": "Ayarlar'dan izlenecek alışkanlıkları seçin. Hiçbir veri bilgisayarınızdan çıkmaz.",
+        "en": "Habit Guard is running in the tray. Finish the setup to start watching. Nothing "
+        "leaves your computer.",
+        "tr": "Habit Guard sistem tepsisinde çalışıyor. İzlemeye başlamak için kurulumu "
+        "tamamlayın. Hiçbir veri bilgisayarınızdan çıkmaz.",
     },
+    "tray.wizard": {"en": "Setup wizard…", "tr": "Kurulum sihirbazı…"},
     # --- settings
     "settings.title": {"en": "Habit Guard settings", "tr": "Habit Guard ayarları"},
     "settings.tab.habits": {"en": "Habits", "tr": "Alışkanlıklar"},
@@ -102,6 +105,133 @@ _STRINGS: dict[str, dict[str, str]] = {
     "settings.custom.keys": {
         "en": "The arrow keys move the zone; Shift with the arrow keys resizes it.",
         "tr": "Ok tuşları bölgeyi taşır; Shift ile ok tuşları boyutunu değiştirir.",
+    },
+    # --- setup wizard
+    "wizard.title": {"en": "Set up Habit Guard", "tr": "Habit Guard kurulumu"},
+    "wizard.step": {"en": "Step {n} of {total}", "tr": "Adım {n} / {total}"},
+    "wizard.back": {"en": "Back", "tr": "Geri"},
+    "wizard.next": {"en": "Next", "tr": "İleri"},
+    "wizard.finish": {"en": "Start watching", "tr": "İzlemeye başla"},
+    "wizard.skip": {"en": "Skip setup", "tr": "Kurulumu atla"},
+    "wizard.welcome.title": {"en": "Welcome to Habit Guard", "tr": "Habit Guard'a hoş geldiniz"},
+    "wizard.welcome.text": {
+        "en": "Habit Guard watches your webcam for a hand going to your mouth, mustache, brows "
+        "or hair, and nudges you to stop. Setup takes about a minute: check the camera, choose "
+        "what to watch for, choose how to be told.",
+        "tr": "Habit Guard webcam'inizi izler; elinizin ağzınıza, bıyığınıza, kaşınıza ya da "
+        "saçınıza gittiğini görünce sizi uyarır. Kurulum yaklaşık bir dakika sürer: kamerayı "
+        "kontrol edecek, neyin izleneceğini ve nasıl uyarılacağınızı seçeceksiniz.",
+    },
+    "wizard.welcome.privacy": {
+        "en": "Everything stays on this computer: pictures are looked at and thrown away, "
+        "nothing is recorded or sent anywhere.",
+        "tr": "Her şey bu bilgisayarda kalır: görüntüler yalnızca analiz edilip atılır, hiçbir "
+        "şey kaydedilmez ya da bir yere gönderilmez.",
+    },
+    "wizard.camera.title": {"en": "Check the camera", "tr": "Kamerayı kontrol edin"},
+    "wizard.camera.text": {
+        "en": "Sit where you normally work. Habit Guard needs your face lit, not too far and "
+        "not too close, with room beside it for your hands. Raise a hand next to your face to "
+        "see it picked up.",
+        "tr": "Normalde çalıştığınız yerde oturun. Habit Guard'ın yüzünüzü iyi aydınlatılmış, ne "
+        "çok uzak ne çok yakın görmesi ve yüzünüzün yanında ellerinize yer kalması gerekir. "
+        "Elinizi yüzünüzün yanına kaldırın; algılandığını göreceksiniz.",
+    },
+    "wizard.check.face": {"en": "Face found", "tr": "Yüz bulundu"},
+    "wizard.check.light": {"en": "Light is good", "tr": "Işık yeterli"},
+    "wizard.check.distance": {"en": "Distance is good", "tr": "Mesafe uygun"},
+    "wizard.check.room": {"en": "Room for your hands", "tr": "Eller için yer var"},
+    "wizard.check.hands": {"en": "A hand was seen", "tr": "El algılandı"},
+    "wizard.camera.all_good": {
+        "en": "Everything looks good.",
+        "tr": "Her şey yolunda görünüyor.",
+    },
+    "wizard.camera.raise_hand": {
+        "en": "Now raise a hand next to your face.",
+        "tr": "Şimdi elinizi yüzünüzün yanına kaldırın.",
+    },
+    "wizard.camera.busy": {
+        "en": "No picture yet. Another program may be using the camera, or try another "
+        "camera number.",
+        "tr": "Henüz görüntü yok. Kamerayı başka bir program kullanıyor olabilir; başka bir "
+        "kamera numarası deneyin.",
+    },
+    "wizard.habits.title": {"en": "What should it watch for?", "tr": "Neleri izlesin?"},
+    "wizard.habits.text": {
+        "en": "Tick the habits you want to stop. You can change this at any time in Settings, "
+        "and draw your own zone under Custom zones.",
+        "tr": "Bırakmak istediğiniz alışkanlıkları işaretleyin. Bunu istediğiniz zaman "
+        "Ayarlar'dan değiştirebilir, Özel bölgeler sekmesinde kendi bölgenizi çizebilirsiniz.",
+    },
+    "wizard.habit.nail_biting": {
+        "en": "Lips and around: biting nails or fingers.",
+        "tr": "Dudaklar ve çevresi: tırnak ya da parmak yeme.",
+    },
+    "wizard.habit.mustache": {
+        "en": "Between nose and lips: pulling the mustache, beard or lips.",
+        "tr": "Burun ile ağız arası: bıyık, sakal ya da dudak koparma.",
+    },
+    "wizard.habit.hair_pulling": {
+        "en": "Brows, lashes, forehead and hairline: pulling hair.",
+        "tr": "Kaşlar, kirpikler, alın ve saç çizgisi: kaş, kirpik ya da saç yolma.",
+    },
+    "wizard.habit.face_touch": {
+        "en": "The rest of the face: touching or picking at the skin.",
+        "tr": "Yüzün geri kalanı: yüze dokunma ya da cildi kaşıma.",
+    },
+    "wizard.alerts.title": {"en": "How should it tell you?", "tr": "Sizi nasıl uyarsın?"},
+    "wizard.alerts.text": {
+        "en": "Pick one or several. The alarm grows louder if your hand stays.",
+        "tr": "Birini ya da birkaçını seçin. El kalırsa alarm giderek güçlenir.",
+    },
+    "wizard.done.title": {"en": "You are all set", "tr": "Her şey hazır"},
+    "wizard.done.watching": {"en": "Watching for: {habits}.", "tr": "İzlenecekler: {habits}."},
+    "wizard.done.none": {
+        "en": "Nothing is selected yet: choose what to watch for in Settings, from the tray.",
+        "tr": "Henüz bir şey seçilmedi: izlenecekleri sistem tepsisinden Ayarlar'da seçin.",
+    },
+    "wizard.done.text": {
+        "en": "Habit Guard now sits in the tray, next to the clock, and watches quietly. Click "
+        "its icon to pause, open the camera preview or change anything again.",
+        "tr": "Habit Guard artık sistem tepsisinde, saatin yanında, sessizce izleyecek. "
+        "Duraklatmak, kamera önizlemesini açmak ya da bir şeyi değiştirmek için simgesine "
+        "tıklayın.",
+    },
+    # --- what to change when the camera is not set up well
+    "quality.no_face": {
+        "en": "No face in view. Sit in front of the camera and look at the screen.",
+        "tr": "Yüz görünmüyor. Kameranın karşısına geçin ve ekrana bakın.",
+    },
+    "quality.too_dark": {
+        "en": "Too dark. Turn on a lamp that lights your face.",
+        "tr": "Çok karanlık. Yüzünüzü aydınlatan bir lamba açın.",
+    },
+    "quality.too_bright": {
+        "en": "Too bright. Reduce the light on your face or the camera's exposure.",
+        "tr": "Çok parlak. Yüzünüze gelen ışığı ya da kameranın pozlamasını azaltın.",
+    },
+    "quality.backlit": {
+        "en": "The light is behind you. Move away from the window or turn a lamp toward you.",
+        "tr": "Işık arkanızda kalıyor. Pencereden uzaklaşın ya da bir lambayı size çevirin.",
+    },
+    "quality.face_small": {
+        "en": "You are too far from the camera. Move closer.",
+        "tr": "Kameradan çok uzaktasınız. Biraz yaklaşın.",
+    },
+    "quality.face_large": {
+        "en": "You are too close. Move back so both hands fit next to your face.",
+        "tr": "Çok yakınsınız. İki eliniz de yüzünüzün yanına sığsın diye biraz geri çekilin.",
+    },
+    "quality.face_cut": {
+        "en": "Your face is cut off by the edge of the picture. Sit in the middle or turn the "
+        "camera.",
+        "tr": "Yüzünüz görüntünün kenarında kesiliyor. Ortaya oturun ya da kamerayı çevirin.",
+    },
+    "quality.no_room": {
+        "en": "There is little room around your face for your hands. Move back, or aim the "
+        "camera so your face is in the middle.",
+        "tr": "Yüzünüzün çevresinde ellerinize az yer kalıyor. Biraz geri çekilin ya da kamerayı "
+        "yüzünüz ortada olacak şekilde çevirin.",
     },
     "settings.custom.overlap": {
         "en": "Where zones overlap, your zone wins over the built-in ones (dashed lines).",
@@ -189,6 +319,7 @@ _STRINGS: dict[str, dict[str, str]] = {
     "preview.no_face": {"en": "No face in view", "tr": "Yüz görünmüyor"},
     "preview.face": {"en": "Face found", "tr": "Yüz bulundu"},
     "preview.hands": {"en": "Hands: {n}", "tr": "El: {n}"},
+    "preview.quality": {"en": "Camera setup", "tr": "Kamera düzeni"},
     "preview.waiting": {"en": "Waiting for the camera…", "tr": "Kamera bekleniyor…"},
     # --- statistics
     "stats.title": {"en": "Statistics", "tr": "İstatistikler"},

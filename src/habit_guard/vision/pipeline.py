@@ -134,6 +134,7 @@ class Pipeline:
     def apply_settings(self, settings: Settings) -> None:
         """Take new settings; a changed camera number is picked up by the loop."""
         self._settings = settings
+        self._wake.set()  # do not sit out a retry wait with the old camera number
 
     # --------------------------------------------------------------------------------- loop
     def _emit_status(self, status: Status, detail: str = "") -> None:

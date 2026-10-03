@@ -15,6 +15,7 @@ from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 from ..i18n import habit_name, tr
 from ..types import FaceInfo, Habit, HandInfo, Observation
+from ..vision.quality import Issue, QualityTracker
 from ..zones import FaceFrame, Zone
 
 HABIT_COLORS = {
@@ -137,11 +138,16 @@ class PreviewWindow(QWidget):
         self.setWindowTitle(tr("preview.title"))
         self.canvas = PreviewCanvas()
         self.status = QLabel(tr("preview.waiting"))
+        #: What to change about the camera set-up (light, distance, room for the hands).
+        self.quality = QLabel()
+        self.quality.setWordWrap(True)
+        self._quality = QualityTracker()
         hint = QLabel(tr("preview.hint"))
         hint.setWordWrap(True)
         layout = QVBoxLayout(self)
         layout.addWidget(self.canvas, 1)
         layout.addWidget(self.status)
+        layout.addWidget(self.quality)
         layout.addWidget(hint)
 
     def show_observation(
@@ -158,8 +164,16 @@ class PreviewWindow(QWidget):
         if active:
             parts.append(" · ".join(active))
         self.status.setText("   |   ".join(parts))
+        issue = self._quality.update(obs).first_issue()
+        # "No face in view" is already in the status line.
+        if issue is None or issue is Issue.NO_FACE:
+            self.quality.setText("")
+        else:
+            self.quality.setText(f"{tr('preview.quality')}: {tr(f'quality.{issue.value}')}")
 
     def closeEvent(self, event: object) -> None:
         self.canvas.clear()
+        self._quality.reset()
+        self.quality.setText("")
         self.closed.emit()
         super().closeEvent(event)  # type: ignore[arg-type]

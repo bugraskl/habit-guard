@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import logging
 import sys
 from datetime import date, datetime, timedelta
@@ -23,6 +24,7 @@ from .ui.preview import PreviewWindow
 from .ui.settings_dialog import SettingsDialog
 from .ui.stats_dialog import StatsDialog
 from .ui.tray import Tray
+from .ui.wizard import SetupWizard
 from .vision.pipeline import Pipeline, Status
 from .zones import FaceFrame, Zone, build_zones, evaluate
 
@@ -74,7 +76,8 @@ class Controller(QObject):
         self._stats_dirty = False
         self._settings_dialog: SettingsDialog | None = None
         self._preview: PreviewWindow | None = None
-        self._previewing = False
+        self._preview_open = False
+        self._wizard: SetupWizard | None = None
         self._closed = False
         self._state_name = "starting"
         self._stats_window: StatsDialog | None = None
@@ -101,6 +104,7 @@ class Controller(QObject):
         self.tray.pause_toggled.connect(self.toggle_pause)
         self.tray.pause_for_requested.connect(self.pause_for)
         self.tray.settings_requested.connect(self.open_settings)
+        self.tray.wizard_requested.connect(self.open_wizard)
         self.tray.preview_requested.connect(self.open_preview)
         self.tray.stats_requested.connect(self.open_stats)
         self.tray.test_requested.connect(lambda: self.test_alarm(self.settings))
@@ -122,8 +126,13 @@ class Controller(QObject):
         self.write_status()
         if not self.settings.onboarded:
             self.tray.notify(i18n.tr("app.name"), i18n.tr("tray.first_run"))
-            QTimer.singleShot(400, self.open_settings)
+            QTimer.singleShot(400, self.open_wizard)
         self.pipeline.start(paused=not self.settings.any_habit_enabled())
+
+    @property
+    def _previewing(self) -> bool:
+        """A window that wants every camera picture is open (the preview or the setup wizard)."""
+        return self._preview_open or self._wizard is not None
 
     # ----------------------------------------------------------------------------- tracking
     def _on_status(self, status: Status, detail: str) -> None:
@@ -134,8 +143,9 @@ class Controller(QObject):
         self._refresh_tray()
 
     def _on_observation(self, obs: Observation) -> None:
-        # While paused (the camera may still run for the preview) nothing is counted or raised.
-        armed = not self._user_paused and self.settings.any_habit_enabled()
+        # While paused (the camera may still run for the preview) nothing is counted or raised,
+        # and nothing is during the setup either: the user is only checking the camera then.
+        armed = not self._user_paused and self.settings.any_habit_enabled() and self._wizard is None
         if armed and self._last_ts is not None and obs.face is not None:
             self.stats.add_watched(obs.ts - self._last_ts)
         self._last_ts = obs.ts if armed else None
@@ -151,8 +161,10 @@ class Controller(QObject):
 
         for event in self.engine.update(obs.ts, counts if armed else {}):
             self._handle(event)
-        if self._previewing and self._preview is not None:
+        if self._preview_open and self._preview is not None:
             self._preview.show_observation(obs, frame, zones, counts)
+        if self._wizard is not None:
+            self._wizard.show_observation(obs)
 
     def _handle(self, event: Trigger | Release) -> None:
         if isinstance(event, Trigger):
@@ -256,15 +268,50 @@ class Controller(QObject):
             self._preview = PreviewWindow()
             self._preview.setWindowIcon(icon(IconState.ACTIVE))
             self._preview.closed.connect(self._on_preview_closed)
-        self._previewing = True
+        self._preview_open = True
         self.pipeline.set_preview(True)
         self._preview.show()
         self._preview.raise_()
         self._sync_pipeline()  # the preview works even while paused
 
     def _on_preview_closed(self) -> None:
-        self._previewing = False
-        self.pipeline.set_preview(False)
+        self._preview_open = False
+        self.pipeline.set_preview(self._previewing)
+        self._sync_pipeline()
+
+    # ------------------------------------------------------------------------------- wizard
+    def open_wizard(self) -> None:
+        """The setup: camera check, habits, alarms. Raises no real alarm while it is open."""
+        if self._wizard is not None:
+            self._wizard.raise_()
+            self._wizard.activateWindow()
+            return
+        wizard = SetupWizard(self.settings)
+        wizard.setWindowIcon(icon(IconState.ACTIVE))
+        wizard.applied.connect(self.apply_settings)
+        wizard.test_requested.connect(self.test_alarm)
+        wizard.camera_requested.connect(self._try_camera)
+        wizard.finished.connect(lambda _: self._forget_wizard())
+        self._wizard = wizard
+        self._calm_down()
+        self.pipeline.set_preview(True)
+        wizard.show()
+        wizard.raise_()
+        wizard.activateWindow()
+        self._sync_pipeline()  # the camera runs for the check, even with nothing enabled yet
+
+    def _try_camera(self, index: int, api: str) -> None:
+        """The wizard tries another camera number; nothing is saved until it is finished."""
+        trial = copy.deepcopy(self.settings)
+        trial.camera_index, trial.camera_api = index, api
+        self.pipeline.apply_settings(trial)
+
+    def _forget_wizard(self) -> None:
+        wizard, self._wizard = self._wizard, None
+        if wizard is not None:
+            wizard.deleteLater()
+        self.pipeline.apply_settings(self.settings)  # the saved camera again if it was skipped
+        self.pipeline.set_preview(self._previewing)
         self._sync_pipeline()
 
     def open_stats(self) -> None:
@@ -362,6 +409,7 @@ class Controller(QObject):
             "toggle": self.toggle_pause,
             "test": lambda: self.test_alarm(self.settings),
             "settings": self.open_settings,
+            "wizard": self.open_wizard,
             "preview": self.open_preview,
             "stats": self.open_stats,
         }

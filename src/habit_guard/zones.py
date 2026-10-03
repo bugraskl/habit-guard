@@ -24,10 +24,20 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .types import CUSTOM_HABITS, FaceInfo, Habit, HandInfo
+from .types import CUSTOM_HABITS, FINGERTIPS, HAND_LANDMARKS, WRIST, FaceInfo, Habit, HandInfo
 
 #: Faces whose eyes are closer than this (in frame pixels) are too small to trust.
 MIN_EYE_DISTANCE_PX = 6.0
+
+#: A finger inside the mouth hides its tip, and the hand model then guesses the tips badly (it
+#: tends to put them on the palm, below the chin). So when *no* fingertip is in any zone, a hand
+#: that clearly lies on the mouth still counts for nail biting: at least this many of its 21
+#: points inside the mouth zone widened by this factor.
+COVER_SCALE = 1.5
+COVER_MIN_POINTS = 3
+#: The points that count for it: the knuckles and finger joints, not the tips (which are the
+#: ones that cannot be trusted then) and not the wrist.
+COVER_POINTS = tuple(i for i in range(HAND_LANDMARKS) if i not in FINGERTIPS and i != WRIST)
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,11 +63,19 @@ class Zone:
     habit: Habit
     include: tuple[Ellipse, ...]
     exclude: tuple[Ellipse, ...] = ()
+    #: The widened area a hand may lie on when its fingertips are hidden (see ``COVER_SCALE``).
+    cover: tuple[Ellipse, ...] = ()
 
     def contains(self, u: float, v: float) -> bool:
         if any(e.contains(u, v) for e in self.exclude):
             return False
         return any(e.contains(u, v) for e in self.include)
+
+    def covered_at(self, u: float, v: float) -> bool:
+        """Whether a hand point at ``(u, v)`` lies on the widened area, outside the excluded."""
+        if any(e.contains(u, v) for e in self.exclude):
+            return False
+        return any(e.contains(u, v) for e in self.cover)
 
 
 @dataclass(frozen=True, slots=True)
@@ -200,7 +218,13 @@ def build_zones(frame: FaceFrame, specs: Mapping[Habit, ZoneSpec]) -> list[Zone]
 
     nail = spec(Habit.NAIL_BITING)
     if nail.enabled:
-        mouth_zone = Zone(Habit.NAIL_BITING, (_mouth(frame).scaled(nail.scale),), owned_by_user)
+        mouth = _mouth(frame)
+        mouth_zone = Zone(
+            Habit.NAIL_BITING,
+            (mouth.scaled(nail.scale),),
+            owned_by_user,
+            cover=(mouth.scaled(nail.scale * COVER_SCALE),),
+        )
         zones.append(mouth_zone)
 
     mustache = spec(Habit.MUSTACHE)
@@ -246,12 +270,30 @@ def tracked_points(habit: Habit, hand: HandInfo) -> np.ndarray:
 def evaluate(
     frame: FaceFrame, zones: Sequence[Zone], hands: Iterable[HandInfo]
 ) -> dict[Habit, int]:
-    """How many tracked hand points are inside each zone, summed over all hands."""
+    """How many tracked hand points are inside each zone, summed over all hands.
+
+    Only when no fingertip is in any zone, a hand lying on the mouth with its tips hidden still
+    counts for the zone that has a ``cover`` (nail biting): at least ``COVER_MIN_POINTS`` of its
+    knuckles and finger joints (``COVER_POINTS``) on the widened zone.
+    """
+    hands = list(hands)
     counts: dict[Habit, int] = {z.habit: 0 for z in zones}
     for hand in hands:
         for zone in zones:
             uv = frame.to_uv(tracked_points(zone.habit, hand))
             counts[zone.habit] += sum(1 for u, v in uv if zone.contains(float(u), float(v)))
+    if not any(counts.values()):
+        for zone in zones:
+            if not zone.cover:
+                continue
+            on_it = sum(
+                1
+                for hand in hands
+                for u, v in frame.to_uv(hand.landmarks[list(COVER_POINTS)])
+                if zone.covered_at(float(u), float(v))
+            )
+            if on_it >= COVER_MIN_POINTS:
+                counts[zone.habit] += on_it
     return counts
 
 

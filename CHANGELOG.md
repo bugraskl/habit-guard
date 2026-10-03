@@ -10,6 +10,20 @@ All notable changes are listed here. The format follows
 
 - A ten-second animation that shows what Habit Guard does, on the website (English and
   Turkish) and in both READMEs. It is an illustration, not a screen recording.
+- Custom zones: **Settings → Custom zones** has three zones you draw yourself, for a habit that
+  is not on the list (ears, cheeks, neck, lips ...). Each has a name, a dwell time and an optional
+  mirror image; you drag the shape on a schematic face, or use the arrow keys.
+- A setup wizard on the first run (and **Setup wizard…** in the tray menu, `habit-guard ctl
+  wizard`): check the camera, choose the habits, choose the alarms. The camera page shows a
+  checklist (face found, light, distance, room for the hands, a hand seen) and says in words what
+  to change. No real alarm is raised while it is open.
+- The camera preview shows the same advice in a line under the picture.
+
+### Fixed
+
+- A finger in the mouth was not detected when the hand model put the hidden fingertips on the
+  palm, below the chin. A hand lying on the mouth now counts for nail biting when at least three
+  knuckles or finger joints are on the (widened) mouth zone and no fingertip is in any zone.
 
 ## [0.1.0] - 2026-10-02
 

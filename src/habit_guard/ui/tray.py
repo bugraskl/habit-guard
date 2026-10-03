@@ -14,6 +14,7 @@ class Tray(QObject):
     pause_toggled = Signal()
     pause_for_requested = Signal(int)  # minutes
     settings_requested = Signal()
+    wizard_requested = Signal()
     preview_requested = Signal()
     stats_requested = Signal()
     test_requested = Signal()
@@ -44,6 +45,7 @@ class Tray(QObject):
         self._preview_action = QAction(self._menu)
         self._stats_action = QAction(self._menu)
         self._settings_action = QAction(self._menu)
+        self._wizard_action = QAction(self._menu)
         self._test_action = QAction(self._menu)
         self._quit_action = QAction(self._menu)
         for action in (
@@ -55,6 +57,7 @@ class Tray(QObject):
             self._preview_action,
             self._stats_action,
             self._settings_action,
+            self._wizard_action,
             self._test_action,
             None,
             self._quit_action,
@@ -74,6 +77,7 @@ class Tray(QObject):
         self._preview_action.triggered.connect(self.preview_requested)
         self._stats_action.triggered.connect(self.stats_requested)
         self._settings_action.triggered.connect(self.settings_requested)
+        self._wizard_action.triggered.connect(self.wizard_requested)
         self._test_action.triggered.connect(self.test_requested)
         self._quit_action.triggered.connect(self.quit_requested)
         self._tray.setContextMenu(self._menu)
@@ -98,6 +102,7 @@ class Tray(QObject):
         self._preview_action.setText(tr("tray.preview"))
         self._stats_action.setText(tr("tray.stats"))
         self._settings_action.setText(tr("tray.settings"))
+        self._wizard_action.setText(tr("tray.wizard"))
         self._test_action.setText(tr("tray.test"))
         self._quit_action.setText(tr("tray.quit"))
         self.set_paused(self._paused)

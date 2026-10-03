@@ -211,7 +211,7 @@ habit-guard stats                 # sayaçlarınızı göster
 habit-guard autostart enable      # oturum açılınca başlat (enable | disable | status)
 habit-guard reset                 # ayarları ve istatistikleri sil
 habit-guard ctl pause             # çalışan uygulamayı yönet: status, pause, resume, toggle,
-                                  # test, settings, preview, stats, quit
+                                  # test, settings, wizard, preview, stats, quit
 habit-guard --camera 1            # başka bir kamera; ya da --camera klip.mp4 ile bir video oynat
 habit-guard --config-dir KLASÖR   # ayarları ve istatistikleri seçtiğiniz klasörde tut
 ```

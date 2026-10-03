@@ -14,6 +14,14 @@ A hand is "in" a zone when one of its **fingertips** (or, for plain face touchin
 palm) falls inside one of the zone's ellipses. The alarm goes off when that has been true for the
 habit's **dwell time**, with short drop-outs forgiven (0.6 s).
 
+**A finger in the mouth.** A fingertip that is inside the mouth is hidden from the camera, and
+the hand model then guesses where it is, often on the palm below the chin, outside every zone. So
+when *no* fingertip is in any zone, a hand that clearly lies on the mouth still counts for **nail
+biting**: at least three of its knuckles and finger joints (not the tips, and not the wrist) inside
+the mouth zone widened by half. A fingertip that is visible and in a zone always decides first, so
+this never adds a second alarm to the same movement. The **Camera preview** fills the mouth zone
+when it counts, so you can see it.
+
 Zones are kept from overlapping so that one movement raises one habit's alarm:
 
 - the lips belong to *nail biting*; *mustache* is the band between the nose and the lips (when nail
@@ -49,6 +57,7 @@ built-in zone steps around it.
 |---|---|
 | Alarms while you drink, talk on the phone or rest your chin | A longer dwell time for that habit, a smaller zone size, or pause from the tray for a while. |
 | The alarm comes too late | A shorter dwell time (down to 0.3 s), or the **Responsive** profile. |
+| The alarm never comes although a finger is in your mouth | The hand model cannot see a fingertip inside the mouth. A fist or hand lying on the mouth still counts when three knuckles or joints are on the widened mouth zone (see above); if yours still does not, enlarge the mouth zone a little, and open **Camera preview** to see where the hand model puts the points. |
 | The alarm never comes although your hand is at your mouth | Open **Camera preview** and check that the hand is drawn with its yellow skeleton. If not, improve the light on your hand and raise the camera so both hands fit in the picture. A larger zone size helps when the zone sits a little off. |
 | Brow or hair pulling is missed | Turn on the **wider area** for hair pulling (it adds the scalp) and enlarge the zone. |
 | Glasses | Work fine. Strong reflections on the lenses can hide the eyes, which are used to place the zones; tilt the lamp or the camera. |

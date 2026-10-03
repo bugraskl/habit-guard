@@ -187,17 +187,23 @@ def _selftest() -> int:
         from .ui.settings_dialog import SettingsDialog
         from .ui.stats_dialog import StatsDialog
         from .ui.tray import Tray
+        from .ui.wizard import SetupWizard
 
         existing = QApplication.instance()
         app = existing if isinstance(existing, QApplication) else QApplication([])
         _ = Tray()
-        for widget in (SettingsDialog(Settings()), PreviewWindow(), StatsDialog()):
+        for widget in (
+            SettingsDialog(Settings()),
+            SetupWizard(Settings()),
+            PreviewWindow(),
+            StatsDialog(),
+        ):
             widget.show()
             app.processEvents()
             if widget.grab().isNull():
                 raise RuntimeError(f"{type(widget).__name__} did not draw")
             widget.close()
-        return "tray, settings, preview and statistics windows drew"
+        return "tray, settings, setup, preview and statistics windows drew"
 
     print(f"habit-guard {__version__} selftest")
     check("models", models)

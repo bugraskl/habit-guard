@@ -27,7 +27,17 @@ from . import paths
 from .stats import write_json_atomic
 
 #: What ``ctl`` can ask a running app to do.
-COMMANDS = ("quit", "pause", "resume", "toggle", "test", "settings", "preview", "stats")
+COMMANDS = (
+    "quit",
+    "pause",
+    "resume",
+    "toggle",
+    "test",
+    "settings",
+    "wizard",
+    "preview",
+    "stats",
+)
 #: ``habit-guard ctl status`` exit code when no instance is running (the installer relies on it).
 EXIT_NOT_RUNNING = 3
 #: A status file older than this many seconds does not come from a running app.

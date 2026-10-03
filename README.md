@@ -205,7 +205,7 @@ habit-guard stats                 # print your counters
 habit-guard autostart enable      # start at login (enable | disable | status)
 habit-guard reset                 # forget settings and statistics
 habit-guard ctl pause             # control the running app: status, pause, resume, toggle,
-                                  # test, settings, preview, stats, quit
+                                  # test, settings, wizard, preview, stats, quit
 habit-guard --camera 1            # use another camera, or --camera clip.mp4 to replay a video
 habit-guard --config-dir DIR      # keep settings and statistics in a folder of your choice
 ```
