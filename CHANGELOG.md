@@ -6,6 +6,11 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-03
+
+Custom zones, a setup wizard that checks the camera, package managers, and a fix for a
+finger in the mouth.
+
 ### Added
 
 - A ten-second animation that shows what Habit Guard does, on the website (English and
@@ -27,18 +32,20 @@ All notable changes are listed here. The format follows
   are made, then the programs and the installer are signed and their signatures checked).
 - `actionlint` checks the workflows in CI.
 
+### Changed
+
+- The first run opens the setup wizard instead of the settings window (the settings are one click
+  away in the tray menu, and the wizard can be opened again from there).
+- The Turkish website and `README.tr.md` were rewritten in natural Turkish.
+
 ### Fixed
 
 - A finger in the mouth was not detected when the hand model put the hidden fingertips on the
   palm, below the chin. A hand lying on the mouth now counts for nail biting when at least three
   knuckles or finger joints of one hand are on the (widened) mouth zone and no fingertip is in any
   zone. It can be turned off per habit (`hidden_tips`).
-- The setup wizard and the settings window are never open together (each edited its own copy and
-  the last one saved won), the tray says so while the wizard is open and no alarm can fire, and
-  numbers that are not numbers (NaN, infinity) in `settings.json` fall back to the default.
-- The release workflow downloads the packages by name, so that with signing on the unsigned
-  installer can never replace the signed one; signing runs for tags only, waits up to an hour for
-  the manual approval, and can be re-run.
+- Numbers that are not numbers (NaN, infinity) in `settings.json` fall back to the default, like
+  any other value that cannot be used.
 
 ## [0.1.0] - 2026-10-02
 
@@ -86,5 +93,6 @@ First public version (alpha).
   is closed while paused, statistics are saved on logoff, and the camera thread survives driver
   errors.
 
-[Unreleased]: https://github.com/bugraskl/habit-guard/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/bugraskl/habit-guard/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/bugraskl/habit-guard/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bugraskl/habit-guard/releases/tag/v0.1.0

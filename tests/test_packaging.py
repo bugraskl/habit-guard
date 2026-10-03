@@ -282,7 +282,8 @@ def test_the_version_and_the_changelog_agree() -> None:
     text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     section = notes_script.changelog_section(text, __version__)
     assert section
-    assert "Watching for four habits" in section
+    assert "### Added" in section or "### Fixed" in section  # it says what changed
+    assert "## [" not in section  # and it ends where the next version starts
 
 
 def test_changelog_sections_end_at_the_next_heading_or_the_link_list() -> None:
