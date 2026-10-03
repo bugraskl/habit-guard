@@ -5,7 +5,7 @@ cask "habit-guard" do
 
   url "https://github.com/bugraskl/habit-guard/releases/download/v#{version}/HabitGuard-#{version}-macos-arm64.dmg"
   name "Habit Guard"
-  desc "Catches nail biting, mustache and hair pulling and face touching through your webcam"
+  desc "Catches nail biting and similar habits through your webcam"
   homepage "https://bugraskl.github.io/habit-guard/"
 
   livecheck do
@@ -14,7 +14,7 @@ cask "habit-guard" do
   end
 
   depends_on arch: :arm64
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "Habit Guard.app"
 

@@ -7,6 +7,7 @@ pkgbase = habit-guard-bin
 	license = MIT
 	depends = dbus
 	depends = fontconfig
+	depends = libglvnd
 	depends = libxkbcommon-x11
 	depends = xcb-util-cursor
 	provides = habit-guard=@VERSION@

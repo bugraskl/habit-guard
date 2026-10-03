@@ -237,7 +237,7 @@ def test_the_cask_names_match_the_app_bundle_and_the_minimum_system(files: dict[
     minimum = re.search(r'MACOS_MINIMUM: "(\d+)\.', build)
     assert minimum
     names = {13: "ventura", 14: "sonoma", 15: "sequoia", 26: "tahoe"}
-    assert f'depends_on macos: ">= :{names[int(minimum.group(1))]}"' in cask
+    assert f"depends_on macos: :{names[int(minimum.group(1))]}\n" in cask
 
 
 def test_the_cask_tells_about_the_missing_signature(files: dict[Path, str]) -> None:
