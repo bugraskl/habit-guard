@@ -1,0 +1,28 @@
+# Maintainer: Buğra Şıkel <https://github.com/bugraskl>
+# Created by scripts/make_package_manifests.py from packaging/templates; do not edit by hand.
+pkgname=habit-guard-bin
+_name=habit-guard
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Catches nail biting, mustache and hair pulling and face touching through your webcam'
+arch=('x86_64')
+url='https://github.com/bugraskl/habit-guard'
+license=('MIT')
+depends=('dbus' 'fontconfig' 'libxkbcommon-x11' 'xcb-util-cursor')
+provides=("habit-guard=$pkgver")
+conflicts=('habit-guard')
+# The PyInstaller bundle must not be stripped.
+options=('!strip' '!debug')
+source=("$_name-$pkgver-linux-x86_64.tar.gz::$url/releases/download/v$pkgver/HabitGuard-$pkgver-linux-x86_64.tar.gz")
+sha256sums=('d0ff2c45b231f3edc689f8a4111c47c49a34ebef33160cb6157fa36a28e86d5f')
+
+package() {
+  cd "$srcdir/habit-guard"
+  install -d "$pkgdir/opt/$_name"
+  cp -a . "$pkgdir/opt/$_name/"
+  install -d "$pkgdir/usr/bin"
+  ln -s "/opt/$_name/habit-guard" "$pkgdir/usr/bin/habit-guard"
+  install -Dm644 habit-guard.desktop "$pkgdir/usr/share/applications/habit-guard.desktop"
+  install -Dm644 habit-guard.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/habit-guard.png"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

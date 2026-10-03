@@ -1,0 +1,43 @@
+{
+    "version": "0.1.0",
+    "description": "Catches nail biting, mustache and hair pulling and face touching through your webcam",
+    "homepage": "https://bugraskl.github.io/habit-guard/",
+    "license": "MIT",
+    "notes": [
+        "Habit Guard is not code-signed yet: Windows SmartScreen may warn on the first start.",
+        "Start it from the Start menu (Habit Guard) or run: HabitGuard.exe",
+        "The command 'habit-guard' (doctor, stats, ctl ...) is on your PATH."
+    ],
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/bugraskl/habit-guard/releases/download/v0.1.0/HabitGuard-0.1.0-windows-x64-portable.zip",
+            "hash": "22c8b546d7a947b8474004420b07b4bd2c647dea86724edc10808d81677ebb0a"
+        }
+    },
+    "extract_dir": "HabitGuard",
+    "bin": [
+        [
+            "habit-guard-cli.exe",
+            "habit-guard"
+        ]
+    ],
+    "shortcuts": [
+        [
+            "HabitGuard.exe",
+            "Habit Guard"
+        ]
+    ],
+    "checkver": {
+        "github": "https://github.com/bugraskl/habit-guard"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/bugraskl/habit-guard/releases/download/v$version/HabitGuard-$version-windows-x64-portable.zip"
+            }
+        },
+        "hash": {
+            "url": "https://github.com/bugraskl/habit-guard/releases/download/v$version/SHA256SUMS.txt"
+        }
+    }
+}

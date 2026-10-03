@@ -1,0 +1,19 @@
+pkgbase = habit-guard-bin
+	pkgdesc = Catches nail biting, mustache and hair pulling and face touching through your webcam
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/bugraskl/habit-guard
+	arch = x86_64
+	license = MIT
+	depends = dbus
+	depends = fontconfig
+	depends = libxkbcommon-x11
+	depends = xcb-util-cursor
+	provides = habit-guard=0.1.0
+	conflicts = habit-guard
+	options = !strip
+	options = !debug
+	source = habit-guard-0.1.0-linux-x86_64.tar.gz::https://github.com/bugraskl/habit-guard/releases/download/v0.1.0/HabitGuard-0.1.0-linux-x86_64.tar.gz
+	sha256sums = d0ff2c45b231f3edc689f8a4111c47c49a34ebef33160cb6157fa36a28e86d5f
+
+pkgname = habit-guard-bin
