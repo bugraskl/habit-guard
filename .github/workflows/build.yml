@@ -30,6 +30,9 @@ on:
       MACOS_SIGNING_IDENTITY:
         description: Identity to sign with (default the certificate's SHA-1).
         required: false
+      SIGNPATH_API_TOKEN:
+        description: SignPath API token for signing the Windows program files and installer (see docs/package-managers.md).
+        required: false
     outputs:
       version:
         description: The version that was built (__version__).
@@ -94,6 +97,9 @@ jobs:
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
       VERSION_NUMERIC: ${{ needs.prepare.outputs.numeric }}
+      # Windows code signing through SignPath: only for release builds, and only once the
+      # organisation id (a repository variable) and the API token (a secret) are set.
+      SIGNPATH_ENABLED: ${{ inputs.upload && vars.SIGNPATH_ORGANIZATION_ID != '' && secrets.SIGNPATH_API_TOKEN != '' }}
     defaults:
       run:
         shell: bash
@@ -129,6 +135,45 @@ jobs:
       - name: Check the bundle (no networking or telemetry components, models and licences present)
         run: uv run --no-sync python scripts/check_bundle.py dist/HabitGuard
 
+      # Optional: sign the two programs with SignPath, before they go into the ZIP and the
+      # installer. Without the SignPath settings these three steps are skipped.
+      - name: Upload the program files for signing
+        id: unsigned-programs
+        if: ${{ env.SIGNPATH_ENABLED == 'true' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-unsigned-programs
+          path: |
+            dist/HabitGuard/HabitGuard.exe
+            dist/HabitGuard/habit-guard-cli.exe
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Sign the program files (SignPath)
+        if: ${{ env.SIGNPATH_ENABLED == 'true' }}
+        uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'habit-guard' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_PROGRAMS_CONFIGURATION_SLUG || 'programs' }}
+          github-artifact-id: ${{ steps.unsigned-programs.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed-programs
+
+      - name: Put the signed programs into the bundle
+        if: ${{ env.SIGNPATH_ENABLED == 'true' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($name in 'HabitGuard.exe', 'habit-guard-cli.exe') {
+            Copy-Item "signed-programs\$name" "dist\HabitGuard\$name" -Force
+            $signature = Get-AuthenticodeSignature "dist\HabitGuard\$name"
+            Write-Host "$name : $($signature.Status), $($signature.SignerCertificate.Subject)"
+            if ($signature.Status -ne 'Valid') { throw "$name is not validly signed: $($signature.Status)" }
+          }
+
       # What the portable ZIP contains: version, models, vision, tones, the Qt windows.
       - name: Smoke-test the bundle
         run: |
@@ -163,6 +208,40 @@ jobs:
           }
           & $iscc "/DAppVersion=$env:VERSION" "/DAppVersionNumeric=$env:VERSION_NUMERIC" packaging\windows\installer.iss
           if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
+
+      - name: Upload the installer for signing
+        id: unsigned-installer
+        if: ${{ env.SIGNPATH_ENABLED == 'true' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-unsigned-installer
+          path: dist/HabitGuard-${{ env.VERSION }}-windows-x64-setup.exe
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Sign the installer (SignPath)
+        if: ${{ env.SIGNPATH_ENABLED == 'true' }}
+        uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'habit-guard' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_INSTALLER_CONFIGURATION_SLUG || 'installer' }}
+          github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed-installer
+
+      - name: Put the signed installer in place
+        if: ${{ env.SIGNPATH_ENABLED == 'true' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $name = "HabitGuard-$env:VERSION-windows-x64-setup.exe"
+          Copy-Item "signed-installer\$name" "dist\$name" -Force
+          $signature = Get-AuthenticodeSignature "dist\$name"
+          Write-Host "$name : $($signature.Status), $($signature.SignerCertificate.Subject)"
+          if ($signature.Status -ne 'Valid') { throw "the installer is not validly signed: $($signature.Status)" }
 
       # Runs on the disposable CI machine: it installs, upgrades over a running app and
       # uninstalls. The "habit-guard" command is put on (and taken off) the user's PATH; the

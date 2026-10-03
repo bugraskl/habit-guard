@@ -1,0 +1,36 @@
+# Created by scripts/make_package_manifests.py from packaging/templates; do not edit by hand.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BugraSikel.HabitGuard
+PackageVersion: @VERSION@
+PackageLocale: en-US
+Publisher: Buğra Şıkel
+PublisherUrl: https://github.com/bugraskl
+PublisherSupportUrl: https://github.com/bugraskl/habit-guard/issues
+PackageName: Habit Guard
+PackageUrl: https://bugraskl.github.io/habit-guard/
+License: MIT
+LicenseUrl: https://github.com/bugraskl/habit-guard/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Buğra Şıkel
+ShortDescription: Catches nail biting, mustache and hair pulling and face touching through your webcam and nudges you to stop.
+Description: |-
+  Habit Guard watches your webcam for a hand going to your mouth, mustache, brows or hair and
+  interrupts the habit within about a second with a sound, a dimmed screen, a spoken phrase or a
+  notification. It runs entirely on your computer, uses a fraction of a percent of the CPU, never
+  saves a picture and has no networking code. Zones can be adjusted, and your own can be drawn for
+  habits that are not on the list.
+Moniker: habit-guard
+Tags:
+- bfrb
+- habit
+- nail-biting
+- privacy
+- trichotillomania
+- webcam
+- wellbeing
+ReleaseNotesUrl: https://github.com/bugraskl/habit-guard/releases/tag/v@VERSION@
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/bugraskl/habit-guard/tree/main/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

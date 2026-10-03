@@ -68,11 +68,16 @@ jobs:
       - name: Verify the bundled models
         run: uv run --no-sync python scripts/fetch_models.py --check
 
+      # Syntax and expressions of every workflow (shellcheck of the run steps is left out here:
+      # it is installed only in the next step).
+      - name: Lint the workflows
+        run: uvx --from actionlint-py==1.7.12.25 actionlint
+
       - name: Check packaging scripts
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends desktop-file-utils shellcheck
-          shellcheck packaging/linux/build_appimage.sh packaging/linux/AppRun packaging/macos/make_dmg.sh
+          shellcheck packaging/linux/build_appimage.sh packaging/linux/AppRun packaging/macos/make_dmg.sh packaging/aur/validate.sh
           desktop-file-validate packaging/linux/habit-guard.desktop
 
       - name: README pictures are up to date

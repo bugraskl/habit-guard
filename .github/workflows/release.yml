@@ -73,6 +73,8 @@ jobs:
       MACOS_SIGNING_CERT_P12: ${{ secrets.MACOS_SIGNING_CERT_P12 }}
       MACOS_SIGNING_CERT_PASSWORD: ${{ secrets.MACOS_SIGNING_CERT_PASSWORD }}
       MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+      # Only the optional Windows signing through SignPath (see docs/package-managers.md).
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 
   release:
     name: Publish the GitHub release
@@ -150,3 +152,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref main
+
+      - name: Update the package-manager manifests
+        # The Scoop bucket, the Homebrew cask and the AUR files describe the newest release, and
+        # are checked by installing it (packages.yml). Pre-releases are not offered there.
+        if: ${{ needs.build.outputs.prerelease != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run packages.yml --repo "$GITHUB_REPOSITORY" --ref main -f tag="$GITHUB_REF_NAME"

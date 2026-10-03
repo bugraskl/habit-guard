@@ -27,3 +27,6 @@ Thumbs.db
 
 # Website build output (scripts/build_site.py)
 _site/
+
+# Written by scripts/make_package_manifests.py; the winget manifests are submitted, not committed.
+winget/

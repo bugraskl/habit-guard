@@ -1,0 +1,22 @@
+# Created by scripts/make_package_manifests.py from packaging/templates; do not edit by hand.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: BugraSikel.HabitGuard
+PackageVersion: @VERSION@
+PackageLocale: tr-TR
+Publisher: Buğra Şıkel
+PackageName: Habit Guard
+ShortDescription: Tırnak yeme, bıyık ve saç yolma, yüze dokunma alışkanlıklarını webcam ile yakalar ve bırakmanız için dürter.
+Description: |-
+  Habit Guard webcam'inizi izler; elinizin ağzınıza, bıyığınıza, kaşınıza ya da saçınıza gittiğini
+  görünce alışkanlığı yaklaşık bir saniye içinde bir ses, kararan ekran, sesli uyarı ya da bildirimle
+  keser. Her şey bilgisayarınızda çalışır, işlemcinizin yüzde birinden azını kullanır, hiçbir
+  görüntüyü kaydetmez ve ağ koduna sahip değildir. Bölgeleri ayarlayabilir, listede olmayan
+  alışkanlıklar için kendi bölgenizi çizebilirsiniz.
+Tags:
+- alışkanlık
+- tırnak-yeme
+- webcam
+ReleaseNotesUrl: https://github.com/bugraskl/habit-guard/releases/tag/v@VERSION@
+ManifestType: locale
+ManifestVersion: 1.12.0

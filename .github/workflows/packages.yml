@@ -1,0 +1,222 @@
+name: Packages
+
+# After a release: write the package-manager manifests from the release's SHA256SUMS.txt, commit
+# the Scoop bucket (bucket/), the Homebrew cask (Casks/) and the AUR files (packaging/aur/) to
+# main, and check each of them by installing the real release with the real package manager.
+# The winget manifests are made too and kept as a workflow artifact: they are submitted to
+# microsoft/winget-pkgs by hand (docs/package-managers.md).
+#
+# Started by release.yml once a release exists; run it by hand to describe a release again.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to describe, for example v0.1.0 (empty: the latest release)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  FORCE_COLOR: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  manifests:
+    name: Write the manifests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      # To commit the manifests to main.
+      contents: write
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Check out main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Find the release and download its checksums
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_INPUT: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          tag="$TAG_INPUT"
+          if [[ -z "$tag" ]]; then
+            tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          fi
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.+-][0-9A-Za-z.+-]*)?$ ]] || { echo "::error::not a release tag: $tag"; exit 1; }
+          date="$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json publishedAt --jq '.publishedAt[0:10]')"
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern SHA256SUMS.txt --dir "$RUNNER_TEMP"
+          cat "$RUNNER_TEMP/SHA256SUMS.txt"
+          {
+            echo "tag=$tag"
+            echo "version=${tag#v}"
+            echo "date=$date"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Write the manifests
+        run: |
+          python3 scripts/make_package_manifests.py \
+            --version "${{ steps.release.outputs.version }}" \
+            --date "${{ steps.release.outputs.date }}" \
+            --sums "$RUNNER_TEMP/SHA256SUMS.txt"
+
+      - name: Keep the winget manifests
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: winget-manifests-${{ steps.release.outputs.version }}
+          path: winget/manifests
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Commit the Scoop, Homebrew and AUR files
+        run: |
+          set -euo pipefail
+          git add bucket Casks packaging/aur
+          if git diff --cached --quiet; then
+            echo "The manifests already describe ${{ steps.release.outputs.version }}."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Package manifests for ${{ steps.release.outputs.tag }}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+  winget-schema:
+    name: winget manifests match the schema
+    needs: manifests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Get the manifests
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: winget-manifests-${{ needs.manifests.outputs.version }}
+          path: winget
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      # The schemas are the ones the winget client and the community repository validate with.
+      - name: Validate against the official JSON schemas
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v1.12.0"
+          dir="$(dirname "$(find winget -name '*.installer.yaml' | head -n 1)")"
+          ls -l "$dir"
+          uvx check-jsonschema --schemafile "$base/manifest.version.1.12.0.json" "$dir/BugraSikel.HabitGuard.yaml"
+          uvx check-jsonschema --schemafile "$base/manifest.installer.1.12.0.json" "$dir/BugraSikel.HabitGuard.installer.yaml"
+          uvx check-jsonschema --schemafile "$base/manifest.defaultLocale.1.12.0.json" "$dir/BugraSikel.HabitGuard.locale.en-US.yaml"
+          uvx check-jsonschema --schemafile "$base/manifest.locale.1.12.0.json" "$dir/BugraSikel.HabitGuard.locale.tr-TR.yaml"
+
+  scoop:
+    name: Scoop installs it
+    needs: manifests
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the bucket
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Install Scoop
+        shell: pwsh
+        run: |
+          Invoke-RestMethod -Uri https://get.scoop.sh -OutFile install-scoop.ps1
+          .\install-scoop.ps1 -RunAsAdmin
+          "$HOME\scoop\shims" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Install Habit Guard from the bucket, run it, remove it
+        shell: pwsh
+        env:
+          EXPECTED: ${{ needs.manifests.outputs.version }}
+          HABIT_GUARD_HOME: ${{ runner.temp }}\hg-home
+        run: |
+          $ErrorActionPreference = 'Stop'
+          scoop bucket add habit-guard "$env:GITHUB_WORKSPACE"
+          scoop install habit-guard/habit-guard
+          if ($LASTEXITCODE -ne 0) { throw 'scoop install failed' }
+          $version = (habit-guard --version) | Out-String
+          Write-Host $version
+          if ($version -notmatch [regex]::Escape($env:EXPECTED)) { throw "expected version $env:EXPECTED" }
+          habit-guard selftest
+          if ($LASTEXITCODE -ne 0) { throw 'selftest failed' }
+          $installed = scoop info habit-guard | Out-String
+          Write-Host $installed
+          scoop uninstall habit-guard
+          if ($LASTEXITCODE -ne 0) { throw 'scoop uninstall failed' }
+          if (Get-Command habit-guard -ErrorAction SilentlyContinue) { throw 'the habit-guard command is still there' }
+
+  homebrew:
+    name: Homebrew installs it
+    needs: manifests
+    runs-on: macos-14
+    timeout-minutes: 30
+    steps:
+      - name: Check out the tap
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Tap this repository
+        run: |
+          set -euo pipefail
+          brew tap bugraskl/habit-guard "$GITHUB_WORKSPACE"
+          brew tap-info bugraskl/habit-guard
+
+      - name: Style and audit the cask
+        run: |
+          set -euo pipefail
+          brew style --cask bugraskl/habit-guard/habit-guard
+          brew audit --cask bugraskl/habit-guard/habit-guard
+
+      - name: Install the cask, run the app, remove it
+        env:
+          EXPECTED: ${{ needs.manifests.outputs.version }}
+          HABIT_GUARD_HOME: ${{ runner.temp }}/hg-home
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          set -euo pipefail
+          brew install --cask bugraskl/habit-guard/habit-guard
+          app="/Applications/Habit Guard.app"
+          test -d "$app"
+          # Homebrew marks downloads as quarantined; the app is not notarized, so running it
+          # from the command line on this disposable machine needs the mark removed.
+          xattr -dr com.apple.quarantine "$app" || true
+          cli="$app/Contents/MacOS/habit-guard-cli"
+          "$cli" --version | tee version.txt
+          grep -qF "$EXPECTED" version.txt
+          "$cli" selftest
+          brew uninstall --cask bugraskl/habit-guard/habit-guard
+          test ! -e "$app"
+
+  aur:
+    name: The AUR package builds and installs
+    needs: manifests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Build, install and run it on Arch Linux
+        run: |
+          docker run --rm -v "$PWD:/work" -e WORK=/work archlinux:base-devel \
+            bash /work/packaging/aur/validate.sh

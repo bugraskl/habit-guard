@@ -70,6 +70,7 @@ dev = [
   "ruff>=0.6",
   "mypy>=1.11",
   "pillow>=12.3.0",
+  "pyyaml>=6.0.3",
 ]
 
 [tool.uv]
